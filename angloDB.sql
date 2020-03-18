@@ -9,8 +9,8 @@ USE AngloDB;
 CREATE TABLE Tb_Imagenes(
 	idImagen int not null AUTO_INCREMENT PRIMARY KEY,
 	urlImagen text not null,
-	typeImagen varchar(15) not null,
-	extImagen varchar(10) not null,
+	typeImagen varchar(15),
+	extImagen varchar(10),
 	statusImagen enum('Activo','Inactivo') default 'Activo',
 	creationDateImagen timestamp default current_timestamp,
 	lastUpdateImagen timestamp default current_timestamp on update current_timestamp
@@ -26,8 +26,8 @@ CREATE TABLE Tb_Universidades(
     fkPrincipalImagenUniversidad int not null,
     creationDateUniversidad  timestamp default current_timestamp,
 	lastUpdateUniversidad  timestamp default current_timestamp on update current_timestamp,
-    FOREIGN KEY(fkLogoImagenUniversidad) REFRENCES Tb_Imagenes(idImagen),
-    FOREIGN KEY(fkPrincipalImagenUniversidad) REFRENCES Tb_Imagenes(idImagen)
+    FOREIGN KEY(fkLogoImagenUniversidad) REFERENCES Tb_Imagenes(idImagen),
+    FOREIGN KEY(fkPrincipalImagenUniversidad) REFERENCES Tb_Imagenes(idImagen)
 );
 
 CREATE TABLE Tb_Rankings(
@@ -36,7 +36,7 @@ CREATE TABLE Tb_Rankings(
     fkUniversidad int not null,
     creationDateRanking  timestamp default current_timestamp,
 	lastUpdateRanking   timestamp default current_timestamp on update current_timestamp,
-    FOREIGN KEY(fkUniversidad) REFRENCES Tb_Universidades(idUniversidad)
+    FOREIGN KEY(fkUniversidad) REFERENCES Tb_Universidades(idUniversidad)
 );
 
 CREATE TABLE Tb_SabiasQues(
@@ -45,7 +45,7 @@ CREATE TABLE Tb_SabiasQues(
     fkUniversidad int not null,
     creationDateSabiasque timestamp default current_timestamp,
 	lastUpdateSabiasque  timestamp default current_timestamp on update current_timestamp,
-    FOREIGN KEY(fkUniversidad) REFRENCES Tb_Universidades(idUniversidad)
+    FOREIGN KEY(fkUniversidad) REFERENCES Tb_Universidades(idUniversidad)
 );
 
 CREATE TABLE Tb_Campus(
@@ -56,7 +56,7 @@ CREATE TABLE Tb_Campus(
     creationDateCampus timestamp default current_timestamp,
 	lastUpdateCampus  timestamp default current_timestamp on update current_timestamp,
     fkUniversidad int not null,
-    FOREIGN KEY(fkUniversidad) REFRENCES Tb_Universidades(idUniversidad)
+    FOREIGN KEY(fkUniversidad) REFERENCES Tb_Universidades(idUniversidad)
 );
 
 CREATE TABLE Tb_Tipo(
@@ -76,7 +76,7 @@ CREATE TABLE Tb_Facultades(
     creationDateCampus timestamp default current_timestamp,
 	lastUpdateCampus  timestamp default current_timestamp on update current_timestamp,
     fkCampus int not null,
-    FOREIGN KEY(fkCampus) REFRENCES Tb_Campus(idCampus)
+    FOREIGN KEY(fkCampus) REFERENCES Tb_Campus(idCampus)
 );
 
 CREATE TABLE Tb_Carreras(
@@ -87,20 +87,8 @@ CREATE TABLE Tb_Carreras(
     fkFacultad int not null,
     creationDateCarrera timestamp default current_timestamp,
 	lastUpdateCarrera  timestamp default current_timestamp on update current_timestamp,
-    FOREIGN KEY(fkTipoCarrera) REFRENCES Tb_Tipo(idTipo),
-    FOREIGN KEY(fkFacultad) REFRENCES Tb_Facultades(idFacultad)
-);
-
-CREATE TABLE Tb_Usuarios(
-    idUsuario int not null auto_increment primary key,
-    emailUsuario varchar(120) not null,
-    passwordUsuario varchar(120),
-    typeOauthUsuario enum('Facebook','Google','Registro') not null,
-    tokenPasswordUser text,
-    cambiarPasswordUsuario enum('True','False') not null default 'False',
-    typeUsuario enum('Agente','Aspirante','Admin') not null,
-    creationDateUsuario timestamp default current_timestamp,
-    lastUpdateUsuario timestamp default current_timestamp on update current_timestamp
+    FOREIGN KEY(fkTipoCarrera) REFERENCES Tb_Tipo(idTipo),
+    FOREIGN KEY(fkFacultad) REFERENCES Tb_Facultades(idFacultad)
 );
 
 CREATE TABLE Tb_Personas(
@@ -114,7 +102,22 @@ CREATE TABLE Tb_Personas(
     creationDatePersona timestamp default current_timestamp,
     lastUpdatePersona timestamp default current_timestamp on update current_timestamp,
     photoPersona int not null,
-    FOREIGN KEY(photoPersona) REFRENCES Tb_Imagenes(idImagen)
+    FOREIGN KEY(photoPersona) REFERENCES Tb_Imagenes(idImagen)
+);
+
+CREATE TABLE Tb_Usuarios(
+    idUsuario int not null auto_increment primary key,
+    emailUsuario varchar(120) not null,
+    passwordUsuario varchar(120),
+    typeOauthUsuario enum('Facebook','Google','Registro') not null,
+    tokenPasswordUser text,
+    cambiarPasswordUsuario enum('True','False') not null default 'False',
+    typeUsuario enum('Agente','Aspirante','Admin') not null,
+    statusUsuario enum('Activo','Inactivo') default 'Activo',
+    creationDateUsuario timestamp default current_timestamp,
+    lastUpdateUsuario timestamp default current_timestamp on update current_timestamp,
+    fkPersona int not null,
+    FOREIGN KEY(fkPersona) REFERENCES Tb_Personas(idPersona)
 );
 
 
