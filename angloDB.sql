@@ -90,3 +90,31 @@ CREATE TABLE Tb_Carreras(
     FOREIGN KEY(fkTipoCarrera) REFRENCES Tb_Tipo(idTipo),
     FOREIGN KEY(fkFacultad) REFRENCES Tb_Facultades(idFacultad)
 );
+
+CREATE TABLE Tb_Usuarios(
+    idUsuario int not null auto_increment primary key,
+    emailUsuario varchar(120) not null,
+    passwordUsuario varchar(120),
+    typeOauthUsuario enum('Facebook','Google','Registro') not null,
+    tokenPasswordUser text,
+    cambiarPasswordUsuario enum('True','False') not null default 'False',
+    typeUsuario enum('Agente','Aspirante','Admin') not null,
+    creationDateUsuario timestamp default current_timestamp,
+    lastUpdateUsuario timestamp default current_timestamp on update current_timestamp
+);
+
+CREATE TABLE Tb_Personas(
+    idPersona int not null auto_increment primary key,
+    firstNamePersona varchar(80) not null,
+    lastNamePersona varchar(80) not null,
+    generoPersona enum('Femenino','Masculino'),
+    fechaNacimientoPersona date,
+    telefonoPersona varchar(15),
+    ciudadPersona varchar(150),
+    creationDatePersona timestamp default current_timestamp,
+    lastUpdatePersona timestamp default current_timestamp on update current_timestamp,
+    photoPersona int not null,
+    FOREIGN KEY(photoPersona) REFRENCES Tb_Imagenes(idImagen)
+);
+
+
