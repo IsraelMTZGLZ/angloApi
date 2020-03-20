@@ -101,7 +101,7 @@ CREATE TABLE Tb_Personas(
     ciudadPersona varchar(150),
     creationDatePersona timestamp default current_timestamp,
     lastUpdatePersona timestamp default current_timestamp on update current_timestamp,
-    photoPersona int not null,
+    photoPersona int,
     FOREIGN KEY(photoPersona) REFERENCES Tb_Imagenes(idImagen)
 );
 
