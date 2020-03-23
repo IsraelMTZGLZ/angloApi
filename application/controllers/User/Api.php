@@ -16,7 +16,7 @@ class Api extends REST_Controller {
     //registro de cualquier tipo de usuario
     public function registro_post()
     {
-        if (count($this->post())==0 || count($this->post())>9) {
+        if (count($this->post())==0 || count($this->post())>7) {
             $response=array(
                 "status"=>"error",
                 "status_code"=>409,
@@ -25,16 +25,14 @@ class Api extends REST_Controller {
                     "nombres"=>"Requerido,Tiene que ser menor a 80 caracteres",
                     "apellidos"=>"Requerido,Tiene que ser menor a 80 caracteres",
                     "email"=>"Requerido,Tiene que ser un correo valido",
-                    "password"=>"Opcional,Tiene que ser mayor a 5 caracteres y Dependiendo del tipo de registro",
-                    "repetir_password"=>"Opcional,Tiene que ser igual al password y Dependiendo del tipo de registro",
-                    "genero"=>"Opcional,Eso tiene que se 'Femenino' o Masxulino'",
+                    "genero"=>"Opcional,Eso tiene que se 'Femenino' o Masculino'",
                     "typeOauth"=>"Requerido,Eso tiene que ser 'Registro','Facebook' or 'Google'",
                     "token"=>"Opcional, Dependiendo del tipo de registro",
                     "urlFoto"=>"Opcional, Dependiendo del tipo de registro"
                 ),
                 "data"=>null
             );
-            count($this->post())>9  ? $response["message"]="Demasiados datos enviados" : $response["message"]="Datos no enviados";
+            count($this->post())>7  ? $response["message"]="Demasiados datos enviados" : $response["message"]="Datos no enviados";
 
         }else{
             $this->form_validation->set_data($this->post());
@@ -44,12 +42,7 @@ class Api extends REST_Controller {
             $this->form_validation->set_rules('genero','Genero','callback_check_gender');
             $this->form_validation->set_rules('typeOauth','Tipo de registro','callback_check_typoOauth');
 
-            if($this->post('typeOauth')=="Registro"){
-                $this->form_validation->set_rules('password','Contraseña','required|min_length[5]');
-                $this->form_validation->set_rules('repetir_password','Repetir contraseña','required|min_length[5]|matches[password]');
-                $this->form_validation->set_rules('token','Token Red Social','callback_check_noRequerido');
-                $this->form_validation->set_rules('urlFoto','Token Red Social','callback_check_noRequerido');
-            }else{
+            if($this->post('typeOauth')!="Registro"){
                 $this->form_validation->set_rules('token','Token Red Social','required');
                 $this->form_validation->set_rules('urlFoto','Url Foto','required|valid_url');
                 $this->form_validation->set_rules('password','Contraseña','callback_check_noRequerido');
@@ -67,7 +60,8 @@ class Api extends REST_Controller {
             else{
                 if($this->post('typeOauth')=="Registro"){
                     $this->load->library('bcrypt');
-                    $password=$this->bcrypt->hash_password($this->post('password'));
+                    $uniquePassword= $this->unique_code(6);
+                    $password=$this->bcrypt->hash_password($uniquePassword);
                 }
                 
                 $itemExist=$this->DAO->selectEntity('Tb_Usuarios',array('emailUsuario'=>$this->post('email')),true);
@@ -111,6 +105,7 @@ class Api extends REST_Controller {
                     }
                     
                     $response = $this->UserDAO->registrar($data);
+                    $response['data']=$uniquePassword;
                 }
             }
         }
@@ -156,11 +151,11 @@ class Api extends REST_Controller {
                             if ($this->bcrypt->check_password($this->post('password'), $itemExist->passwordUsuario )) {
                         
                                 if ($itemExist->typeUsuario=="Agente") {
-                                    $vista=null;
+                                    $vista='Vw_Agente';
                                 }else if($itemExist->typeUsuario=="Admin"){
-                                    $vista=null;
+                                    $vista='Vw_Admin';
                                 }else if($itemExist->typeUsuario=="Aspirante"){
-                                    $vista=null;
+                                    $vista='Vw_Aspirante';
                                 }else {
                                     $vista=null;
                                 }
@@ -364,6 +359,9 @@ class Api extends REST_Controller {
 
     }
     
-    
+    public function unique_code($limit)
+    {
+        return substr(base_convert(sha1(uniqid(mt_rand())), 16,36), 0, $limit);
+    }
 
 }
