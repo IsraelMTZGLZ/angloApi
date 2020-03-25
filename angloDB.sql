@@ -92,11 +92,20 @@ CREATE TABLE Tb_Permisos_Agentes(
     FOREIGN KEY(fkAgente) REFERENCES Tb_Agentes(idAgente)
 );
 
+CREATE TABLE `Tb_config` (
+  `email_send` varchar(140) NOT NULL,
+  `email_pass` text NOT NULL,
+  `email_protocol` varchar(20) NOT NULL,
+  `email_port` varchar(5) NOT NULL,
+  `email_host` varchar(60) NOT NULL,
+  `from_email` varchar(120) NOT NULL,
+  PRIMARY KEY (`email_send`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --ASPIRANTE
 CREATE OR REPLACE View Vw_Aspirante as
 select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,generoPersona as genero,photoPersona as photo,
-if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where idImagen=photoPersona limit 1)) as photoUrl,
+if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where i.idImagen=p.photoPersona limit 1)) as photoUrl,
 emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsuario as statusU,
 idUsuario as usuario,
 CASE
@@ -121,7 +130,7 @@ where p.idPersona = u.fkPersona and typeUsuario="Aspirante";
 --vista Agente
 CREATE OR REPLACE View Vw_Agente as
 select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,generoPersona as genero,photoPersona as photo,
-if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where idImagen=photoPersona limit 1)) as photoUrl,
+if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where i.idImagen=p.photoPersona limit 1)) as photoUrl,
 emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsuario as statusU,
 idUsuario as usuario,
 CASE
@@ -142,7 +151,7 @@ where p.idPersona = u.fkPersona and typeUsuario="Agente";
 --vista admin
 CREATE OR REPLACE View Vw_Admin as
 select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,generoPersona as genero,photoPersona as photo,
-if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where idImagen=photoPersona limit 1)) as photoUrl,
+if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where i.idImagen=p.photoPersona limit 1)) as photoUrl,
 emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsuario as statusU,
 idUsuario as usuario
 from Tb_Personas as p, Tb_Usuarios as u

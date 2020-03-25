@@ -103,9 +103,15 @@ class Api extends REST_Controller {
                     else{
                         $data['Usuario']['typeUsuario']="Aspirante";  
                     }
+
+                    $dataUser['persona']=$this->post('nombres').' '.$this->post('apellidos');
                     
                     $response = $this->UserDAO->registrar($data);
-                    $response['data']=$uniquePassword;
+                    //$response['data']=$uniquePassword;
+                    $dataUser['password']=$uniquePassword;
+                    if($response['status']=="success"){
+                        $this->templateEmail($data['Usuario']['emailUsuario'],$data['Person']['firstNamePersona'],'Welcome',$dataUser,'email_bienvenida');
+                    }
                 }
             }
         }
@@ -254,11 +260,11 @@ class Api extends REST_Controller {
                     if ($itemExist->typeOauthUsuario!='Registro') {
                         
                         if ($itemExist->typeUsuario=="Agente") {
-                            $vista=null;
+                            $vista='Vw_Agente';
                         }else if($itemExist->typeUsuario=="Admin"){
-                            $vista=null;
+                            $vista='Vw_Admin';
                         }else if($itemExist->typeUsuario=="Aspirante"){
-                            $vista=null;
+                            $vista='Vw_Aspirante';
                         }else {
                             $vista=null;
                         }
@@ -362,6 +368,37 @@ class Api extends REST_Controller {
     public function unique_code($limit)
     {
         return substr(base_convert(sha1(uniqid(mt_rand())), 16,36), 0, $limit);
+    }
+
+    public function templateEmail($to,$name,$subject,$data=null,$vista)
+    {
+        $this->load->library('encryption');
+        $this->load->library('email');
+
+        $email_settings =  $this->DAO->selectEntity('Tb_config',null,true);
+        if($email_settings){
+            $config['protocol'] = $email_settings->email_protocol;
+            $config['smtp_host'] = "ssl://".$email_settings->email_host;
+            $config['smtp_user'] = $email_settings->email_send;
+            $config['smtp_pass'] = $this->encryption->decrypt($email_settings->email_pass);
+            $config['smtp_port'] = $email_settings->email_port;
+            $config['charset'] = "utf-8";
+            $config['mailtype'] = "html";
+            $this->email->initialize($config);  
+    
+            $this->email->set_newline("\r\n");
+            
+            $this->email->from($email_settings->email_send,$email_settings->from_email);
+            $this->email->to($to,$name);
+            $this->email->subject($subject);
+            $msg = $this->load->view($vista,$data,true);
+            $this->email->message($msg);
+            if($this->email->send()){
+                
+            }else{
+                
+            }
+        }
     }
 
 }

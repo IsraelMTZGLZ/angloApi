@@ -51,7 +51,7 @@ class DAO extends CI_Model{
             $response = array(
               "status"=>"success",
               "status_code"=>201,
-              "message"=>"Item created Successfully", 
+              "message"=>"Artículo creado con éxito", 
               "data"=>$returnData ? $query->inserted_id() : null
             );
         }
@@ -87,7 +87,7 @@ class DAO extends CI_Model{
             $response = array(
               "status"=>"success",
               "status_code"=>201,
-              "message"=>"Item update Successfully"
+              "message"=>"Artículo actualizado correctamente"
             );
         }
 
@@ -109,7 +109,7 @@ class DAO extends CI_Model{
             $reponseDB = array(
                 "status"=>"success",
                 "status_code"=>200,
-                "message"=>"Item deleted successful",
+                "message"=>"Artículo eliminado correctamente",
                 "validations"=>null,
                 "data"=>null
             );
