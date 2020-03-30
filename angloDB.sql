@@ -27,6 +27,7 @@ CREATE TABLE Tb_Imagenes(
 	creationDateImagen timestamp default current_timestamp,
 	lastUpdateImagen timestamp default current_timestamp on update current_timestamp
 );
+insert into Tb_Imagenes(urlImagen)values ('https://upload.wikimedia.org/wikipedia/commons/d/d3/User_Circle.png');
 
 CREATE TABLE Tb_Personas(
     idPersona int not null auto_increment primary key,
@@ -38,7 +39,7 @@ CREATE TABLE Tb_Personas(
     photoPersona int,
     FOREIGN KEY(photoPersona) REFERENCES Tb_Imagenes(idImagen) on update cascade on delete cascade
 );
-
+insert into Tb_Personas (firstNamePersona,lastNamePersona, generoPersona, photoPersona) values('Isra','Mtz','Masculino',6);
 CREATE TABLE Tb_Usuarios(
     idUsuario int not null auto_increment primary key,
     emailUsuario varchar(120) not null,
@@ -53,7 +54,7 @@ CREATE TABLE Tb_Usuarios(
     fkPersona int not null,
     FOREIGN KEY(fkPersona) REFERENCES Tb_Personas(idPersona) on update cascade on delete cascade
 );
-
+insert into Tb_Usuarios(emailUsuario, passwordUsuario, typeOauthUsuario, tokenPasswordUser,typeUsuario,fkPersona) values('isra@gmail.com','1234','Registro','fskdfjhskdjfhsdada','Aspirante',2);
 CREATE TABLE Tb_Aspirantes(
     idAspirante int not null auto_increment primary key,
     fechaNacimientoAspirante date,
@@ -64,7 +65,7 @@ CREATE TABLE Tb_Aspirantes(
     fkPersona int not null,
     FOREIGN KEY(fkPersona) REFERENCES Tb_Personas(idPersona)
 );
-
+insert into Tb_Aspirantes(fechaNacimientoAspirante, telefonoAspirante,ciudadAspirante,fkPersona)values(now(),'442332233223','Qro',2);
 CREATE TABLE Tb_Agentes(
     idAgente int not null auto_increment primary key,
     numeroEmpleado varchar(20) not null,
@@ -159,10 +160,10 @@ where p.idPersona = u.fkPersona and typeUsuario="Admin";
 
 --vista Aspirante
 
-CREATE OR REPLACE View Vw_Admin as
+CREATE OR REPLACE View Vw_Aspirante as
 select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,generoPersona as genero,photoPersona as photo,
 if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where i.idImagen=p.photoPersona limit 1)) as photoUrl,
-emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsuario as statusU,
+emailUsuario as email, typeUsuario,statusUsuario as statusU,fechaNacimientoAspirante as fecNac,telefonoAspirante as tel, ciudadAspirante as ciudad,
 idUsuario as usuario
-from Tb_Personas as p, Tb_Usuarios as u
-where p.idPersona = u.fkPersona and typeUsuario="Admin";
+from Tb_Personas as p, Tb_Usuarios as u, Tb_Aspirantes as a
+where p.idPersona = u.fkPersona and typeUsuario="Aspirante" and p.idPersona = a.fkPersona;

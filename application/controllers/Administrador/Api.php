@@ -18,14 +18,32 @@ class Api extends REST_Controller {
         if($id){
              $response = array(
                 "status"=>"success",
-                "message"=> '',
-                "data"=>$this->DAO->selectEntity('Tb_Agentes',array('idAgente'=>$id)),
+                "message"=> 'Data loaded successfully',
+                "data"=>$this->DAO->selectEntity('Vw_Admin',array('idPersona'=>$id)),
             );
         }else{
             $response = array(
                 "status"=>"success",
-                "message"=> '',
-                "data"=>$this->DAO->selectEntity('Tb_Agentes'),
+                "message"=> 'Data loaded successfully',
+                "data"=>$this->DAO->selectEntity('Vw_Admin'),
+            );
+        }
+        $this->response($response,200);
+    }
+
+    function aspirante_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> 'Data loaded successfully',
+                "data"=>$this->DAO->selectEntity('Vw_Aspirante',array('idPersona'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> 'Data loaded successfully',
+                "data"=>$this->DAO->selectEntity('Vw_Aspirante'),
             );
         }
         $this->response($response,200);
