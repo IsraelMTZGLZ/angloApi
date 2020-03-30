@@ -36,7 +36,7 @@ CREATE TABLE Tb_Personas(
     creationDatePersona timestamp default current_timestamp,
     lastUpdatePersona timestamp default current_timestamp on update current_timestamp,
     photoPersona int,
-    FOREIGN KEY(photoPersona) REFERENCES Tb_Imagenes(idImagen)
+    FOREIGN KEY(photoPersona) REFERENCES Tb_Imagenes(idImagen) on update cascade on delete cascade
 );
 
 CREATE TABLE Tb_Usuarios(
@@ -51,7 +51,7 @@ CREATE TABLE Tb_Usuarios(
     creationDateUsuario timestamp default current_timestamp,
     lastUpdateUsuario timestamp default current_timestamp on update current_timestamp,
     fkPersona int not null,
-    FOREIGN KEY(fkPersona) REFERENCES Tb_Personas(idPersona)
+    FOREIGN KEY(fkPersona) REFERENCES Tb_Personas(idPersona) on update cascade on delete cascade
 );
 
 CREATE TABLE Tb_Aspirantes(
@@ -109,19 +109,19 @@ if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Pers
 emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsuario as statusU,
 idUsuario as usuario,
 CASE
-    WHEN typeUsuario="Aspirante" THEN 
+    WHEN typeUsuario="Aspirante" THEN
         (select idAspirante from Tb_Aspirantes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
 END as aspirante,
 CASE
-    WHEN typeUsuario="Aspirante" THEN 
+    WHEN typeUsuario="Aspirante" THEN
         (select fechaNacimientoAspirante from Tb_Aspirantes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
 END as fechaNacimiento,
 CASE
-    WHEN typeUsuario="Aspirante" THEN 
+    WHEN typeUsuario="Aspirante" THEN
         (select telefonoAspirante from Tb_Aspirantes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
 END as telefono,
 CASE
-    WHEN typeUsuario="Aspirante" THEN 
+    WHEN typeUsuario="Aspirante" THEN
         (select ciudadAspirante from Tb_Aspirantes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
 END as ciudad
 from Tb_Personas as p, Tb_Usuarios as u
@@ -134,15 +134,15 @@ if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Pers
 emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsuario as statusU,
 idUsuario as usuario,
 CASE
-    WHEN typeUsuario="Agente" THEN 
+    WHEN typeUsuario="Agente" THEN
         (select idAgente from Tb_Agentes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
 END as agente,
 CASE
-    WHEN typeUsuario="Agente" THEN 
+    WHEN typeUsuario="Agente" THEN
         (select numeroEmpleado from Tb_Agentes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
 END as numeroEmpleado,
 CASE
-    WHEN typeUsuario="Agente" THEN 
+    WHEN typeUsuario="Agente" THEN
         (select puestoAgente from Tb_Agentes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
 END as puesto
 from Tb_Personas as p, Tb_Usuarios as u
