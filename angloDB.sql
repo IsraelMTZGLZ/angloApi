@@ -156,3 +156,13 @@ emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsu
 idUsuario as usuario
 from Tb_Personas as p, Tb_Usuarios as u
 where p.idPersona = u.fkPersona and typeUsuario="Admin";
+
+--vista Aspirante
+
+CREATE OR REPLACE View Vw_Admin as
+select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,generoPersona as genero,photoPersona as photo,
+if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where i.idImagen=p.photoPersona limit 1)) as photoUrl,
+emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsuario as statusU,
+idUsuario as usuario
+from Tb_Personas as p, Tb_Usuarios as u
+where p.idPersona = u.fkPersona and typeUsuario="Admin";

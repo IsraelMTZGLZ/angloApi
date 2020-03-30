@@ -232,196 +232,66 @@ class Api extends REST_Controller {
     }
 
     //login forma nativa desde la pagina web
-    public function loginNativo_post()
-    {
-        if (count($this->post())==0 || count($this->post())>2) {
-            $response=array(
-                "status"=>"error",
-                "status_code"=>409,
-                "message"=>null,
-                "validations"=>array(
-                    "email"=>"Requerido, email valido",
-                    "password"=>"required, minimo 5 caracteres"
-                ),
-                "data"=>null
-            );
-            count($this->post())>2  ? $response["message"]="Demasiados datos enviados" : $response["message"]="Datos no enviados";
-        }else{
-            $this->form_validation->set_data($this->post());
-            $this->form_validation->set_rules('email','Correo','required|valid_email');
-            $this->form_validation->set_rules('password','Contraseña','required|min_length[5]');
+    function admin_delete(){
+      $id = $this->get('id');
+    		if ($id) {
+    			$Admin = $this->DAO->selectEntity('Tb_Personas',array('idPersona'=>$id),TRUE);
+    			if($Admin){
+          $this->db->trans_begin();
 
-            if ($this->form_validation->run()==false) {
-                $response=array(
-                      "status"=>"error",
-                      "status_code"=>409,
-                      "message"=>"check the validations",
-                      "validations"=>$this->form_validation->error_array(),
-                      "data"=>null
-                  );
-            }
-            else{
-                $this->load->library('bcrypt');
-                $itemExist=$this->DAO->selectEntity('Tb_Usuarios',array('emailUsuario'=>$this->post('email')),true);
-                if ($itemExist) {
-                    if ($itemExist->typeOauthUsuario=='Registro') {
-                        if ($itemExist->statusUsuario=="Activo"){
-                            if ($this->bcrypt->check_password($this->post('password'), $itemExist->passwordUsuario )) {
-
-                                if ($itemExist->typeUsuario=="Agente") {
-                                    $vista='Vw_Agente';
-                                }else if($itemExist->typeUsuario=="Admin"){
-                                    $vista='Vw_Admin';
-                                }else if($itemExist->typeUsuario=="Aspirante"){
-                                    $vista='Vw_Aspirante';
-                                }else {
-                                    $vista=null;
-                                }
-
-                                if ($vista) {
-                                    $item2Exist=$this->DAO->selectEntity($vista,array('email'=>$this->post('email')),true);
-                                    $response = array(
-                                        "status"=>"success",
-                                        "status_code"=>"201",
-                                        "message"=>"Informacion Cargada Correctamente",
-                                        "data"=>$item2Exist
-                                    );
-                                }else{
-                                    $response = array(
-                                        "status"=>"error",
-                                        "status_code"=>"201",
-                                        "message"=>"Usuario con problemas",
-                                        "data"=>null
-                                    );
-                                }
-
-
-                            }
-                            else{
-                                $response = array(
-                                    "status"=>"error",
-                                    "status_code"=>"201",
-                                    "message"=>"Email y/o contraseña incorrecta",
-                                    "data"=>null
-                                );
-                            }
-                        }else{
-                            $response = array(
-                                "status"=>"error",
-                                "status_code"=>"201",
-                                "message"=>"El usuario no tiene permisos",
-                                "data"=>null
-                            );
-                        }
-
-                    }else{
-                        $response=array(
-                            "status"=>"error",
-                            "status_code"=>409,
-                            "message"=>"El usuario ".$itemExist->emailUsuario. " fue creado via ".$itemExist->typeOauthUsuario,
-                            "data"=>null
-                        );
-                    }
-
-
-                }else{
-                    $response = array(
-                        "status"=>"error",
-                        "status_code"=>"201",
-                        "message"=>"Email y/o contraseña incorrecta",
-                        "data"=>null
+          $Admin = $this->DAO->deleteData('Tb_Personas',array('idPersona'=>$id));
+          if($Admin['status']=="success"){
+                 $User = $this->DAO->deleteData('Tb_Usuarios',array('idUsuario'=>$id));
+                   if($User['status']=="success"){
+                     $response = array(
+                        "status"=>"success",
+                        "message"=>"Admin deleted successfully",
+                        "data"=>null,
                     );
-                }
-            }
-        }
-        $this->response($response,200);
-    }
-
-    //login por cuenta google o facebook
-    public function loginPlus_post()
-    {
-        if (count($this->post())==0 || count($this->post())>2) {
-            $response=array(
-                "status"=>"error",
-                "status_code"=>409,
-                "message"=>null,
-                "validations"=>array(
-                    "email"=>"requerido, email valido",
-                    "token"=>"required"
-                ),
-                "data"=>null
-            );
-            count($this->post())>2  ? $response["message"]="Demasiados datos enviados" : $response["message"]="Datos no enviados";
-        }else{
-            $this->form_validation->set_data($this->post());
-            $this->form_validation->set_rules('email','Correo','required|valid_email');
-            $this->form_validation->set_rules('token','Token Usuario','required');
-
-            if ($this->form_validation->run()==false) {
-                $response=array(
-                      "status"=>"error",
-                      "status_code"=>409,
-                      "message"=>"check the validations",
-                      "validations"=>$this->form_validation->error_array(),
-                      "data"=>null
-                  );
-            }
-            else{
-                $itemExist=$this->DAO->selectEntity('Tb_Usuarios',array('tokenPasswordUser'=>$this->post('token'),'emailUsuario'=>$this->post('email')),true);
-                if ($itemExist) {
-                    if ($itemExist->typeOauthUsuario!='Registro') {
-
-                        if ($itemExist->typeUsuario=="Agente") {
-                            $vista='Vw_Agente';
-                        }else if($itemExist->typeUsuario=="Admin"){
-                            $vista='Vw_Admin';
-                        }else if($itemExist->typeUsuario=="Aspirante"){
-                            $vista='Vw_Aspirante';
-                        }else {
-                            $vista=null;
-                        }
-
-                        if ($vista) {
-                            $item2Exist=$this->DAO->selectEntity($vista,array('email'=>$itemExist->emailUsuario),true);
-                            $response = array(
-                                "status"=>"success",
-                                "status_code"=>"201",
-                                "message"=>"Informacion Cargada Correctamente",
-                                "data"=>$item2Exist
-                            );
-                        }else{
-                            $response = array(
-                                "status"=>"error",
-                                "status_code"=>"201",
-                                "message"=>"Usuario con problemas",
-                                "data"=>null
-                            );
-                        }
-
-
-
                     }else{
-                        $response=array(
-                            "status"=>"error",
-                            "status_code"=>409,
-                            "message"=>"El usuario ".$this->post('email')." no fue creado por esta red social",
-                            "data"=>null
-                        );
-                    }
+                       $response = array(
+                           "status"=>"error",
+                           "message"=>$User['message'],
+                           "data"=>null,
+                       );
+                     }
+           }else{
+               $response = array(
+                   "status"=>"error",
+                   "message"=>  $Admin['message'],
+                   "data"=>null,
+               );
+           }
+           if($this->db->trans_status()==FALSE){
+              $this->db->trans_rollback();
+           }else{
+              $this->db->trans_commit();
+           }
+    		 	}else{
+    				$response = array(
+    					"status"=>"error",
+    					"status_code"=>409,
+    					"message"=>"Id doesn't exists",
+    					"validations"=>null,
+    					"data"=>null
+    				);
+    			}
+    		} else {
+    			$response = array(
+    				"status"=>"error",
+    				"status_code"=>409,
+    				"message"=>"Id wasn't sent",
+    				"validations"=>array(
+    					"id"=>"Required (Id)",
+
+    				),
+    				"data"=>null
+    			);
+    		}
+		 $this->response($response,200);
+		}
 
 
-                }else{
-                    $response = array(
-                        "status"=>"error",
-                        "status_code"=>"201",
-                        "message"=>"Correo no encontrado",
-                        "data"=>null
-                    );
-                }
-            }
-        }
-        $this->response($response,200);
-    }
 
     function check_gender($str){
         if (!$str) {
