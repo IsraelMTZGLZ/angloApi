@@ -95,10 +95,10 @@ class Api extends REST_Controller {
 
                     if($emailExplode[1]=="anglolatinoedu.com"){
                         $data['Usuario']['typeUsuario']="Agente";
-                        $data['Usuario']['statusUsuario']="Inactivo";
+                        $data['Usuario']['statusUsuario']="Pendiente";
                     }else if($emailExplode[0]=="admin"){
                         $data['Usuario']['typeUsuario']="Admin"; 
-                        $data['Usuario']['statusUsuario']="Inactivo"; 
+                        $data['Usuario']['statusUsuario']="Pendiente"; 
                     }
                     else{
                         $data['Usuario']['typeUsuario']="Aspirante";  

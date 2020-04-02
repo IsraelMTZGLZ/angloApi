@@ -48,7 +48,7 @@ CREATE TABLE Tb_Usuarios(
     tokenPasswordUser text,
     cambiarPasswordUsuario enum('True','False') not null default 'False',
     typeUsuario enum('Agente','Aspirante','Admin') not null,
-    statusUsuario enum('Activo','Inactivo') default 'Activo',
+    statusUsuario enum('Activo','Inactivo','Pendiente') default 'Activo',
     creationDateUsuario timestamp default current_timestamp,
     lastUpdateUsuario timestamp default current_timestamp on update current_timestamp,
     fkPersona int not null,
