@@ -57,9 +57,10 @@ CREATE TABLE Tb_Usuarios(
 insert into Tb_Usuarios(emailUsuario, passwordUsuario, typeOauthUsuario, tokenPasswordUser,typeUsuario,fkPersona) values('isra@gmail.com','1234','Registro','fskdfjhskdjfhsdada','Aspirante',2);
 CREATE TABLE Tb_Aspirantes(
     idAspirante int not null auto_increment primary key,
-    fechaNacimientoAspirante date,
+    fechaNacimientoAspirante text,
     telefonoAspirante varchar(15),
     ciudadAspirante varchar(150),
+    programaDeInteres enum('Universidad','Preparatoria','CursoIngles','CursoVerano'),
     creationDateAspirante timestamp default current_timestamp,
     lastUpdateAspirante timestamp default current_timestamp on update current_timestamp,
     fkPersona int not null,
@@ -124,7 +125,11 @@ END as telefono,
 CASE
     WHEN typeUsuario="Aspirante" THEN
         (select ciudadAspirante from Tb_Aspirantes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
-END as ciudad
+END as ciudad,
+CASE
+WHEN typeUsuario="Aspirante" THEN
+   (select programaDeInteres from Tb_Aspirantes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
+END as programaDeInteres
 from Tb_Personas as p, Tb_Usuarios as u
 where p.idPersona = u.fkPersona and typeUsuario="Aspirante";
 
