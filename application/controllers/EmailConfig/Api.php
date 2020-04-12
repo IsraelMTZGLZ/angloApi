@@ -50,11 +50,11 @@ class Api extends REST_Controller {
                     "message"=>"Revisa las validaciones",
                     "validations"=>$this->form_validation->error_array(),
                     "data"=>null
-                ); 
+                );
             }
             else{
                 $this->load->library('encryption');
-                
+
                 $pass=$this->encryption->encrypt($this->post('password'));
                 $data=array(
                     "email_send"=>$this->post('email'),
@@ -126,19 +126,19 @@ class Api extends REST_Controller {
             $config['smtp_port'] = $email_settings['email_port'];
             $config['charset'] = "utf-8";
             $config['mailtype'] = "html";
-            $this->email->initialize($config);  
-  
+            $this->email->initialize($config);
+
             $this->email->set_newline("\r\n");
-            
+
             $this->email->from($email_settings['email_send'],$email_settings['from_email']);
             $this->email->to($to,$name);
             $this->email->subject($subject);
             $msg = $this->load->view($vista,$data,true);
             $this->email->message($msg);
             if($this->email->send()){
-                
+
             }else{
-                
+
             }
         }
     }

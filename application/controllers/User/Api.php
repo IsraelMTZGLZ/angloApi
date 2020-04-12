@@ -55,7 +55,7 @@ class Api extends REST_Controller {
                     "message"=>"Revisa las validaciones",
                     "validations"=>$this->form_validation->error_array(),
                     "data"=>null
-                ); 
+                );
             }
             else{
                 if($this->post('typeOauth')=="Registro"){
@@ -63,7 +63,7 @@ class Api extends REST_Controller {
                     $uniquePassword= $this->unique_code(6);
                     $password=$this->bcrypt->hash_password($uniquePassword);
                 }
-                
+
                 $itemExist=$this->DAO->selectEntity('Tb_Usuarios',array('emailUsuario'=>$this->post('email')),true);
                 if($itemExist){
                     $response=array(
@@ -71,7 +71,7 @@ class Api extends REST_Controller {
                         "status_code"=>409,
                         "message"=>"El usuario ".$this->post('email')." ya existe revisa tu cuenta por favor",
                         "data"=>null
-                    ); 
+                    );
                 }else{
                     $data['Person']=array(
                         "firstNamePersona"=>$this->post('nombres'),
@@ -97,15 +97,15 @@ class Api extends REST_Controller {
                         $data['Usuario']['typeUsuario']="Agente";
                         $data['Usuario']['statusUsuario']="Pendiente";
                     }else if($emailExplode[0]=="admin"){
-                        $data['Usuario']['typeUsuario']="Admin"; 
-                        $data['Usuario']['statusUsuario']="Pendiente"; 
+                        $data['Usuario']['typeUsuario']="Admin";
+                        $data['Usuario']['statusUsuario']="Pendiente";
                     }
                     else{
-                        $data['Usuario']['typeUsuario']="Aspirante";  
+                        $data['Usuario']['typeUsuario']="Aspirante";
                     }
 
                     $dataUser['persona']=$this->post('nombres').' '.$this->post('apellidos');
-                    
+
                     $response = $this->UserDAO->registrar($data);
                     //$response['data']=$uniquePassword;
                     $dataUser['password']=$uniquePassword;
@@ -146,7 +146,7 @@ class Api extends REST_Controller {
                       "message"=>"check the validations",
                       "validations"=>$this->form_validation->error_array(),
                       "data"=>null
-                  ); 
+                  );
             }
             else{
                 $this->load->library('bcrypt');
@@ -155,7 +155,7 @@ class Api extends REST_Controller {
                     if ($itemExist->typeOauthUsuario=='Registro') {
                         if ($itemExist->statusUsuario=="Activo"){
                             if ($this->bcrypt->check_password($this->post('password'), $itemExist->passwordUsuario )) {
-                        
+
                                 if ($itemExist->typeUsuario=="Agente") {
                                     $vista='Vw_Agente';
                                 }else if($itemExist->typeUsuario=="Admin"){
@@ -165,7 +165,7 @@ class Api extends REST_Controller {
                                 }else {
                                     $vista=null;
                                 }
-        
+
                                 if ($vista) {
                                     $item2Exist=$this->DAO->selectEntity($vista,array('email'=>$this->post('email')),true);
                                     $response = array(
@@ -179,18 +179,18 @@ class Api extends REST_Controller {
                                         "status"=>"error",
                                         "status_code"=>"201",
                                         "message"=>"Usuario con problemas",
-                                        "data"=>null 
+                                        "data"=>null
                                     );
                                 }
-                                    
-                                
+
+
                             }
                             else{
                                 $response = array(
                                     "status"=>"error",
                                     "status_code"=>"201",
                                     "message"=>"Email y/o contraseña incorrecta",
-                                    "data"=>null 
+                                    "data"=>null
                                 );
                             }
                         }else{
@@ -198,26 +198,26 @@ class Api extends REST_Controller {
                                 "status"=>"error",
                                 "status_code"=>"201",
                                 "message"=>"El usuario no tiene permisos",
-                                "data"=>null 
+                                "data"=>null
                             );
                         }
-                        
+
                     }else{
                         $response=array(
                             "status"=>"error",
                             "status_code"=>409,
                             "message"=>"El usuario ".$itemExist->emailUsuario. " fue creado via ".$itemExist->typeOauthUsuario,
                             "data"=>null
-                        ); 
+                        );
                     }
-                    
-                    
+
+
                 }else{
                     $response = array(
                         "status"=>"error",
                         "status_code"=>"201",
                         "message"=>"Email y/o contraseña incorrecta",
-                        "data"=>null 
+                        "data"=>null
                     );
                 }
             }
@@ -252,13 +252,13 @@ class Api extends REST_Controller {
                       "message"=>"check the validations",
                       "validations"=>$this->form_validation->error_array(),
                       "data"=>null
-                  ); 
+                  );
             }
             else{
                 $itemExist=$this->DAO->selectEntity('Tb_Usuarios',array('tokenPasswordUser'=>$this->post('token'),'emailUsuario'=>$this->post('email')),true);
                 if ($itemExist) {
                     if ($itemExist->typeOauthUsuario!='Registro') {
-                        
+
                         if ($itemExist->typeUsuario=="Agente") {
                             $vista='Vw_Agente';
                         }else if($itemExist->typeUsuario=="Admin"){
@@ -282,22 +282,22 @@ class Api extends REST_Controller {
                                 "status"=>"error",
                                 "status_code"=>"201",
                                 "message"=>"Usuario con problemas",
-                                "data"=>null 
+                                "data"=>null
                             );
                         }
-                                
-                            
-                        
+
+
+
                     }else{
                         $response=array(
                             "status"=>"error",
                             "status_code"=>409,
                             "message"=>"El usuario ".$this->post('email')." no fue creado por esta red social",
                             "data"=>null
-                        ); 
+                        );
                     }
-                    
-                    
+
+
                 }else{
                     $response = array(
                         "status"=>"error",
@@ -315,7 +315,7 @@ class Api extends REST_Controller {
         if (!$str) {
             return true;
         }
-        
+
         switch ($str) {
             case 'Femenino':
                 return true;
@@ -328,7 +328,7 @@ class Api extends REST_Controller {
                 return false;
                 break;
         }
-        
+
     }
 
     public function check_typoOauth($str){
@@ -364,7 +364,7 @@ class Api extends REST_Controller {
         }
 
     }
-    
+
     public function unique_code($limit)
     {
         return substr(base_convert(sha1(uniqid(mt_rand())), 16,36), 0, $limit);
@@ -384,19 +384,19 @@ class Api extends REST_Controller {
             $config['smtp_port'] = $email_settings->email_port;
             $config['charset'] = "utf-8";
             $config['mailtype'] = "html";
-            $this->email->initialize($config);  
-    
+            $this->email->initialize($config);
+
             $this->email->set_newline("\r\n");
-            
+
             $this->email->from($email_settings->email_send,$email_settings->from_email);
             $this->email->to($to,$name);
             $this->email->subject($subject);
             $msg = $this->load->view($vista,$data,true);
             $this->email->message($msg);
             if($this->email->send()){
-                
+
             }else{
-                
+
             }
         }
     }
