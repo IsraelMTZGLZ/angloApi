@@ -103,7 +103,32 @@ CREATE TABLE `Tb_config` (
   PRIMARY KEY (`email_send`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---ASPIRANTE
+CREATE TABLE Tb_Preparatoria(
+  idPreparatoria int primary key auto_increment,
+  nombre_Preparatoria varchar(80) not null,
+  creationDatePermiso timestamp default current_timestamp,
+  lastUpdatePermiso timestamp default current_timestamp on update current_timestamp,
+  fkCampus int
+);
+
+CREATE TABLE Tb_Campus(
+  idCampus int primary key auto_increment,
+  ubicacion_Campus varchar(80),
+  nombre_Campus varchar(80),
+  creationDatePermiso timestamp default current_timestamp,
+  lastUpdatePermiso timestamp default current_timestamp on update current_timestamp,
+  fkMaterias int
+ );
+
+CREATE TABLE Tb_Materias(
+  idMateria int primary key auto_increment.
+  nombre_Materia varchar(80) not null,
+  key_Materia varchar(80) unique not null,
+  creationDatePermiso timestamp default current_timestamp,
+  lastUpdatePermiso timestamp default current_timestamp on update current_timestamp
+
+)
+
 CREATE OR REPLACE View Vw_Aspirante as
 select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,concat(firstNamePersona,' ',lastNamePersona) as fullname,generoPersona as genero,photoPersona as photo,
 if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where i.idImagen=p.photoPersona limit 1)) as photoUrl,
@@ -132,7 +157,7 @@ END as programaDeInteres
 from Tb_Personas as p, Tb_Usuarios as u
 where p.idPersona = u.fkPersona and typeUsuario="Aspirante";
 
---vista Agente
+
 CREATE OR REPLACE View Vw_Agente as
 select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,concat(firstNamePersona,' ',lastNamePersona) as fullname,generoPersona as genero,photoPersona as photo,
 if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where i.idImagen=p.photoPersona limit 1)) as photoUrl,
@@ -153,7 +178,7 @@ END as puesto
 from Tb_Personas as p, Tb_Usuarios as u
 where p.idPersona = u.fkPersona and typeUsuario="Agente";
 
---vista admin
+
 CREATE OR REPLACE View Vw_Admin as
 select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,generoPersona as genero,photoPersona as photo,
 if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where i.idImagen=p.photoPersona limit 1)) as photoUrl,
