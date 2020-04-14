@@ -106,28 +106,36 @@ CREATE TABLE `Tb_config` (
 CREATE TABLE Tb_Preparatoria(
   idPreparatoria int primary key auto_increment,
   nombre_Preparatoria varchar(80) not null,
-  creationDatePermiso timestamp default current_timestamp,
-  lastUpdatePermiso timestamp default current_timestamp on update current_timestamp,
-  fkCampus int
+  fundacion_Preparatoria varchar(80) not null,
+  status_Preparatoria enum('Activo','Inactivo','Pendiente') default 'Activo',
+  creationDate_Preparatoria timestamp default current_timestamp,
+  lastUpdate_Preparatoria timestamp default current_timestamp on update current_timestamp
 );
 
 CREATE TABLE Tb_Campus(
   idCampus int primary key auto_increment,
-  ubicacion_Campus varchar(80),
+  ubicacion_Campus text,
   nombre_Campus varchar(80),
-  creationDatePermiso timestamp default current_timestamp,
-  lastUpdatePermiso timestamp default current_timestamp on update current_timestamp,
-  fkMaterias int
+  tipo_Campus varchar(50) not null,
+  alojamiento_Campus varchar(50) not null,
+  urlVideo_Campus text default "Sin Video",
+  descripcion_Campus text,
+  creationDate_Campus timestamp default current_timestamp,
+  lastUpdate_Campus timestamp default current_timestamp on update current_timestamp,
+  fkPreparatoria int,
+  FOREIGN KEY(fkPreparatoria) REFERENCES Tb_Preparatoria(idPreparatoria) on update cascade on delete cascade
  );
 
 CREATE TABLE Tb_Materias(
   idMateria int primary key auto_increment.
   nombre_Materia varchar(80) not null,
   key_Materia varchar(80) unique not null,
-  creationDatePermiso timestamp default current_timestamp,
-  lastUpdatePermiso timestamp default current_timestamp on update current_timestamp
-
-)
+  status_Materia enum('Activo','Inactivo','Pendiente') default 'Activo',
+  creationDate_Materia timestamp default current_timestamp,
+  lastUpdate_Materia timestamp default current_timestamp on update current_timestamp,
+  fkCampus int,
+  FOREIGN KEY(fkCampus) REFERENCES Tb_Campus(idCampus) on update cascade on delete cascade
+);
 
 CREATE OR REPLACE View Vw_Aspirante as
 select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,concat(firstNamePersona,' ',lastNamePersona) as fullname,generoPersona as genero,photoPersona as photo,
