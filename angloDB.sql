@@ -107,20 +107,23 @@ CREATE TABLE Tb_Preparatoria(
   idPreparatoria int primary key auto_increment,
   nombre_Preparatoria varchar(80) not null,
   fundacion_Preparatoria varchar(80) not null,
-  status_Preparatoria enum('Activo','Inactivo','Pendiente') default 'Activo',
+  status_Preparatoria enum('Activo','Inactivo','Pendiente') default 'Pendiente',
   creationDate_Preparatoria timestamp default current_timestamp,
   lastUpdate_Preparatoria timestamp default current_timestamp on update current_timestamp
 );
 
 CREATE TABLE Tb_Campus(
   idCampus int primary key auto_increment,
-  ubicacion_Campus text,
+  ubicacion_Campus text ,
+  urlUbicacion_Campus text ,
   nombre_Campus varchar(80),
   tipo_Campus varchar(50) not null,
   alojamiento_Campus varchar(50) not null,
-  urlVideo_Campus text default "Sin Video",
-  urlImagen_Campus text default "Sin Imagen",
+  urlVideo_Campus text,
+  urlImagen_Campus text,
+  urlImagenLogo_Campus text,
   descripcion_Campus text,
+  status_Campus enum('Activo','Inactivo','Pendiente') default 'Pendiente',
   creationDate_Campus timestamp default current_timestamp,
   lastUpdate_Campus timestamp default current_timestamp on update current_timestamp,
   fkPreparatoria int,
@@ -128,10 +131,10 @@ CREATE TABLE Tb_Campus(
  );
 
 CREATE TABLE Tb_Materias(
-  idMateria int primary key auto_increment.
+  idMateria int primary key auto_increment,
   nombre_Materia varchar(80) not null,
   key_Materia varchar(80) unique not null,
-  status_Materia enum('Activo','Inactivo','Pendiente') default 'Activo',
+  status_Materia enum('Activo','Inactivo','Pendiente') default 'Pendiente',
   creationDate_Materia timestamp default current_timestamp,
   lastUpdate_Materia timestamp default current_timestamp on update current_timestamp,
   fkCampus int,
@@ -195,3 +198,10 @@ emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsu
 idUsuario as usuario
 from Tb_Personas as p, Tb_Usuarios as u
 where p.idPersona = u.fkPersona and typeUsuario="Admin";
+
+CREATE OR REPLACE View Vw_Admin as
+select idPreparatoria AS id_Preparatoria, nombre_Preparatoria as nombrePreparatoria, fundacion_Preparatoria as fundacion, status_Preparatoria as statusPreparatoria,
+idCampus as id_Campus,ubicacion_Campus as ubicacionCampus, urlUbicacion_Campus as urlUCapus, nombre_Campus as nombreCampus, tipo_Campus as tipoCampus, alojamiento_Campus as alojamientoCampus, urlVideo_Campus as urlVCampus,urlImagen_Campus AS urlICampus, descripcion_Campus as descCampus,
+nombre_Materia as nombreMateria
+from Tb_Preparatoria as p, Tb_Campus as c, Tb_Materias as m
+where p.idPreparatoria = c.fkPreparatoria and m.fkCampus = c.idCampus;
