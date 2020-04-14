@@ -119,6 +119,7 @@ CREATE TABLE Tb_Campus(
   tipo_Campus varchar(50) not null,
   alojamiento_Campus varchar(50) not null,
   urlVideo_Campus text default "Sin Video",
+  urlImagen_Campus text default "Sin Imagen",
   descripcion_Campus text,
   creationDate_Campus timestamp default current_timestamp,
   lastUpdate_Campus timestamp default current_timestamp on update current_timestamp,
