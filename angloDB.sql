@@ -121,6 +121,7 @@ CREATE TABLE Tb_Campus(
   alojamiento_Campus varchar(50) not null,
   urlVideo_Campus text,
   urlImagen_Campus text,
+  materias_Campus text,
   urlImagenLogo_Campus text,
   descripcion_Campus text,
   status_Campus enum('Activo','Inactivo','Pendiente') default 'Pendiente',
