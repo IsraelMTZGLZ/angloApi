@@ -171,9 +171,9 @@ class Api extends REST_Controller {
                     $dataUser['password']=$uniquePassword;
                     if($response['status']=="success"){
                         //test
-                        $this->templateEmail('hectori.um.15@gmail.com','hector urias','Change Password',$dataUser,'email_password');
+                        //$this->templateEmail('hectori.um.15@gmail.com','hector urias','Change Password',$dataUser,'email_password');
                         //real
-                        //$this->templateEmail($data['Usuario']['emailUsuario'],$data['Person']['firstNamePersona'],'Welcome',$dataUser,'email_password');
+                        $this->templateEmail($item->emailUsuario,$itemPersona->firstNamePersona,'Change Password',$dataUser,'email_password');
                     }
                 }else{
                     $response=array(
@@ -495,7 +495,9 @@ class Api extends REST_Controller {
             $msg = $this->load->view($vista,$data,true);
             $this->email->message($msg);
             if($this->email->send()){
+                //echo $this->email->print_debugger();
             }else{
+                //echo $this->email->print_debugger();
             }
         }
     }
