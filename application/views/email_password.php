@@ -138,7 +138,7 @@
                 </tr>
               </tbody>
             </table>
-            <div style="background-color:#fff;max-width:580px;"><img src="https://1030z2bnst92zo6j523feq9e-wpengine.netdna-ssl.com/wp-content/uploads/2019/07/welcome-email.png" style="-ms-interpolation-mode:bicubic;clear:both;display:block;max-width:100%;outline:0;text-decoration:none;width:auto" alt="city-page-1.jpg">
+            <div style="background-color:#fff;max-width:580px;">
             </div>
             <table style="margin:0 auto;background:#fefefe;border-collapse:collapse;border-spacing:0;max-width:580px;padding:0;text-align:inherit;vertical-align:top;width:580px;" align="center" class="container">
               <tbody>
@@ -167,12 +167,7 @@
                                     </tbody>
                                   </table>
                                   <p style="margin:0;margin-bottom:10px;color:#0a0a0a;font-family:Georgia, sans-serif;font-size:18px;font-weight:400;line-height:26px;padding:0;text-align:left;">
-It was a pleasure meeting you atthe Expo recently. Many thanks for your interestin
-our programmes of study. Very soon you will receive more information from us
-specifically related to your course of interest. Meantime if you have any questions
-or want to send through your documentation to me for review, please do not
-hesitate to doso.
-I look forward to hearing from you.
+                                  This is your new password to enter the system, the password is temporary in your settings you can change the password
 </p>
 <br>
 <?php if (@$password) { ;?>

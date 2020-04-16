@@ -119,6 +119,78 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
+    //cambiar contraseña
+    public function cambiarPassword_post()
+    {
+        if (count($this->post())==0 || count($this->post())>1) {
+            $response=array(
+                "status"=>"error",
+                "status_code"=>409,
+                "message"=>null,
+                "validations"=>array(
+                    "email"=>"Requerido,Tiene que ser un correo valido"
+                ),
+                "data"=>null
+            );
+            count($this->post())>1  ? $response["message"]="Demasiados datos enviados" : $response["message"]="Datos no enviados";
+
+        }else{
+            $this->form_validation->set_data($this->post());
+            $this->form_validation->set_rules('email','Correo','callback_email_check');
+            
+            if ($this->form_validation->run()==false) {
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"Revisa las validaciones",
+                    "validations"=>$this->form_validation->error_array(),
+                    "data"=>null
+                );
+            }
+            else{
+                
+                $this->load->library('bcrypt');
+                $uniquePassword= $this->unique_code(6);
+                $password=$this->bcrypt->hash_password($uniquePassword);
+                
+
+                $item=$this->DAO->selectEntity('Tb_Usuarios',array('emailUsuario'=>$this->post('email')),true);
+                
+                if($item->typeOauthUsuario=="Registro"){
+
+                    $data=array(
+                        "passwordUsuario"=>$password
+                    );
+
+                    $itemPersona=$this->DAO->selectEntity('Tb_Personas',array('idPersona'=>$item->fkPersona),true);
+
+                    $dataUser['persona']=$itemPersona->firstNamePersona.' '.$itemPersona->lastNamePersona;
+                    
+                    $response = $this->DAO->updateData('Tb_Usuarios',$data,array("idUsuario"=>$item->idUsuario));
+                    
+                    $dataUser['password']=$uniquePassword;
+                    if($response['status']=="success"){
+                        //test
+                        $this->templateEmail('hectori.um.15@gmail.com','hector urias','Change Password',$dataUser,'email_password');
+                        //real
+                        //$this->templateEmail($data['Usuario']['emailUsuario'],$data['Person']['firstNamePersona'],'Welcome',$dataUser,'email_password');
+                    }
+                }else{
+                    $response=array(
+                        "status"=>'error',
+                        "status_code"=>409,
+                        "message"=>"El correo ".$item->emailUsuario." fue creado via ".$item->typeOauthUsuario.", no es posible cambiar la contraseña",
+                        "validations"=>null,
+                        "data"=>null
+                    );
+                }
+                
+            }
+        }
+
+        $this->response($response,200);
+    }
+
     //login forma nativa desde la pagina web
     public function loginNativo_post()
     {
@@ -370,6 +442,21 @@ class Api extends REST_Controller {
         return substr(base_convert(sha1(uniqid(mt_rand())), 16,36), 0, $limit);
     }
 
+    public function email_check($str){
+        if (!$str) {
+            $this->form_validation->set_message('email_check','El {field} campo es requerido');
+            return false;
+        }else{
+            $itemExist=$this->DAO->selectEntity('Tb_Usuarios',array('emailUsuario'=>$str),true);
+            if (!$itemExist) {
+                $this->form_validation->set_message('email_check','El {field} no existe en el sistema');
+                return false;
+            }else{
+                return true;
+            } 
+        }
+    }
+
     public function templateEmail($to,$name,$subject,$data=null,$vista)
     {
         $this->load->library('encryption');
@@ -377,26 +464,38 @@ class Api extends REST_Controller {
 
         $email_settings =  $this->DAO->selectEntity('Tb_config',null,true);
         if($email_settings){
-            $config['protocol'] = $email_settings->email_protocol;
+            //email servidor goddady
+            $config['mailpath'] = "/usr/sbin/sendmail";
+            $config['protocol'] = "sendmail";
+            $config['smtp_host'] = "relay-hosting.secureserver.net";
+            $config['smtp_user'] = "study@anglopageone.com";
+            $config['smtp_pass'] = "Anglo@2020";
+            $config['smtp_port'] = "25";
+            $config['mailtype'] = "HTML";
+            $config['validate'] = "TRUE";
+            $this->email->initialize($config);
+
+            //email google
+            /*$config['protocol'] = $email_settings->email_protocol;
             $config['smtp_host'] = "ssl://".$email_settings->email_host;
             $config['smtp_user'] = $email_settings->email_send;
             $config['smtp_pass'] = $this->encryption->decrypt($email_settings->email_pass);
             $config['smtp_port'] = $email_settings->email_port;
             $config['charset'] = "utf-8";
             $config['mailtype'] = "html";
-            $this->email->initialize($config);
+            $this->email->initialize($config);*/
+            
 
             $this->email->set_newline("\r\n");
 
             $this->email->from($email_settings->email_send,$email_settings->from_email);
+            $this->email->reply_to('study@anglolatinoedu.com');
             $this->email->to($to,$name);
             $this->email->subject($subject);
             $msg = $this->load->view($vista,$data,true);
             $this->email->message($msg);
             if($this->email->send()){
-
             }else{
-
             }
         }
     }

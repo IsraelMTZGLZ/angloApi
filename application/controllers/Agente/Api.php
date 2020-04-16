@@ -14,19 +14,41 @@ class Api extends REST_Controller {
     }
 
     function agente_get(){
-        $id = $this->get('id');
-        if($id){
-             $response = array(
-                "status"=>"success",
-                "message"=> '',
-                "data"=>$this->DAO->selectEntity('Tb_Agentes',array('idAgente'=>$id)),
+        $id=$this->get('id');
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
             );
         }else{
-            $response = array(
-                "status"=>"success",
-                "message"=> '',
-                "data"=>$this->DAO->selectEntity('Tb_Agentes'),
-            );
+            if ($id) {
+                $data = $this->DAO->selectEntity('Vw_Agente',array('usuario'=>$id),true);
+            }
+            else{
+                $data = $this->DAO->selectEntity('Vw_Agente',null,false);
+            }
+            if ($data) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$data
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
         }
         $this->response($response,200);
     }
@@ -34,111 +56,108 @@ class Api extends REST_Controller {
     function agente_post(){
         $data = $this->post();
 
-        if(count($data) == 0 || count($data) > 12){
+        if(count($data) == 0 || count($data) > 4){
             $response = array(
                 "status"=>"error",
                 "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
                 "data"=>null,
                 "validations"=>array(
-                  "nombres"=>"Requerido,Tiene que ser menor a 80 caracteres",
-                  "apellidos"=>"Requerido,Tiene que ser menor a 80 caracteres",
-                  "email"=>"Requerido,Tiene que ser un correo valido",
+                  "persona"=>"Requerido,It has to exist",
                   "genero"=>"Opcional,Eso tiene que se 'Femenino' o Masculino'",
-                  "typeOauth"=>"Requerido,Eso tiene que ser 'Registro','Facebook' or 'Google'",
-                  "token"=>"Opcional, Dependiendo del tipo de registro",
-                  "urlFoto"=>"Opcional, Dependiendo del tipo de registro",
-                  "numeroEmp"=>"Opcional, Tiene que se unico",
-                  "puesto"=>"Opcional, Se requiere el puesto"
+                  "numeroEmp"=>"Requerido, Tiene que se unico",
+                  "puesto"=>"Requerido, Se requiere el puesto"
                 )
             );
-            count($this->post())>9  ? $response["message"]="Demasiados datos enviados" : $response["message"]="Datos no enviados";
+            count($this->post())>4  ? $response["message"]="Demasiados datos enviados" : $response["message"]="Datos no enviados";
 
         }else{
             $this->form_validation->set_data($data);
-            $this->form_validation->set_rules('nombres','Nombres','required|min_length[1]|max_length[80]');
-            $this->form_validation->set_rules('apellidos','Apellidos','required|min_length[1]|max_length[80]');
-            $this->form_validation->set_rules('email','Correo','required|valid_email|is_unique[Tb_Usuarios.emailUsuario]');
+            $this->form_validation->set_rules('persona','Fk persona','callback_check_persona');
             $this->form_validation->set_rules('genero','Genero','callback_check_gender');
-            $this->form_validation->set_rules('typeOauth','Tipo de registro','callback_check_typoOauth');
-
-            if($this->post('typeOauth')!="Registro"){
-              $this->form_validation->set_rules('token','Token Red Social','required');
-              $this->form_validation->set_rules('urlFoto','Url Foto','required|valid_url');
-              $this->form_validation->set_rules('password','Contraseña','callback_check_noRequerido');
-              $this->form_validation->set_rules('numeroEmp','numeroEmp','callback_check_numUnique');
-              $this->form_validation->set_rules('puesto','Puesto','required');
+            $this->form_validation->set_rules('numeroEmp','Numero empleado','callback_check_numUnique');
+            $this->form_validation->set_rules('puesto','Puesto','required');
+            
+            if ($this->form_validation->run()==false) {
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"Revisa las validaciones",
+                    "validations"=>$this->form_validation->error_array(),
+                    "data"=>null
+                ); 
             }
+            else{
+                $data['Persona']=array(
+                    "generoPersona"=>$this->post('genero')
+                );
+    
+                $data['Agente']=array(
+                    "numeroEmpleado"=>$this->post('numeroEmp'),
+                    "puestoAgente"=>$this->post('puesto'),
+                    "fkPersona"=>$this->post('persona')
+                );
+    
+                
+                $response = $this->DAO->updateData('Tb_Personas',$data['Persona'],array("idPersona"=>$this->post('persona')));
+                $response = $this->DAO->insertData('Tb_Agentes',$data['Agente']);
 
-             if($this->form_validation->run()==FALSE){
-               $response=array(
-                   "status"=>"error",
-                   "status_code"=>409,
-                   "message"=>"Revisa las validaciones",
-                   "validations"=>$this->form_validation->error_array(),
-                   "data"=>null
-               );
-             }else{
-               if($this->post('typeOauth')=="Registro"){
-                   $this->load->library('bcrypt');
-                   $uniquePassword= $this->unique_code(6);
-                   $password=$this->bcrypt->hash_password($uniquePassword);
-               }
+            }
+            
+             
+        }
 
-               $itemExist=$this->DAO->selectEntity('Tb_Usuarios',array('emailUsuario'=>$this->post('email')),true);
-               if($itemExist){
-                   $response=array(
-                       "status"=>"error",
-                       "status_code"=>409,
-                       "message"=>"El usuario ".$this->post('email')." ya existe revisa tu cuenta por favor",
-                       "data"=>null
-                   );
-               }else{
-                   $data['Person']=array(
-                       "firstNamePersona"=>$this->post('nombres'),
-                       "lastNamePersona"=>$this->post('apellidos'),
-                       "generoPersona"=>$this->post('genero')
-                   );
+        $this->response($response,200);
+    }
 
-                   $data['Usuario']=array(
-                       "emailUsuario"=>$this->post('email'),
-                       "typeOauthUsuario"=>$this->post('typeOauth'),
-                       "tokenPasswordUser"=>$this->post('token')
-                   );
-                   $data['Agente']=array(
-                       "numeroEmpleado"=>$this->post('numeroEmp'),
-                       "puestoAgente"=>$this->post('puesto')
-                   );
+    //cambiar status agnete
+    public function agenteStatus_put()
+    {
+        $data = $this->put();
 
-                   if($this->post('typeOauth')=="Registro"){
-                       $data['Usuario']['passwordUsuario']=$password;
-                   }
+        if(count($data) == 0 || count($data) > 1){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No datos recibidos' : 'Demasiados datos recibidos',
+                "data"=>null,
+                "validations"=>array(
+                  "usuario"=>"Requerido,It has to exist"
+                )
+            );
+            count($this->put())>1  ? $response["message"]="Demasiados datos enviados" : $response["message"]="Datos no enviados";
 
-                   $data['image']['urlImagen']=$this->post('urlFoto');
+        }else{
+            $this->form_validation->set_data($data);
+            $this->form_validation->set_rules('usuario','Usuario','callback_check_usuario');
+            
+            if ($this->form_validation->run()==false) {
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"Revisa las validaciones",
+                    "validations"=>$this->form_validation->error_array(),
+                    "data"=>null
+                ); 
+            }
+            else{
+                $item = $this->DAO->selectEntity('Vw_Agente',array('usuario'=>$this->put('usuario')),true);
 
-                   $emailExplode = explode("@",$this->post('email'));
+                if($item->statusU == 'Activo'){
+                    $statusChange='Inactivo';
+                }else{
+                    $statusChange='Activo';
+                }
 
-                   if($emailExplode[1]=="anglolatinoedu.com"){
-                       $data['Usuario']['typeUsuario']="Agente";
-                       $data['Usuario']['statusUsuario']="Activo";
-                   }else if($emailExplode[0]=="admin"){
-                       $data['Usuario']['typeUsuario']="Admin";
-                       $data['Usuario']['statusUsuario']="Activo";
-                   }
-                   else{
-                       $data['Usuario']['typeUsuario']="Aspirante";
-                   }
+                $data=array(
+                    "statusUsuario"=>$statusChange
+                );
+    
+    
+                
+                $response = $this->DAO->updateData('Tb_Usuarios',$data,array("idUsuario"=>$this->put('usuario')));
 
-                   $dataUser['persona']=$this->post('nombres').' '.$this->post('apellidos');
-
-                   $response = $this->UserDAO->registrarAgente($data);
-                   //$response['data']=$uniquePassword;
-                   $dataUser['password']=$uniquePassword;
-                   if($response['status']=="success"){
-                       $this->templateEmail($data['Usuario']['emailUsuario'],$data['Person']['firstNamePersona'],'Welcome',$dataUser,'email_bienvenida');
-                   }
-               }
-
-             }
+            }
+            
+             
         }
 
         $this->response($response,200);
@@ -200,6 +219,38 @@ class Api extends REST_Controller {
 
     }
 
+    function check_persona($str){
+        if (!$str) {
+            $this->form_validation->set_message('check_persona','El {field} campo es requerido');
+            return false;
+        }
+        
+        $itemExist=$this->DAO->selectEntity('Tb_Personas',array('idPersona'=>$str),true);
+        if (!$itemExist) {
+            $this->form_validation->set_message('check_persona','The {field} campo no existe');
+            return false;
+        }else{
+            return true;
+        } 
+        
+    }
+
+    function check_usuario($str){
+        if (!$str) {
+            $this->form_validation->set_message('check_usuario','El {field} campo es requerido');
+            return false;
+        }
+        
+        $itemExist=$this->DAO->selectEntity('Tb_Usuarios',array('idUsuario'=>$str),true);
+        if (!$itemExist) {
+            $this->form_validation->set_message('check_usuario','El {field} campo no existe');
+            return false;
+        }else{
+            return true;
+        } 
+        
+    }
+
     public function unique_code($limit)
     {
         return substr(base_convert(sha1(uniqid(mt_rand())), 16,36), 0, $limit);
@@ -240,7 +291,7 @@ class Api extends REST_Controller {
       if ( strlen($str)>=1) {
         $agenteExists = $this->DAO->selectEntity('Tb_Agentes',array('numeroEmpleado'=>$str),TRUE);
         if ($agenteExists) {
-          $this->form_validation->set_message('check_numUnique','The {field}already exists.');
+          $this->form_validation->set_message('check_numUnique','El {field} ya existe.');
 
             return FALSE;
 
@@ -249,7 +300,7 @@ class Api extends REST_Controller {
         }
 
       } else {
-        $this->form_validation->set_message('check_numUnique','The {field} must content somenthing');
+        $this->form_validation->set_message('check_numUnique','El {field} deberia contener algo');
           return FALSE;
       }
     }
