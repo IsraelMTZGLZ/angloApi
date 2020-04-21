@@ -142,6 +142,16 @@ CREATE TABLE Tb_Materias(
   FOREIGN KEY(fkCampus) REFERENCES Tb_Campus(idCampus) on update cascade on delete cascade
 );
 
+create table Ficheros(idfichero int primary key auto_increment,
+  ficheroNombre text,
+  ficheroExt text,
+  ficheroSize text,
+  ficheroUri text,
+  ficherMime text,
+  name text
+);
+
+
 CREATE OR REPLACE View Vw_Aspirante as
 select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,concat(firstNamePersona,' ',lastNamePersona) as fullname,generoPersona as genero,photoPersona as photo,
 if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where i.idImagen=p.photoPersona limit 1)) as photoUrl,
@@ -200,7 +210,7 @@ idUsuario as usuario
 from Tb_Personas as p, Tb_Usuarios as u
 where p.idPersona = u.fkPersona and typeUsuario="Admin";
 
-CREATE OR REPLACE View Vw_Admin as
+CREATE OR REPLACE View Vw_Prepa as
 select idPreparatoria AS id_Preparatoria, nombre_Preparatoria as nombrePreparatoria, fundacion_Preparatoria as fundacion, status_Preparatoria as statusPreparatoria,
 idCampus as id_Campus,ubicacion_Campus as ubicacionCampus, urlUbicacion_Campus as urlUCapus, nombre_Campus as nombreCampus, tipo_Campus as tipoCampus, alojamiento_Campus as alojamientoCampus, urlVideo_Campus as urlVCampus,urlImagen_Campus AS urlICampus, descripcion_Campus as descCampus,
 nombre_Materia as nombreMateria

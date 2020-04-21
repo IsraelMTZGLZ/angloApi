@@ -10,7 +10,7 @@ class DAO extends CI_Model{
      public function selectEntity($entityName,$whereClause = null,$uniqueResult =false)
     {
         if ($whereClause) {
-            $this->db->where($whereClause); 
+            $this->db->where($whereClause);
         }
         $result = $this->db->get($entityName);
         if ($this->db->error()['message']!='') {
@@ -26,6 +26,7 @@ class DAO extends CI_Model{
         }
     }
 
+
     public function insertData($entityName,$data,$returnData=false)
     {
         $query=$this->db->insert($entityName,$data);
@@ -35,7 +36,7 @@ class DAO extends CI_Model{
                 case '1062':
                     $message="Item already inserted, please insert another one";
                     break;
-                
+
                 default:
                     $message = $this->db->error()['message'];
                     break;
@@ -51,14 +52,14 @@ class DAO extends CI_Model{
             $response = array(
               "status"=>"success",
               "status_code"=>201,
-              "message"=>"Artículo creado con éxito", 
+              "message"=>"Artículo creado con éxito",
               "data"=>$returnData ? $query->inserted_id() : null
             );
         }
 
         return $response;
     }
-    
+
 
     public function updateData($entityName,$data,$whereClause)
     {
@@ -117,5 +118,16 @@ class DAO extends CI_Model{
         return $reponseDB;
 
     }
+
+		function selectEnt($entity, $whereClause = NULL){
+			if($whereClause){
+				$this->db->where($whereClause);
+
+			}
+			$query = $this->db->get($entity);
+
+
+			return $whereClause ? $query->row() : $query->result();
+		}
 
 }
