@@ -96,8 +96,7 @@ class Api extends REST_Controller {
             else{
                 if($this->post('typeOauth')=="Registro"){
                     $this->load->library('bcrypt');
-                    $uniquePassword= $this->unique_code(6);
-                    $password=$this->bcrypt->hash_password($uniquePassword);
+                    $password=$this->bcrypt->hash_password($this->post('password'));
                 }
 
                 $itemExist=$this->DAO->selectEntity('Tb_Usuarios',array('emailUsuario'=>$this->post('email')),true);
@@ -132,11 +131,7 @@ class Api extends REST_Controller {
                     $dataUser['persona']=$this->post('nombres').' '.$this->post('apellidos');
 
                     $response = $this->UserDAO->registrar($data);
-                    //$response['data']=$uniquePassword;
-                    $dataUser['password']=$uniquePassword;
-                    if($response['status']=="success"){
-                        $this->templateEmail($data['Usuario']['emailUsuario'],$data['Person']['firstNamePersona'],'Welcome',$dataUser,'email_bienvenida');
-                    }
+                    
                 }
             }
         }

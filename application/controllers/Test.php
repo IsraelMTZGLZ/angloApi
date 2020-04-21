@@ -9,6 +9,6 @@ class Test extends CI_Controller {
 
 	public function index()
 	{
-	 $this->load->view('email_bienvenida');
+	 $this->load->view('email_password');
 	}
 }
