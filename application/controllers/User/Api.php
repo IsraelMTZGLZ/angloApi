@@ -459,47 +459,50 @@ class Api extends REST_Controller {
 
     public function templateEmail($to,$name,$subject,$data=null,$vista)
     {
-        $this->load->library('encryption');
-        $this->load->library('email');
+		$headers = array(
+			'Authorization: Bearer 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',
+			'Content-Type: application/json'
+		);
 
-        $email_settings =  $this->DAO->selectEntity('Tb_config',null,true);
-        if($email_settings){
-            //email servidor goddady
-            $config['mailpath'] = "/usr/sbin/sendmail";
-            $config['protocol'] = "sendmail";
-            $config['smtp_host'] = "relay-hosting.secureserver.net";
-            $config['smtp_user'] = "study@anglopageone.com";
-            $config['smtp_pass'] = "Anglo@2020";
-            $config['smtp_port'] = "25";
-            $config['mailtype'] = "HTML";
-            $config['validate'] = "TRUE";
-            $this->email->initialize($config);
+		$data = array(
+			"personalizations" => array(
+				array(
+					"to" => array(
+						array(
+							"email" => $to,
+							"name" => $name
+						)
+					),
+					"dynamic_template_data"=> array (
+						
+						"password" => $data['password'],
+						"name" => $to
+						
+					)
 
-            //email google
-            /*$config['protocol'] = $email_settings->email_protocol;
-            $config['smtp_host'] = "ssl://".$email_settings->email_host;
-            $config['smtp_user'] = $email_settings->email_send;
-            $config['smtp_pass'] = $this->encryption->decrypt($email_settings->email_pass);
-            $config['smtp_port'] = $email_settings->email_port;
-            $config['charset'] = "utf-8";
-            $config['mailtype'] = "html";
-            $this->email->initialize($config);*/
-            
-
-            $this->email->set_newline("\r\n");
-
-            $this->email->from($email_settings->email_send,$email_settings->from_email);
-            $this->email->reply_to('study@anglolatinoedu.com');
-            $this->email->to($to,$name);
-            $this->email->subject($subject);
-            $msg = $this->load->view($vista,$data,true);
-            $this->email->message($msg);
-            if($this->email->send()){
-                //echo $this->email->print_debugger();
-            }else{
-                //echo $this->email->print_debugger();
-            }
-        }
+				)
+			),
+			"from" => array(
+				"email" => "study@anglopageone.com",
+				"name"=>"Anglo Latino Education Partnership"
+			),
+			"reply_to"=> array(
+				"email"=>"study@anglolatinoedu.com",
+				"name"=>"Anglo Latino Education Partnership"
+			),
+			"template_id"=> "d-386031cf274443729e178fff7da5392b"
+		);
+	
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, "https://api.sendgrid.com/v3/mail/send");
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		$response = curl_exec($ch);
+		curl_close($ch);
+        
     }
 
 }
