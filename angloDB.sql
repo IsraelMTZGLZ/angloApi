@@ -216,3 +216,9 @@ idCampus as id_Campus,ubicacion_Campus as ubicacionCampus, urlUbicacion_Campus a
 nombre_Materia as nombreMateria
 from Tb_Preparatoria as p, Tb_Campus as c, Tb_Materias as m
 where p.idPreparatoria = c.fkPreparatoria and m.fkCampus = c.idCampus;
+
+CREATE OR REPLACE View Vw_Permiso as
+select idPermisoAgente, fkPermiso as permiso, fkAgente as agente,
+nombrePermiso,estatusPermiso
+from Tb_Agentes as a, Tb_Permisos as p, Tb_Permisos_Agentes as pa
+where pa.fkAgente = a.idAgente and pa.fkPermiso = p.idPermiso;
