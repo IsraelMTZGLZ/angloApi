@@ -130,4 +130,57 @@ class DAO extends CI_Model{
 			return $whereClause ? $query->row() : $query->result();
 		}
 
+
+
+		function saveOrUpdateItem($entityName,$data,$whereClause = NULL,$generateKey =  FALSE){
+
+		    if($whereClause){
+		        $this->db->where($whereClause);
+		        $this->db->update($entityName,$data);
+		    }else{
+		        $this->db->insert($entityName,$data);
+		    }
+		    if($this->db->error()['message']!=''){
+		        $responseDB = array(
+		            "status"=>"error",
+		            "status_code"=>409,
+		            "message"=>$this->db->error()['message']
+		        );
+		    }else{
+		        $responseDB = array(
+		            "status"=>"success",
+		            "status_code"=>$whereClause ? 200 : 201,
+		            "message"=>"Item created Successfully",
+		            "key"=>$generateKey ? $this->db->insert_id() : null
+		        );
+		    }
+		    return $responseDB;
+
+		}
+
+
+		function saveOrUpdateBatchItems($entityName,$data,$whereClause = NULL){
+		    if($whereClause){
+
+		    }else{
+		        $this->db->insert_batch($entityName,$data);
+		    }
+		    if($this->db->error()['message']!=''){
+		        $responseDB = array(
+		            "status"=>"error",
+		            "status_code"=>409,
+		            "message"=>$this->db->error()['message']
+		        );
+		    }else{
+		        $responseDB = array(
+		            "status"=>"success",
+		            "status_code"=>201,
+		            "message"=>"Item created Successfully"
+		        );
+		    }
+		    return $responseDB;
+
+		}
+
+
 }

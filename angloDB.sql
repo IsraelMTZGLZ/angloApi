@@ -112,6 +112,15 @@ CREATE TABLE Tb_Preparatoria(
   lastUpdate_Preparatoria timestamp default current_timestamp on update current_timestamp
 );
 
+CREATE TABLE Tb_Logotipos(
+	idLogotipo int not null AUTO_INCREMENT PRIMARY KEY,
+	urlLogotipo text not null,
+	typeLogotipo varchar(15),
+	extLogotipo varchar(10),
+	statusLogotipo enum('Activo','Inactivo') default 'Activo',
+	creationDateLogotipo timestamp default current_timestamp,
+	lastUpdateLogotipo timestamp default current_timestamp on update current_timestamp);
+
 CREATE TABLE Tb_Campus(
   idCampus int primary key auto_increment,
   ubicacion_Campus text ,
@@ -128,28 +137,17 @@ CREATE TABLE Tb_Campus(
   creationDate_Campus timestamp default current_timestamp,
   lastUpdate_Campus timestamp default current_timestamp on update current_timestamp,
   fkPreparatoria int,
-  FOREIGN KEY(fkPreparatoria) REFERENCES Tb_Preparatoria(idPreparatoria) on update cascade on delete cascade
+  photoCampus int,
+  logotipoCampus int,
+  FOREIGN KEY(fkPreparatoria) REFERENCES Tb_Preparatoria(idPreparatoria) on update cascade on delete cascade,
+  FOREIGN KEY(photoCampus) REFERENCES Tb_Imagenes(idImagen) on update cascade on delete cascade,
+  FOREIGN KEY(logotipoCampus) REFERENCES Tb_Logotipos(idLogotipo) on update cascade on delete cascade
+
  );
 
-CREATE TABLE Tb_Materias(
-  idMateria int primary key auto_increment,
-  nombre_Materia varchar(80) not null,
-  key_Materia varchar(80) unique not null,
-  status_Materia enum('Activo','Inactivo','Pendiente') default 'Pendiente',
-  creationDate_Materia timestamp default current_timestamp,
-  lastUpdate_Materia timestamp default current_timestamp on update current_timestamp,
-  fkCampus int,
-  FOREIGN KEY(fkCampus) REFERENCES Tb_Campus(idCampus) on update cascade on delete cascade
-);
 
-create table Ficheros(idfichero int primary key auto_increment,
-  ficheroNombre text,
-  ficheroExt text,
-  ficheroSize text,
-  ficheroUri text,
-  ficherMime text,
-  name text
-);
+
+
 
 
 CREATE OR REPLACE View Vw_Aspirante as
@@ -212,7 +210,15 @@ where p.idPersona = u.fkPersona and typeUsuario="Admin";
 
 CREATE OR REPLACE View Vw_Prepa as
 select idPreparatoria AS id_Preparatoria, nombre_Preparatoria as nombrePreparatoria, fundacion_Preparatoria as fundacion, status_Preparatoria as statusPreparatoria,
+idCampus as id_Campus,ubicacion_Campus as ubicacionCampus, urlUbicacion_Campus as urlUCapus, nombre_Campus as nombreCampus, tipo_Campus as tipoCampus, alojamiento_Campus as alojamientoCampus, urlVideo_Campus as urlVCampus,urlImagen_Campus AS urlICampus, descripcion_Campus as descCampus
+from Tb_Preparatoria as p, Tb_Campus as c
+where p.idPreparatoria = c.fkPreparatoria;
+
+
+CREATE OR REPLACE View Vw_PrepaCampus as
+select idPreparatoria AS id_Preparatoria, nombre_Preparatoria as nombrePreparatoria, fundacion_Preparatoria as fundacion, status_Preparatoria as statusPreparatoria,
 idCampus as id_Campus,ubicacion_Campus as ubicacionCampus, urlUbicacion_Campus as urlUCapus, nombre_Campus as nombreCampus, tipo_Campus as tipoCampus, alojamiento_Campus as alojamientoCampus, urlVideo_Campus as urlVCampus,urlImagen_Campus AS urlICampus, descripcion_Campus as descCampus,
-nombre_Materia as nombreMateria
-from Tb_Preparatoria as p, Tb_Campus as c, Tb_Materias as m
-where p.idPreparatoria = c.fkPreparatoria and m.fkCampus = c.idCampus;
+idImagen as idImagen, urlImagen as urlImagen,
+idLogotipo as idLogotipo, urlLogotipo as urlLogotipo
+from Tb_Preparatoria as p, Tb_Campus as c, Tb_Imagenes as i, Tb_Logotipos as  l
+where p.idPreparatoria = c.fkPreparatoria and c.photoCampus = i.idImagen and c.logotipoCampus = l.idLogotipo;
