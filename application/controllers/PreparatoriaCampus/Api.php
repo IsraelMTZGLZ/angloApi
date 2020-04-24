@@ -17,13 +17,13 @@ class Api extends REST_Controller {
              $response = array(
                 "status"=>"success",
                 "message"=> '',
-                "data"=>$this->DAO->selectEntity('Tb_Campus',array('idCampus'=>$id)),
+                "data"=>$this->DAO->selectEntity('Vw_PrepaCampus',array('idCampus'=>$id)),
             );
         }else{
             $response = array(
                 "status"=>"success",
                 "message"=> '',
-                "data"=>$this->DAO->selectEntity('Tb_Campus'),
+                "data"=>$this->DAO->selectEntity('Vw_PrepaCampus'),
             );
         }
         $this->response($response,200);
@@ -203,10 +203,6 @@ class Api extends REST_Controller {
       $config_upload['allowed_types'] = "jpg|gif|png";
       $config_upload['max_size'] = 2048;
 
-      // $datan = array(
-      //   "name"=>$this->post('name')
-      // );
-      // $response = $this->DAO->insertData('Ficheros',$datan);
       $this->load->library('upload',$config_upload);
 
       if($this->upload->do_upload('my_file')){
@@ -214,7 +210,7 @@ class Api extends REST_Controller {
           "ficheroNombre"=>$this->upload->data('file_name'),
           "ficheroExt"=>$this->upload->data()['file_ext'],
           "ficheroSize"=>$this->upload->data('file_size'),
-          "ficheroUri"=>base_url('files/'.$this->upload->data('file_name')),
+          "ficheroUrl"=>base_url('files/'.$this->upload->data('file_name')),
           "ficherMime"=>$this->upload->data('file_type'),
            "name"=>$this->post('name')
         );
@@ -240,33 +236,44 @@ class Api extends REST_Controller {
     function preparatoriacampusfhoto_post(){
         $data = $this->post();
 
-        if(count($data) == 0 || count($data) > 12){
+        $config_upload["upload_path"] = "./files/";
+        $config_upload['allowed_types'] = "jpg|gif|png";
+        $config_upload['max_size'] = 2048;
+
+        $this->load->library('upload',$config_upload);
+        if($this->upload->do_upload('my_file')){
+        if(count($data) == 0 || count($data) > 15){
             $response = array(
                 "status"=>"error",
                 "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
                 "data"=>null,
                 "validations"=>array(
 
-                      "name"=>"The name must have between 4 and 60 characters in length",
-                      "lastname"=>"The lastname must have between 4 and 60 characters in length",
-                      "status"=>"The gender must be F for Female or M for Male",
-                      "tel"=>"The curp must have between 4 and 60 characters in length",
-                      "gender"=>"The email must be unique and valid Email",
-                      "email"=>"The email must have between 4 and 60 characters in length",
-                      "address"=>"The email must be unique and valid Email"
-
-
+                  "nombreCampus"=>"Required, The name is required",
+                  "ubicacionCampus"=>"Required, The ubication is required",
+                  "urlUbicacionCampus"=>"Optional, the url is optional",
+                  "tipoCampus"=>"Required, The type of campus ir required",
+                  "alojamientoCampus"=>"Required, The type of campus ir required",
+                  "urlVideoCampus"=>"Optional, The url video is optional",
+                  "urlImagenCampus"=>"Optional, The url imagen is optional",
+                  "urlImagenLogoCampus"=>"Optional, The url imagen is optional",
+                  "statusCampus"=>"Required, The status is required",
+                  "descripcionCampus"=>"Required, The description campus ir required",
+                  "preparatoria"=>"Required, The preparatoria is required"
                 )
+
+
+
             );
         }else{
             $this->form_validation->set_data($data);
-            $this->form_validation->set_rules('name','name','required|max_length[160]|min_length[3]');
-            $this->form_validation->set_rules('lastname','lastname','required|max_length[160]|min_length[3]');
-            $this->form_validation->set_rules('status','status','required');
-            $this->form_validation->set_rules('tel','tel','required|max_length[160]|min_length[4]');
-            $this->form_validation->set_rules('gender','gender','required|exact_length[1]|callback_gender_valid');
-            $this->form_validation->set_rules('email','email','callback_check_email');
-            $this->form_validation->set_rules('address','address','required');
+            $this->form_validation->set_rules('nombreCampus','nombreCampus','required|min_length[1]|max_length[100]');
+            $this->form_validation->set_rules('ubicacionCampus','ubicacionCampus','required|min_length[3]');
+            $this->form_validation->set_rules('tipoCampus','tipoCampus','required|min_length[3]|max_length[50]');
+            $this->form_validation->set_rules('alojamientoCampus','alojamientoCampus','required|min_length[3]|max_length[50]');
+            $this->form_validation->set_rules('statusCampus','statusCampus','callback_check_status');
+            $this->form_validation->set_rules('descripcionCampus','descripcionCampus','required');
+            $this->form_validation->set_rules('preparatoria','preparatoria','callback_check_preparatoria');
 
 
              if($this->form_validation->run()==FALSE){
@@ -281,42 +288,83 @@ class Api extends REST_Controller {
                 $this->load->library('bcrypt');
                 $this->db->trans_begin();
 
-                $person = array(
-                    "name_Person"=>$this->post('name'),
-                    "surname_Person "=>$this->post('lastname'),
-                    "gender_Person"=>$this->post('gender'),
-                    "tel_Person"=>$this->post('tel')
+                $ficheros = array(
+                  "urlImagen"=>$this->upload->data('file_name'),
+                  "extImagen"=>$this->upload->data()['file_ext'],
+                  "urlImagen"=>base_url('files/'.$this->upload->data('file_name')),
+                  "typeImagen"=>$this->upload->data('file_type')
                 );
 
-                $personResponse = $this->DAO->saveOrUpdateItem('tb_Person',$person,null,true);
-                if($personResponse['status']=="success"){
-                    $user = array(
-                        "email_User"=>$this->post('email'),
-                        "type_User"=>"Admin",
-                        "status_User "=>$this->post("status"),
-                        "address_User "=>$this->post('address'),
-                        "fk_Person"=>$personResponse['key']
-                    );
-                    $userResponse = $this->DAO->saveOrUpdateItem('tb_Users',$user,null,true);
-                    if($userResponse['status']=="success"){
-                        $response = array(
-                           "status"=>"success",
-                           "message"=>"Professor update successfully",
-                           "data"=>null,
-                       );
+                $ficheroResponse = $this->DAO->saveOrUpdateItem('Tb_Imagenes',$ficheros,null,true);
+                if($ficheroResponse['status']=="success"){
 
-                    }else{
-                        $response = array(
-                            "status"=>"error",
-                            "message"=>  $userResponse['message'],
-                            "data"=>null,
-                        );
-                    }
-                    if($this->db->trans_status()==FALSE){
-                        $this->db->trans_rollback();
-                    }else{
-                        $this->db->trans_commit();
-                    }
+                          $config_upload["upload_path"] = "./files/";
+                          $config_upload['allowed_types'] = "jpg|gif|png";
+                          $config_upload['max_size'] = 2048;
+
+                          $this->load->library('upload',$config_upload);
+                          if($this->upload->do_upload('my_logo')){
+
+                            $logotipo = array(
+                              "urlLogotipo"=>$this->upload->data('file_name'),
+                              "extLogotipo"=>$this->upload->data()['file_ext'],
+                              "urlLogotipo"=>base_url('files/'.$this->upload->data('file_name')),
+                              "typeLogotipo"=>$this->upload->data('file_type')
+                            );
+
+                            $logotipoResponse = $this->DAO->saveOrUpdateItem('Tb_Logotipos',$logotipo,null,true);
+                              if($logotipoResponse['status']=="success"){
+                                $Campus = array(
+                                  "nombre_Campus"=>$this->post('nombreCampus'),
+                                  "ubicacion_Campus"=>$this->post('ubicacionCampus'),
+                                  "urlUbicacion_Campus"=>$this->post('urlUbicacionCampus'),
+                                  "tipo_Campus"=>$this->post('tipoCampus'),
+                                  "alojamiento_Campus"=>$this->post('alojamientoCampus'),
+                                  "urlVideo_Campus"=>$this->post('urlVideoCampus'),
+                                  "urlImagen_Campus"=>$this->post('urlImagenCampus'),
+                                  "urlImagenLogo_Campus"=>$this->post('urlImagenLogoCampus'),
+                                  "descripcion_Campus"=>$this->post('descripcionCampus'),
+                                  "status_Campus"=>$this->post('statusCampus'),
+                                  "fkPreparatoria"=>$this->post('preparatoria'),
+                                  "photoCampus"=>$ficheroResponse['key'],
+                                  "logotipoCampus"=>$logotipoResponse['key']
+                                );
+                                $campusResponse = $this->DAO->saveOrUpdateItem('Tb_Campus',$Campus,null,true);
+                                if($campusResponse['status']=="success"){
+                                    $response = array(
+                                       "status"=>"success",
+                                       "message"=>"Professor update successfully",
+                                       "data"=>null,
+                                   );
+
+                                }else{
+                                    $response = array(
+                                        "status"=>"error",
+                                        "message"=>  $campusResponse['message'],
+                                        "data"=>null,
+                                    );
+                                }
+                                if($this->db->trans_status()==FALSE){
+                                    $this->db->trans_rollback();
+                                }else{
+                                    $this->db->trans_commit();
+                                }
+                              }else{
+                                $response = array(
+                                  "status"=>"error",
+                                  "message"=>$logotipoResponse['message'],
+                                  "data"=>null,
+                                  );
+
+                              }
+
+                          }else{
+                            $response = array(
+                              "status"=>"error",
+                              "message"=> "Fichero no fue subido correctamente",
+                              "data"=>null,
+                              );
+                          }
 
                 }else{
                   $response = array(
@@ -327,7 +375,14 @@ class Api extends REST_Controller {
                 }
 
              }
-        }
+        }//here
+      }else{
+        $response = array(
+          "status"=>"error",
+          "message"=> "Fichero no fue subido correctamente",
+          "data"=>null,
+          );
+      }
 
         $this->response($response,200);
     }
