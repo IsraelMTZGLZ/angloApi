@@ -224,5 +224,5 @@ nombrePermiso,estatusPermiso
 from Tb_Agentes as a, Tb_Permisos as p, Tb_Permisos_Agentes as pa
 where pa.fkAgente = a.idAgente and pa.fkPermiso = p.idPermiso;
 
-CREATE OR REPLACE View Vw_Test as
+CREATE OR REPLACE View Vw_Reporte as
 select DATE_FORMAT(creationDateUsuario, '%Y-%m-%d'),idUsuario from Tb_Usuarios;
