@@ -73,7 +73,7 @@ class Api extends REST_Controller {
             $anterior = $m-01;
             $totalAnterior=$y.'-0'.$anterior.'-01';
             $totalNuevo= $y.'-'.$m.'-'.$new;
-            $query = $this->db->query("select count(idUsuario) as total from Vw_Reporte where fecha between '".$totalAnterior."' and '".$totalNuevo."'")->row();
+            $query = $this->db->query("select count(idUsuario) as total from Vw_Test where fecha between '".$totalAnterior."' and '".$totalNuevo."'")->row();
             
 
             if ($query) {
