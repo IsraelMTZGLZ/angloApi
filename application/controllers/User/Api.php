@@ -509,7 +509,7 @@ class Api extends REST_Controller {
     public function templateEmail($to,$name,$subject,$data=null,$vista)
     {
 		$headers = array(
-			'Authorization: Bearer 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',
+			'Authorization: Bearer ',
 			'Content-Type: application/json'
 		);
 
