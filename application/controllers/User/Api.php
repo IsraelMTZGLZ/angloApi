@@ -457,6 +457,55 @@ class Api extends REST_Controller {
         }
     }
 
+    function editPerson_put(){
+        $data = $this->put();
+        $id = $this->get('id');
+        $existe = $this->DAO->selectEntity('Tb_Personas',array('idPersona'=>$id),TRUE);
+        if($existe){
+            if(count($data) == 0 || count($data) > 2){
+                $response = array(
+                    "status"=>"error",
+                    "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
+                    "data"=>null,
+                    "validations"=>array(
+                        "nombre"=>"El nombre es requerido",
+                        "Apellidos" => "Los apellidos son requeridos"
+                    )
+                );
+            }else{
+                $this->form_validation->set_data($data);
+                $this->form_validation->set_rules('nombre','Nombre','required');
+                $this->form_validation->set_rules('apellidos','Apellidos','required');
+
+                 if($this->form_validation->run()==FALSE){
+                    $response = array(
+                        "status"=>"error",
+                        "message"=>'check the validations',
+                        "data"=>null,
+                        "validations"=>$this->form_validation->error_array()
+                    );
+                 }else{
+    
+                   $data=array(
+                       "firstNamePersona"=>$this->put('nombre'),
+                       "lastNamePersona"=>$this->put('apellidos')
+                   );
+                   $response = $this->DAO->updateData('Tb_Personas',$data,array('idPersona'=>$id));
+    
+                 }
+            }
+        }else{
+            $response = array(
+            "status"=>"error",
+            "message"=> "check the id",
+            "data"=>null,
+            );
+        }
+        
+
+        $this->response($response,200);
+    }
+
     public function templateEmail($to,$name,$subject,$data=null,$vista)
     {
 		$headers = array(

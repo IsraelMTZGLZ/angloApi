@@ -60,6 +60,7 @@ CREATE TABLE Tb_Aspirantes(
     telefonoAspirante varchar(15),
     ciudadAspirante varchar(150),
     programaDeInteres enum('Universidad','Preparatoria','CursoIngles','CursoVerano'),
+    statusAspirante varchar(5) default '0',
     creationDateAspirante timestamp default current_timestamp,
     lastUpdateAspirante timestamp default current_timestamp on update current_timestamp,
     fkPersona int not null,
@@ -222,3 +223,6 @@ select idPermisoAgente, fkPermiso as permiso, fkAgente as agente,
 nombrePermiso,estatusPermiso
 from Tb_Agentes as a, Tb_Permisos as p, Tb_Permisos_Agentes as pa
 where pa.fkAgente = a.idAgente and pa.fkPermiso = p.idPermiso;
+
+CREATE OR REPLACE View Vw_Test as
+select DATE_FORMAT(creationDateUsuario, '%Y-%m-%d'),idUsuario from Tb_Usuarios;
