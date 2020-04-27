@@ -266,6 +266,7 @@ idLogotipo as idLogotipo, urlLogotipo as urlLogotipo
 from Tb_Preparatoria as p, Tb_Campus as c, Tb_Imagenes as i, Tb_Logotipos as  l
 where p.idPreparatoria = c.fkPreparatoria and c.photoCampus = i.idImagen and c.logotipoCampus = l.idLogotipo;
 
+
 CREATE OR REPLACE View Vw_Permiso as
 select idPermisoAgente, fkPermiso as permiso, fkAgente as agente,
 nombrePermiso,estatusPermiso
