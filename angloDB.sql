@@ -121,29 +121,72 @@ CREATE TABLE Tb_Logotipos(
 	creationDateLogotipo timestamp default current_timestamp,
 	lastUpdateLogotipo timestamp default current_timestamp on update current_timestamp);
 
-CREATE TABLE Tb_Campus(
-  idCampus int primary key auto_increment,
-  ubicacion_Campus text ,
-  urlUbicacion_Campus text ,
-  nombre_Campus varchar(80),
-  tipo_Campus varchar(50) not null,
-  alojamiento_Campus varchar(50) not null,
-  urlVideo_Campus text,
-  urlImagen_Campus text,
-  materias_Campus text,
-  urlImagenLogo_Campus text,
-  descripcion_Campus text,
-  status_Campus enum('Activo','Inactivo','Pendiente') default 'Pendiente',
-  creationDate_Campus timestamp default current_timestamp,
-  lastUpdate_Campus timestamp default current_timestamp on update current_timestamp,
-  fkPreparatoria int,
-  photoCampus int,
-  logotipoCampus int,
-  FOREIGN KEY(fkPreparatoria) REFERENCES Tb_Preparatoria(idPreparatoria) on update cascade on delete cascade,
-  FOREIGN KEY(photoCampus) REFERENCES Tb_Imagenes(idImagen) on update cascade on delete cascade,
-  FOREIGN KEY(logotipoCampus) REFERENCES Tb_Logotipos(idLogotipo) on update cascade on delete cascade
+  CREATE TABLE Tb_Universidades(
+    idUniversidad int primary key auto_increment,
+    nombre_Universidad varchar(80) not null,
+    estudios_Universidad varchar(80) not null,
+    facultades_Universidad varchar(80) not null,
+    anioIngreso_Universidad varchar(80) not null,
+    status_Universidad enum('Activo','Inactivo','Pendiente') default 'Pendiente',
+    creationDate_Universidad timestamp default current_timestamp,
+    lastUpdate_Universidad timestamp default current_timestamp on update current_timestamp,
+    photo_Universidad int,
+    logotipo_Universidad int,
+    FOREIGN KEY(photo_Universidad) REFERENCES Tb_Imagenes(idImagen) on update cascade on delete cascade,
+    FOREIGN KEY(logotipo_Universidad) REFERENCES Tb_Logotipos(idLogotipo) on update cascade on delete cascade
+   );
 
+CREATE TABLE Tb_Preparatorias(
+  idPreparatoria int primary key auto_increment,
+  nombre_Preparatoria varchar(80) not null,
+  alojamiento_Preparatoria varchar(80) not null,
+  estudios_Preparatoria varchar(80) not null,
+  anioIngreso_Preparatoria varchar(80) not null,
+  status_Preparatoria enum('Activo','Inactivo','Pendiente') default 'Pendiente',
+  creationDate_Preparatoria timestamp default current_timestamp,
+  lastUpdate_Preparatoria timestamp default current_timestamp on update current_timestamp,
+  photo_Preparatoria int,
+  logotipo_Preparatoria int,
+  FOREIGN KEY(photo_Preparatoria) REFERENCES Tb_Imagenes(idImagen) on update cascade on delete cascade,
+  FOREIGN KEY(logotipo_Preparatoria) REFERENCES Tb_Logotipos(idLogotipo) on update cascade on delete cascade
  );
+
+ CREATE TABLE Tb_Ingles(
+   idIngles int primary key auto_increment,
+   nombre_Ciudad varchar(80) not null,
+   edades_Ingles varchar(80) default '16 +',
+   tipoCurso_Ingles varchar(80) not null,
+   alojamiento_Ingles varchar(80) not null,
+   anioIngreso_Ingles varchar(80) not null,
+   status_Ingles enum('Activo','Inactivo','Pendiente') default 'Pendiente',
+   creationDate_Ingles timestamp default current_timestamp,
+   lastUpdate_Ingles timestamp default current_timestamp on update current_timestamp,
+   photo_Ingles int,
+   logotipo_Ingles int,
+   FOREIGN KEY(photo_Ingles) REFERENCES Tb_Imagenes(idImagen) on update cascade on delete cascade,
+   FOREIGN KEY(logotipo_Ingles) REFERENCES Tb_Logotipos(idLogotipo) on update cascade on delete cascade
+  );
+
+  CREATE TABLE Tb_Verano(
+    idVerano int primary key auto_increment,
+    nombre_Institucion varchar(80) not null,
+    edades_Verano varchar(80) not null,
+    tipoCampamento_Verano varchar(80) not null,
+    alojamiento_Verano varchar(80) not null,
+    anioIngreso_Verano varchar(80) not null,
+    status_Verano enum('Activo','Inactivo','Pendiente') default 'Pendiente',
+    creationDate_Verano timestamp default current_timestamp,
+    lastUpdate_Verano timestamp default current_timestamp on update current_timestamp,
+    photo_Verano int,
+    logotipo_Verano int,
+    FOREIGN KEY(photo_Verano) REFERENCES Tb_Imagenes(idImagen) on update cascade on delete cascade,
+    FOREIGN KEY(logotipo_Verano) REFERENCES Tb_Logotipos(idLogotipo) on update cascade on delete cascade
+   );
+
+
+
+
+
 
 
 
@@ -218,19 +261,13 @@ where p.idPreparatoria = c.fkPreparatoria;
 CREATE OR REPLACE View Vw_PrepaCampus as
 select idPreparatoria AS id_Preparatoria, nombre_Preparatoria as nombrePreparatoria, fundacion_Preparatoria as fundacion, status_Preparatoria as statusPreparatoria,
 idCampus as id_Campus,ubicacion_Campus as ubicacionCampus, urlUbicacion_Campus as urlUCapus, nombre_Campus as nombreCampus, tipo_Campus as tipoCampus, alojamiento_Campus as alojamientoCampus, urlVideo_Campus as urlVCampus,urlImagen_Campus AS urlICampus, descripcion_Campus as descCampus,
-<<<<<<< HEAD
 idImagen as idImagen, urlImagen as urlImagen,
 idLogotipo as idLogotipo, urlLogotipo as urlLogotipo
 from Tb_Preparatoria as p, Tb_Campus as c, Tb_Imagenes as i, Tb_Logotipos as  l
 where p.idPreparatoria = c.fkPreparatoria and c.photoCampus = i.idImagen and c.logotipoCampus = l.idLogotipo;
-=======
-nombre_Materia as nombreMateria
-from Tb_Preparatoria as p, Tb_Campus as c, Tb_Materias as m
-where p.idPreparatoria = c.fkPreparatoria and m.fkCampus = c.idCampus;
 
 CREATE OR REPLACE View Vw_Permiso as
 select idPermisoAgente, fkPermiso as permiso, fkAgente as agente,
 nombrePermiso,estatusPermiso
 from Tb_Agentes as a, Tb_Permisos as p, Tb_Permisos_Agentes as pa
 where pa.fkAgente = a.idAgente and pa.fkPermiso = p.idPermiso;
->>>>>>> 87c11c81b3ce9e55f012f9a7871f53d88e217149
