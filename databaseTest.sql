@@ -18,6 +18,7 @@ CREATE TABLE Tb_Institucion(
     idInstitucion INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     nombreInstitucion VARCHAR(120) NOT NULL,
     logoInstitucion int,
+    ubicacionInstitucion text,
     statusInstitucion enum('Activo','Inactivo') default 'Activo',
     creationDateInstitucion timestamp default current_timestamp,
     lastUpdateInstitucion timestamp default current_timestamp on update current_timestamp,
@@ -68,7 +69,10 @@ CREATE TABLE Tb_TipoEstudioInstituccion(
 CREATE TABLE Tb_TipoAlojamiento(
     idTipoAlojamiento INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     nombreTipoAlojamiento VARCHAR(120) NOT NULL,
-    abreviacionTipoAlojamiento VARCHAR(10) NOT NULL
+    abreviacionTipoAlojamiento VARCHAR(10) NOT NULL,
+    statusTipoTipoAlojamiento enum('Activo','Inactivo') default 'Activo',
+    creationTipoAlojamiento timestamp default current_timestamp,
+    lastUpdateTipoAlojamiento timestamp default current_timestamp on update current_timestamp
 );
 
 CREATE TABLE Tb_TipoAlojamientoInstitucion(
@@ -120,7 +124,7 @@ INSERT INTO Tb_TipoAlojamientoInstitucion (fkTipoAlojamiento,fkInstitucion) VALU
 INSERT INTO Tb_TipoAlojamientoInstitucion (fkTipoAlojamiento,fkInstitucion) VALUES(2,4);
 
 CREATE OR REPLACE VIEW Vw_Uni as
-select nombreInstitucion,nombreFacultad,abreviacionFacultad 
+select idInstitucion,nombreInstitucion,idFacultad,nombreFacultad,abreviacionFacultad,idInstitucionFacultad 
 from Tb_Facultad as f, Tb_Institucion as i, Tb_InstitucionFacultad as insfa 
 where insfa.fkFacultad = f.idFacultad and insfa.fkInstitucion=i.idInstitucion;
 
