@@ -65,6 +65,12 @@ CREATE TABLE Tb_TipoEstudioInstituccion(
     lastUpdateTipoEstudioInstituccion timestamp default current_timestamp on update current_timestamp
 );
 
+CREATE OR REPLACE VIEW Vw_tipoEstudio as
+select nombreTipoEstudio,abreviacionTipoEstudio,nombreInstitucion,logoInstitucion,
+ubicacionInstitucion,idInstitucion,idTipoEstudio,idTipoEstudioInstituccion
+from Tb_Institucion as i, Tb_TipoEstudio as te, Tb_TipoEstudioInstituccion as tei
+where tei.fkTipoEstudio=te.idTipoEstudio and tei.fkInstitucion=i.idInstitucion;
+
 CREATE TABLE Tb_TipoAlojamiento(
     idTipoAlojamiento INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     nombreTipoAlojamiento VARCHAR(120) NOT NULL,
@@ -81,6 +87,12 @@ CREATE TABLE Tb_TipoAlojamientoInstitucion(
     FOREIGN KEY(fkTipoAlojamiento) REFERENCES Tb_TipoAlojamiento(idTipoAlojamiento) on update cascade on delete cascade,
     FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade
 );
+
+CREATE OR REPLACE VIEW Vw_tipoAlojamiento as
+select nombreTipoAlojamiento,abreviacionTipoAlojamiento,nombreInstitucion,logoInstitucion,
+ubicacionInstitucion,idInstitucion,idTipoAlojamiento,idTipoAlojamientoInstitucion
+from Tb_Institucion as i, Tb_TipoAlojamiento as ta, Tb_TipoAlojamientoInstitucion as tai
+where tai.fkTipoAlojamiento=ta.idTipoAlojamiento and tai.fkInstitucion=i.idInstitucion;
 
 INSERT INTO Tb_Institucion(nombreInstitucion,logoInstitucion,ubicacionInstitucion) VALUES('University of Bath','https://upload.wikimedia.org/wikipedia/en/thumb/c/ca/University_of_Bath_logo.svg/1200px-University_of_Bath_logo.svg.png','test');
 INSERT INTO Tb_Institucion(nombreInstitucion,logoInstitucion) VALUES('University of Bristol',1);

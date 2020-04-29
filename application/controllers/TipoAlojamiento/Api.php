@@ -22,14 +22,14 @@ class Api extends REST_Controller {
                 "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
                 "data"=>null,
                 "validations"=>array(
-                    "nombre"=>"El nombre es requerido",
-                    "abreviacion" => "La abreviacion es requerida"
+                    "nombreA"=>"El nombre es requerido",
+                    "abreviacionA" => "La abreviacion es requerida"
                 )
             );
         }else{
             $this->form_validation->set_data($data);
-            $this->form_validation->set_rules('nombre','Nombre','required');
-            $this->form_validation->set_rules('abreviacion','Abreviacion','required');
+            $this->form_validation->set_rules('nombreA','Nombre','required');
+            $this->form_validation->set_rules('abreviacionA','Abreviacion','required');
 
 
              if($this->form_validation->run()==FALSE){
@@ -42,8 +42,8 @@ class Api extends REST_Controller {
              }else{
 
                $data=array(
-                   "nombreTipoAlojamiento"=>$this->post('nombre'),
-                   "abreviacionTipoAlojamiento"=>$this->post('abreviacion')
+                   "nombreTipoAlojamiento"=>$this->post('nombreA'),
+                   "abreviacionTipoAlojamiento"=>$this->post('abreviacionA')
                );
                $response = $this->DAO->insertData('Tb_TipoAlojamiento',$data);
 
@@ -104,14 +104,14 @@ class Api extends REST_Controller {
                     "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
                     "data"=>null,
                     "validations"=>array(
-                        "nombre"=>"El nombre es requerido",
-                        "abreviacion" => "La abreviacion es requerida"
+                        "nombreA"=>"El nombre es requerido",
+                        "abreviacionA" => "La abreviacion es requerida"
                     )
                 );
             }else{
                 $this->form_validation->set_data($data);
-                $this->form_validation->set_rules('nombre','Nombre','required');
-                $this->form_validation->set_rules('abreviacion','Abreviacion','required');
+                $this->form_validation->set_rules('nombreA','Nombre','required');
+                $this->form_validation->set_rules('abreviacionA','Abreviacion','required');
     
                  if($this->form_validation->run()==FALSE){
                     $response = array(
@@ -123,8 +123,8 @@ class Api extends REST_Controller {
                 }else{
     
                     $data=array(
-                       "nombreTipoAlojamiento"=>$this->put('nombre'),
-                       "abreviacionTipoAlojamiento"=>$this->put('abreviacion')
+                       "nombreTipoAlojamiento"=>$this->put('nombreA'),
+                       "abreviacionTipoAlojamiento"=>$this->put('abreviacionA')
                     );
 
                    $response = $this->DAO->updateData('Tb_TipoAlojamiento',$data,array('idTipoAlojamiento'=>$id));
@@ -143,7 +143,7 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
-    public function facultad_delete(){
+    public function tipoAlojamiento_delete(){
         $id = $this->get('id');
       if ($id) {
         $IdExists = $this->DAO->selectEntity('Tb_TipoAlojamiento',array('idTipoAlojamiento'=>$id),TRUE);

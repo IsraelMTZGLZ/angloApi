@@ -23,13 +23,13 @@ class Api extends REST_Controller {
                 "data"=>null,
                 "validations"=>array(
                     "tipoAlojamiento"=>"La Tipo Alojamiento es requerido",
-                    "institucion" => "La Institucion es requerida"
+                    "institucionA" => "La Institucion es requerida"
                 )
             );
         }else{
             $this->form_validation->set_data($data);
             $this->form_validation->set_rules('tipoAlojamiento','Tipo Alojamiento','required');
-            $this->form_validation->set_rules('institucion','Institucion','required');
+            $this->form_validation->set_rules('institucionA','Institucion','required');
 
 
              if($this->form_validation->run()==FALSE){
@@ -43,7 +43,7 @@ class Api extends REST_Controller {
 
               $data=array(
                 "fkTipoAlojamiento"=>$this->post('tipoAlojamiento'),
-                "fkInstitucion"=>$this->post('institucion')
+                "fkInstitucion"=>$this->post('institucionA')
               );
               $response = $this->DAO->insertData('Tb_TipoAlojamientoInstitucion',$data);
 
@@ -106,13 +106,13 @@ class Api extends REST_Controller {
                     "data"=>null,
                     "validations"=>array(
                       "tipoAlojamiento"=>"La Tipo Alojamiento es requerido",
-                      "institucion" => "La Institucion es requerida"
+                      "institucionA" => "La Institucion es requerida"
                     )
                 );
             }else{
                 $this->form_validation->set_data($data);
                 $this->form_validation->set_rules('tipoAlojamiento','Tipo de Alojamiento','required');
-                $this->form_validation->set_rules('institucion','institucion','required');
+                $this->form_validation->set_rules('institucionA','institucion','required');
     
                  if($this->form_validation->run()==FALSE){
                     $response = array(
@@ -125,7 +125,7 @@ class Api extends REST_Controller {
     
                     $data=array(
                        "fkTipoAlojamiento"=>$this->put('tipoAlojamiento'),
-                       "fkInstitucion"=>$this->put('institucion')
+                       "fkInstitucion"=>$this->put('institucionA')
                     );
 
                    $response = $this->DAO->updateData('Tb_TipoAlojamientoInstitucion',$data,array('idTipoAlojamientoInstitucion'=>$id));
@@ -216,5 +216,46 @@ class Api extends REST_Controller {
       }
       $this->response($response,200);
   }
+
+  function preparatoriaBYinstitucion_get(){
+    $id=$this->get('id');
+    $id2=$this->get('id2');
+    if (count($this->get())>2) {
+        $response = array(
+            "status" => "error",
+            "status_code" => 409,
+            "message" => "Demasiados datos enviados",
+            "validations" =>array(
+                    "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+            ),
+            "data"=>null
+        );
+    }else{
+        if ($id) {
+            $data = $this->DAO->selectEntity('Vw_tipoAlojamiento',array('idInstitucion'=>$id),false);
+        }
+        else{
+            $data = $this->DAO->selectEntity('Vw_tipoAlojamiento',null,false);
+        }
+        if ($data) {
+            $response = array(
+                "status" => "success",
+                "status_code" => 201,
+                "message" => "Articulo Cargado correctamente",
+                "validations" =>null,
+                "data"=>$data
+            );
+        }else{
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "No se recibio datos",
+                "validations" =>null,
+                "data"=>null
+            );
+        }
+    }
+    $this->response($response,200);
+}
 
 }
