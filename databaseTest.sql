@@ -17,12 +17,11 @@ DROP TABLE Tb_TipoAlojamiento;
 CREATE TABLE Tb_Institucion(
     idInstitucion INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     nombreInstitucion VARCHAR(120) NOT NULL,
-    logoInstitucion int,
+    logoInstitucion text,
     ubicacionInstitucion text,
     statusInstitucion enum('Activo','Inactivo') default 'Activo',
     creationDateInstitucion timestamp default current_timestamp,
-    lastUpdateInstitucion timestamp default current_timestamp on update current_timestamp,
-    FOREIGN KEY(logoInstitucion) REFERENCES Tb_Imagenes(idImagen) on update cascade on delete cascade
+    lastUpdateInstitucion timestamp default current_timestamp on update current_timestamp
 );
 
 CREATE TABLE Tb_Facultad(
@@ -83,7 +82,7 @@ CREATE TABLE Tb_TipoAlojamientoInstitucion(
     FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade
 );
 
-INSERT INTO Tb_Institucion(nombreInstitucion,logoInstitucion) VALUES('University of Bath',1);
+INSERT INTO Tb_Institucion(nombreInstitucion,logoInstitucion,ubicacionInstitucion) VALUES('University of Bath','https://upload.wikimedia.org/wikipedia/en/thumb/c/ca/University_of_Bath_logo.svg/1200px-University_of_Bath_logo.svg.png','test');
 INSERT INTO Tb_Institucion(nombreInstitucion,logoInstitucion) VALUES('University of Bristol',1);
 INSERT INTO Tb_Institucion(nombreInstitucion,logoInstitucion) VALUES('Cambridge School of Visual & Performing Arts',1);
 INSERT INTO Tb_Institucion(nombreInstitucion,logoInstitucion) VALUES('Concord College',1);
@@ -124,19 +123,19 @@ INSERT INTO Tb_TipoAlojamientoInstitucion (fkTipoAlojamiento,fkInstitucion) VALU
 INSERT INTO Tb_TipoAlojamientoInstitucion (fkTipoAlojamiento,fkInstitucion) VALUES(2,4);
 
 CREATE OR REPLACE VIEW Vw_Uni as
-select idInstitucion,nombreInstitucion,idFacultad,nombreFacultad,abreviacionFacultad,idInstitucionFacultad
-from Tb_Facultad as f, Tb_Institucion as i, Tb_InstitucionFacultad as insfa
+select idInstitucion,nombreInstitucion,idFacultad,nombreFacultad,abreviacionFacultad,idInstitucionFacultad 
+from Tb_Facultad as f, Tb_Institucion as i, Tb_InstitucionFacultad as insfa 
 where insfa.fkFacultad = f.idFacultad and insfa.fkInstitucion=i.idInstitucion;
 
 CREATE OR REPLACE VIEW Vw_Prep as
-select nombreInstitucion,abreviacionTipoEstudio,abreviacionTipoAlojamiento
+select idInstitucion,nombreInstitucion,
+idTipoEstudio,nombreTipoEstudio,abreviacionTipoEstudio,
+idTipoAlojamiento,nombreTipoAlojamiento,abreviacionTipoAlojamiento,
+idTipoEstudioInstituccion,idTipoAlojamientoInstitucion
 FROM Tb_Institucion as i, Tb_TipoEstudio as te, Tb_TipoEstudioInstituccion as tei,
 Tb_TipoAlojamiento as ta, Tb_TipoAlojamientoInstitucion as tai
 where tei.fkInstitucion = i.idInstitucion and tei.fkTipoEstudio = te.idTipoEstudio
 and tai.fkTipoAlojamiento = ta.idTipoAlojamiento and tai.fkInstitucion=i.idInstitucion;
-
-
-
 
 --Campamento de verano
 CREATE TABLE Tb_Edades(
