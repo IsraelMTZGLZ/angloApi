@@ -214,11 +214,51 @@ class Api extends REST_Controller {
           }
       }
       $this->response($response,200);
-  }
+    }
+
+    public function universidadOrdenByInstitucion_get()
+    {
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Too many data was sent",
+                "validations" =>array(
+                        "id"=>"send Id (get) to get specific item or empty to get all items "
+                ),
+                "data"=>null
+            );
+        }else{
+            
+            $query = $this->db->query("select * from Vw_Uni group by idInstitucion")->result();
+            
+
+            if ($query) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$query
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No datos proveidos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+            
+            
+        }
+        $this->response($response,200);
+    }
 
   function universidadByInstitucion_get(){
-    $id=$this->get('id');
-    if (count($this->get())>1) {
+      $id=$this->get('id');
+      if (count($this->get())>1) {
         $response = array(
             "status" => "error",
             "status_code" => 409,
@@ -253,6 +293,7 @@ class Api extends REST_Controller {
         }
     }
     $this->response($response,200);
-}
+  }
+
 
 }
