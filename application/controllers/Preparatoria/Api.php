@@ -258,4 +258,242 @@ class Api extends REST_Controller {
     $this->response($response,200);
 }
 
+    //traer solo las preparatorias sin nada repetido
+    public function preparatoriaOrdenByInstitucion_get()
+    {
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Too many data was sent",
+                "validations" =>array(
+                        "id"=>"send Id (get) to get specific item or empty to get all items "
+                ),
+                "data"=>null
+            );
+        }else{
+            
+            $query = $this->db->query("select * from Vw_Prep group by idInstitucion")->result();
+            
+
+            if ($query) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$query
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No datos proveidos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+            
+            
+        }
+        $this->response($response,200);
+    }
+
+    //obtener tipos de estudios por cada tipo de preparatoria
+    function preparatoriasBYInstitucionTiposEstudios_get(){
+        $id=$this->get('id');
+        if (count($this->get())>2) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            if ($id) {
+                $data = $this->DAO->selectEntity('Vw_tipoEstudio',array('idInstitucion'=>$id),false);
+            }
+            else{
+                $data = $this->DAO->selectEntity('Vw_tipoEstudio',null,false);
+            }
+            if ($data) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$data
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
+    //obtener tipos de alojamientos por cada tipo de preparatoria
+    function preparatoriasBYInstitucionTiposAlojamientos_get(){
+        $id=$this->get('id');
+        $id2=$this->get('id2');
+        if (count($this->get())>2) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            if ($id) {
+                $data = $this->DAO->selectEntity('Vw_tipoAlojamiento',array('idInstitucion'=>$id),false);
+            }
+            else{
+                $data = $this->DAO->selectEntity('Vw_tipoAlojamiento',null,false);
+            }
+            if ($data) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$data
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
+    function preparatoriaBYtipoEstudio_get(){
+        $id=$this->get('id');
+        if (count($this->get())>2) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            if ($id) {
+                $data = $this->DAO->selectEntity('Vw_Prep',array('idTipoEstudio'=>$id),false);
+            }
+            else{
+                $data = $this->DAO->selectEntity('Vw_Prep',null,false);
+            }
+            if ($data) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$data
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
+    function preparatoriaBYtipoAlojamiento_get(){
+        $id=$this->get('id');
+        if (count($this->get())>2) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            $query = $this->db->query("select * from Vw_Prep where idTipoAlojamiento=".$id." group by idInstitucion")->result();
+            
+
+            if ($query) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$query
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No datos proveidos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
+    function preparatoriaBYIns_get(){
+        $id=$this->get('id');
+        if (count($this->get())>2) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            $query = $this->db->query("select * from Vw_Prep where idInstitucion=".$id." group by idInstitucion")->result();
+            
+
+            if ($query) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$query
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No datos proveidos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
 }

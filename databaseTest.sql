@@ -139,7 +139,7 @@ from Tb_Facultad as f, Tb_Institucion as i, Tb_InstitucionFacultad as insfa
 where insfa.fkFacultad = f.idFacultad and insfa.fkInstitucion=i.idInstitucion;
 
 CREATE OR REPLACE VIEW Vw_Prep as
-select idInstitucion,nombreInstitucion,
+select idInstitucion,nombreInstitucion,logoInstitucion,ubicacionInstitucion,
 idTipoEstudio,nombreTipoEstudio,abreviacionTipoEstudio,
 idTipoAlojamiento,nombreTipoAlojamiento,abreviacionTipoAlojamiento,
 idTipoEstudioInstituccion,idTipoAlojamientoInstitucion
