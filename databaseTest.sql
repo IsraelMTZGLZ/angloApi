@@ -1,3 +1,4 @@
+DROP TABLE Tb_AspiranteUniversidades;
 DROP TABLE Tb_TipoAlojamientoInstitucion;
 DROP TABLE Tb_TipoEstudioInstituccion;
 DROP TABLE Tb_TipoEstudio;
@@ -276,3 +277,32 @@ from Tb_Institucion as i, Tb_TipoCursos as tc, Tb_TipoAlojamiento as ta,
 Tb_TipoCursosInstituciones as tci,Tb_AlojamientoCurso as ac
 where tci.fkTipoCurso = tc.idTipoCurso and tci.fkInstitucion =i.idInstitucion and
 ac.fkTipoAlojamiento = ta.idTipoAlojamiento and ac.fkInstitucion=i.idInstitucion;
+
+CREATE TABLE Tb_AspiranteUniversidades(
+    idAspiranteUniversidad INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    fkAspirante int,
+    fkFacultad int,
+    estudiosAspiranteUniversidad enum('Carrera','Masters','PhD'),
+    añoIngreso VARCHAR(10),
+    mesIngreso VARCHAR(10),
+    FOREIGN KEY(fkFacultad) REFERENCES Tb_Facultad(idFacultad) on update cascade on delete cascade,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
+    CAU timestamp default current_timestamp,
+    LUAU timestamp default current_timestamp on update current_timestamp
+);
+
+CREATE TABLE Tb_InstitucionAspiranteUniversidades(
+    idInstitucionAspiranteUniversidades INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    fkInstitucion int,
+    fkAspiranteUniversidad int,
+    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
+    FOREIGN KEY(fkAspiranteUniversidad) REFERENCES Tb_AspiranteUniversidades(idAspiranteUniversidad) on update cascade on delete cascade,
+    CIAU timestamp default current_timestamp,
+    LUIAU timestamp default current_timestamp on update current_timestamp
+);
+
+CREATE OR REPLACE VIEW Vw_AspiranteUniversidad as 
+select nombreFacultad,abreviacionFacultad,idFacultad,
+fkAspirante,estudiosAspiranteUniversidad,añoIngreso,mesIngreso,idAspiranteUniversidad
+from Tb_Facultad as f, Tb_Aspirantes as a, Tb_AspiranteUniversidades as au
+where au.fkAspirante = a.idAspirante and au.fkFacultad = f.idFacultad;
