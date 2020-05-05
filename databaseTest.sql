@@ -285,6 +285,7 @@ CREATE TABLE Tb_AspiranteUniversidades(
     estudiosAspiranteUniversidad enum('Carrera','Masters','PhD'),
     añoIngreso VARCHAR(10),
     mesIngreso VARCHAR(10),
+    statusAU enum('Activo','Inactivo') default 'Inactivo',
     FOREIGN KEY(fkFacultad) REFERENCES Tb_Facultad(idFacultad) on update cascade on delete cascade,
     FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
     CAU timestamp default current_timestamp,
@@ -303,6 +304,6 @@ CREATE TABLE Tb_InstitucionAspiranteUniversidades(
 
 CREATE OR REPLACE VIEW Vw_AspiranteUniversidad as 
 select nombreFacultad,abreviacionFacultad,idFacultad,
-fkAspirante,estudiosAspiranteUniversidad,añoIngreso,mesIngreso,idAspiranteUniversidad
+fkAspirante,estudiosAspiranteUniversidad,añoIngreso,mesIngreso,idAspiranteUniversidad,statusAU
 from Tb_Facultad as f, Tb_Aspirantes as a, Tb_AspiranteUniversidades as au
 where au.fkAspirante = a.idAspirante and au.fkFacultad = f.idFacultad;
