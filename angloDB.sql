@@ -458,3 +458,39 @@ select nombreFacultad,abreviacionFacultad,idFacultad,
 fkAspirante,estudiosAspiranteUniversidad,anioMesIngreso,idAspiranteUniversidad,statusAU
 from Tb_Facultad as f, Tb_Aspirantes as a, Tb_AspiranteUniversidades as au
 where au.fkAspirante = a.idAspirante and au.fkFacultad = f.idFacultad;
+
+--falta vista Tb_InstitucionAspiranteUniversidades
+
+CREATE TABLE Tb_AspirantePreparatorias(
+    idAspirantePreparatoria INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    fkTipoEstudio int,
+    fkTipoAlojamiento int,
+    anioMesIngreso date,
+    fkAspirante int,
+    statusAP enum('Activo','Inactivo') default 'Activo',
+    FOREIGN KEY(fkTipoEstudio) REFERENCES Tb_TipoEstudio(idTipoEstudio) on update cascade on delete cascade,
+    FOREIGN KEY(fkTipoAlojamiento) REFERENCES Tb_TipoAlojamiento(idTipoAlojamiento) on update cascade on delete cascade,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
+    CIAP timestamp default current_timestamp,
+    LUIAP timestamp default current_timestamp on update current_timestamp
+);
+
+CREATE TABLE Tb_InstitucionAspirantePreparatorias(
+    idInstitucionAspirantePreparatorias INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    fkInstitucion int,
+    fkAspirantePreparatoria int,
+    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
+    FOREIGN KEY(fkAspirantePreparatoria) REFERENCES Tb_AspirantePreparatorias(idAspirantePreparatoria) on update cascade on delete cascade,
+    CIAU timestamp default current_timestamp,
+    LUIAU timestamp default current_timestamp on update current_timestamp
+);
+
+CREATE OR REPLACE VIEW Vw_AspirantePreparatoria as 
+select
+nombreTipoEstudio,abreviacionTipoEstudio,idTipoEstudio,
+nombreTipoAlojamiento,abreviacionTipoAlojamiento,idTipoAlojamiento,
+anioMesIngreso,fkAspirante,idAspirantePreparatoria
+from Tb_TipoEstudio as te,Tb_TipoAlojamiento as ta, Tb_AspirantePreparatorias as ap,
+Tb_Aspirantes as a 
+where ap.fkAspirante = a.idAspirante and ap.fkTipoEstudio = te.idTipoEstudio and
+ap.fkTipoAlojamiento = ta.idTipoAlojamiento;
