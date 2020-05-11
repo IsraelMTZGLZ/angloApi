@@ -459,7 +459,13 @@ fkAspirante,estudiosAspiranteUniversidad,anioMesIngreso,idAspiranteUniversidad,s
 from Tb_Facultad as f, Tb_Aspirantes as a, Tb_AspiranteUniversidades as au
 where au.fkAspirante = a.idAspirante and au.fkFacultad = f.idFacultad;
 
---falta vista Tb_InstitucionAspiranteUniversidades
+--Tb_InstitucionAspiranteUniversidades
+CREATE OR REPLACE VIEW Vw_AspiranteInstituciones as
+select nombreInstitucion,logoInstitucion,ubicacionInstitucion,
+idAspiranteUniversidad,idInstitucion
+from Tb_Institucion as i , Tb_AspiranteUniversidades as au, 
+Tb_InstitucionAspiranteUniversidades as iau
+where iau.fkInstitucion = i.idInstitucion and iau.fkAspiranteUniversidad = au.idAspiranteUniversidad;
 
 CREATE TABLE Tb_AspirantePreparatorias(
     idAspirantePreparatoria INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -494,3 +500,17 @@ from Tb_TipoEstudio as te,Tb_TipoAlojamiento as ta, Tb_AspirantePreparatorias as
 Tb_Aspirantes as a 
 where ap.fkAspirante = a.idAspirante and ap.fkTipoEstudio = te.idTipoEstudio and
 ap.fkTipoAlojamiento = ta.idTipoAlojamiento;
+
+CREATE TABLE Tb_Documentos(
+	idDocumento int not null AUTO_INCREMENT PRIMARY KEY,
+	urlDocumento text not null,
+	typeDocumento varchar(15),
+	extDocumento varchar(10),
+    nombreDocumento text,
+    tipo enum('Boleta','CartaMotivo','Pasaporte') not null,
+	statusDocumento enum('Activo','Inactivo') default 'Activo',
+	creationDateDocumento timestamp default current_timestamp,
+	lastUpdateDocumento timestamp default current_timestamp on update current_timestamp,
+    fkAspirante int,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade
+);
