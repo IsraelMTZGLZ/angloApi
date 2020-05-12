@@ -16,7 +16,7 @@ class Api extends REST_Controller {
     function institucion_post(){
         $data = $this->post();
 
-        if(count($data) == 0 || count($data) > 2){
+        if(count($data) == 0 || count($data) > 3){
             $response = array(
                 "status"=>"error",
                 "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
@@ -112,7 +112,7 @@ class Api extends REST_Controller {
                 $this->form_validation->set_data($data);
                 $this->form_validation->set_rules('nombre','Nombre','required');
                 $this->form_validation->set_rules('ubicacion','Ubicacion','required');
-    
+
                  if($this->form_validation->run()==FALSE){
                     $response = array(
                         "status"=>"error",
@@ -121,14 +121,14 @@ class Api extends REST_Controller {
                         "validations"=>$this->form_validation->error_array()
                     );
                 }else{
-    
+
                     $data=array(
                        "nombreInstitucion"=>$this->put('nombre'),
                        "ubicacionInstitucion"=>$this->put('ubicacion')
                     );
 
                    $response = $this->DAO->updateData('Tb_Institucion',$data,array('idInstitucion'=>$id));
-    
+
                 }
             }
         }else{
@@ -138,7 +138,7 @@ class Api extends REST_Controller {
             "data"=>null,
             );
         }
-        
+
 
         $this->response($response,200);
     }

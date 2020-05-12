@@ -94,6 +94,24 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
+    function alojamientoByInstituciones_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selEntityMany('Vw_AlojInst',array('idInstitucion'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selEntityMany('Vw_AlojInst'),
+            );
+        }
+        $this->response($response,200);
+    }
+
     function alojamientocampamento_put(){
         $data = $this->put();
         $id = $this->get('id');
@@ -192,7 +210,7 @@ class Api extends REST_Controller {
       }
 
     } else {
-      $this->form_validation->set_message('check_alojamiento','The edad must have characters in length');
+      $this->form_validation->set_message('check_alojamiento','The alojamiento must have characters in length');
         return FALSE;
     }
   }

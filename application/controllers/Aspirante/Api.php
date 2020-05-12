@@ -44,10 +44,10 @@ class Api extends REST_Controller {
                     "message"=>"Revisa las validaciones",
                     "validations"=>$this->form_validation->error_array(),
                     "data"=>null
-                ); 
+                );
             }
             else{
-               
+
                 $data['Persona']=array(
                     "generoPersona"=>$this->post('genero')
                 );
@@ -85,7 +85,7 @@ class Api extends REST_Controller {
             $this->form_validation->set_data($this->post());
             $this->form_validation->set_rules('aspirante','id Aspirante','callback_check_institucion');
             $this->form_validation->set_rules('institucion','institucion Universidad','required');
-            
+
             if ($this->form_validation->run()==false) {
                 $response=array(
                     "status"=>"error",
@@ -93,10 +93,10 @@ class Api extends REST_Controller {
                     "message"=>"Revisa las validaciones",
                     "validations"=>$this->form_validation->error_array(),
                     "data"=>null
-                ); 
+                );
             }
             else{
-               
+
                 $data=array(
                     "programaDeInteres"=>$this->post('institucion')
                 );
@@ -154,15 +154,15 @@ class Api extends REST_Controller {
             $this->form_validation->set_message('check_persona','The {field} campo es requerido');
             return false;
         }
-        
+
         $itemExist=$this->DAO->selectEntity('Tb_Personas',array('idPersona'=>$str),true);
         if (!$itemExist) {
             $this->form_validation->set_message('check_persona','The {field} campo no existe');
             return false;
         }else{
             return true;
-        } 
-        
+        }
+
     }
 
     function check_institucion($str){
@@ -170,15 +170,15 @@ class Api extends REST_Controller {
             $this->form_validation->set_message('check_institucion','The {field} campo es requerido');
             return false;
         }
-        
+
         $itemExist=$this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$str),true);
         if (!$itemExist) {
             $this->form_validation->set_message('check_institucion','The {field} campo no existe');
             return false;
         }else{
             return true;
-        } 
-        
+        }
+
     }
 
     function check_gender($str){

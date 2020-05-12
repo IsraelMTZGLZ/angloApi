@@ -13,6 +13,28 @@ class Api extends REST_Controller {
         $this->load->model('UserDAO');
     }
 
+
+
+function universidadByInstitucion_get(){
+    $id = $this->get('id');
+    if($id){
+         $response = array(
+            "status"=>"success",
+            "message"=> '',
+            "data"=>$this->DAO->selectEnt('Vw_Uni',array('idInstitucion'=>$id)),
+        );
+    }else{
+        $response = array(
+            "status"=>"success",
+            "message"=> '',
+            "data"=>$this->DAO->selectEnt('Vw_Uni'),
+        );
+    }
+    $this->response($response,200);
+}
+
+
+
     function edad_get(){
         $id = $this->get('id');
         if($id){
@@ -127,6 +149,37 @@ class Api extends REST_Controller {
 
 
         $this->response($response,200);
+    }
+
+    public function alojamiento_delete(){
+        $id = $this->get('id');
+      if ($id) {
+        $IdExists = $this->DAO->selectEntity('Tb_TipoAlojamiento',array('idTipoAlojamiento'=>$id),TRUE);
+
+        if($IdExists){
+          $response = $this->DAO->deleteData('Tb_TipoAlojamiento',array('idTipoAlojamiento'=>$id));
+        }else{
+          $response = array(
+            "status"=>"error",
+            "status_code"=>409,
+            "message"=>"Id no existe",
+            "validations"=>null,
+            "data"=>null
+          );
+        }
+      } else {
+        $response = array(
+          "status"=>"error",
+          "status_code"=>409,
+          "message"=>"Id no fue encontrado",
+          "validations"=>array(
+            "id"=>"Required (get)",
+          ),
+          "data"=>null
+        );
+      }
+
+      $this->response($response,200);
     }
 
     public function edad_delete(){

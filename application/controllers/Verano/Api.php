@@ -17,13 +17,128 @@ class Api extends REST_Controller {
              $response = array(
                 "status"=>"success",
                 "message"=> '',
-                "data"=>$this->DAO->selectEntity('Vw_PrepaCampus',array('idCampus'=>$id)),
+                "data"=>$this->DAO->selectEntity('Vw_Verano',array('idCampus'=>$id)),
             );
         }else{
             $response = array(
                 "status"=>"success",
                 "message"=> '',
-                "data"=>$this->DAO->selectEntity('Vw_PrepaCampus'),
+                "data"=>$this->DAO->selectEntity('Vw_Verano'),
+            );
+        }
+        $this->response($response,200);
+    }
+
+    function institucionBysteps_get(){
+        $idO = $this->get('idO');
+        $idTw = $this->get('idTw');
+        $idTh = $this->get('idTh');
+        if($idO){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selectEntityVerano('Vw_Verano',array('idEdad'=>$idO),array('idCampamento'=>$idTw),array('idTipoAlojamiento'=>$idTh)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selectEntityVerano('Vw_Verano'),
+            );
+
+        }
+        $this->response($response,200);
+    }
+
+
+    function aspirante_E_C_A_post($id=null){
+        $data = $this->post();
+
+        if(count($data) == 0 || count($data) > 11){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
+                "data"=>null,
+                "validations"=>array(
+                      "aspirante"=>"Required, The name is required",
+                      "edad"=>"Required, The ubication is required",
+                      "campamento"=>"Optional, the url is optional",
+                      "alojamiento"=>"Required, The type of campus ir required",
+                )
+            );
+        }else{
+            $this->form_validation->set_data($data);
+            $this->form_validation->set_rules('aspirante','aspirante','required');
+            $this->form_validation->set_rules('edad','edad','required');
+            $this->form_validation->set_rules('campamento','campamento','required');
+            $this->form_validation->set_rules('alojamiento','alojamiento','required');
+
+
+             if($this->form_validation->run()==FALSE){
+                $response = array(
+                    "status"=>"error",
+                    "message"=>'check the validations',
+                    "data"=>null,
+                    "validations"=>$this->form_validation->error_array()
+                );
+             }else{
+
+               $data=array(
+                   "fkAspirante"=>$this->post('aspirante'),
+                   "fkEdad"=>$this->post('edad'),
+                   "fkCampamento"=>$this->post('campamento'),
+                   "fkAlojamiento"=>$this->post('alojamiento')
+               );
+               $response = $this->DAO->insertData('Tb_Aspirante_E_C_A_I',$data);
+
+             }
+        }
+
+        $this->response($response,200);
+    }
+
+    function aspirante_E_C_A_put($id=null){
+        $data = $this->put();
+        $Eixist = $this->DAO->selectEntity('Tb_Aspirante_E_C_A_I',array('fkAspirante'=>$id),TRUE);
+        if($Eixist){
+          if(count($data) == 0 || count($data) > 11){
+              $response = array(
+                  "status"=>"error",
+                  "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
+                  "data"=>null,
+                  "validations"=>array(
+                    "campusone"=>"Required, The name is required",
+                    "campustwo"=>"Required, The ubication is required",
+                    "campusthree"=>"Optional, the url is optional",
+                  )
+              );
+          }else{
+              $this->form_validation->set_data($data);
+              $this->form_validation->set_rules('campusone','campusone','required');
+              $this->form_validation->set_rules('campustwo','campustwo','required');
+              $this->form_validation->set_rules('campusthree','campusthree','required');
+
+             if($this->form_validation->run()==FALSE){
+                  $response = array(
+                      "status"=>"error",
+                      "message"=> 'Too many data received',
+                      "data"=>null,
+                      "validations"=>$this->form_validation->error_array()
+                  );
+               }else{
+               $data = array(
+                 "fkInstitutoOne"=>$this->put('campusone'),
+                 "fkInstitutoTwo"=>$this->put('campustwo'),
+                 "fkInstitutoThree"=>$this->put('campusthree')
+               );
+               $response = $this->DAO->updateData('Tb_Aspirante_E_C_A_I',$data,array('fkAspirante'=>$id));
+               }
+          }
+        }else{
+          $response = array(
+            "status"=>"error",
+            "message"=> "check the id",
+            "data"=>$Eixist,
             );
         }
         $this->response($response,200);
@@ -94,6 +209,7 @@ class Api extends REST_Controller {
 
         $this->response($response,200);
     }
+
 
     function preparatoriaCampus_put($id=null){
         $data = $this->put();

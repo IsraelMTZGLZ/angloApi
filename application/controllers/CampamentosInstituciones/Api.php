@@ -68,7 +68,7 @@ class Api extends REST_Controller {
             );
         }else{
             if ($id) {
-                $data = $this->DAO->selectEntity('Vw_CampInst',array('id'=>$id),true);
+                $data = $this->DAO->selectEntity('Vw_CampInst',array('idInstitucion'=>$id),true);
             }
             else{
                 $data = $this->DAO->selectEntity('Vw_CampInst',null,false);
@@ -90,6 +90,24 @@ class Api extends REST_Controller {
                     "data"=>null
                 );
             }
+        }
+        $this->response($response,200);
+    }
+
+    function campamentoByInstitucion_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selEntityMany('Vw_CampInst',array('idInstitucion'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selEntityMany('Vw_CampInst'),
+            );
         }
         $this->response($response,200);
     }

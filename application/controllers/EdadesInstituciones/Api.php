@@ -29,7 +29,7 @@ class Api extends REST_Controller {
         }else{
             $this->form_validation->set_data($data);
             $this->form_validation->set_rules('edad','Edad','callback_check_edad');
-            $this->form_validation->set_rules('institucion','Institucion','callback_check_institucion');
+            $this->form_validation->set_rules('institucion','Institucion','required');
 
 
              if($this->form_validation->run()==FALSE){
@@ -50,6 +50,24 @@ class Api extends REST_Controller {
             }
         }
 
+        $this->response($response,200);
+    }
+
+    function edadByInstituciones_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selEntityMany('Vw_EdadesInst',array('idInstitucion'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selEntityMany('Vw_EdadesInst'),
+            );
+        }
         $this->response($response,200);
     }
 
@@ -203,13 +221,13 @@ class Api extends REST_Controller {
       if ($Exists) {
         return TRUE;
       } else {
-      $this->form_validation->set_message('check_edad','The institution does not exist.');
+      $this->form_validation->set_message('check_institucion','The institution does not exist.');
 
         return FALSE;
       }
 
     } else {
-      $this->form_validation->set_message('check_edad','The institution must have characters in length');
+      $this->form_validation->set_message('check_institucion','The institution must have characters in length');
         return FALSE;
     }
   }

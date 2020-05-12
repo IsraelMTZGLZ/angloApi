@@ -27,6 +27,20 @@ class DAO extends CI_Model{
     }
 
 
+	 function selectEntityVerano($entity, $whereClauseOne = null,$whereClauseTwo = null,$whereClauseThree = null){
+		 if($whereClauseOne and $whereClauseTwo and $whereClauseThree){
+		 $this->db->where($whereClauseOne);
+		 $this->db->where($whereClauseTwo);
+		 $this->db->where($whereClauseThree);
+		 	$query = $this->db->get($entity);
+		 }else{
+			 $query = $this->db->get($entity);
+		 }
+		 return  $query->result();
+	 }
+
+
+
     public function insertData($entityName,$data,$returnData=false)
     {
         $query=$this->db->insert($entityName,$data);
@@ -181,6 +195,17 @@ class DAO extends CI_Model{
 		    return $responseDB;
 
 		}
+
+		function selEntityMany($entity, $whereClause = NULL){
+			if($whereClause){
+			$this->db->where($whereClause);
+				 $query = $this->db->get($entity);
+			}else{
+				$query = $this->db->get($entity);
+			}
+			return  $query->result();
+		}
+
 
 
 }

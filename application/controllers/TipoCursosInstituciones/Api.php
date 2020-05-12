@@ -53,6 +53,23 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
+    function tipoCursoByInstituciones_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selEntityMany('Vw_CursoInst',array('idInstitucion'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selEntityMany('Vw_CursoInst'),
+            );
+        }
+        $this->response($response,200);
+    }
     //traer solo los id
     function tipoCursosInstituciones_get(){
         $id=$this->get('id');

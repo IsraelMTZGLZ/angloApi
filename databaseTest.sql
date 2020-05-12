@@ -136,7 +136,19 @@ where tei.fkInstitucion = i.idInstitucion and tei.fkTipoEstudio = te.idTipoEstud
 and tai.fkTipoAlojamiento = ta.idTipoAlojamiento and tai.fkInstitucion=i.idInstitucion;
 
 
+CREATE TABLE Tb_TipoCurso_Verano(
+  int idTcv int primary key auto_increment,
+  tipocursoVerano enum ('Cursos académico de verano','Curso de verano de Inglés'),
+  CDEdad timestamp default current_timestamp,
+  LUEdad timestamp default current_timestamp on update current_timestamp
+);
 
+CREATE TABLE Tb_TipoInstitucion(
+  int idTipoInstitucion int primary key auto_increment,
+  tipoInstitucion enum('Académico','Inglés','Ninguno') default 'Ninguno',
+  CDEdad timestamp default current_timestamp,
+  LUEdad timestamp default current_timestamp on update current_timestamp,
+);
 
 --Campamento de verano
 CREATE TABLE Tb_Edades(
@@ -158,8 +170,8 @@ CREATE TABLE Tb_EdadesInstituciones(
     LUEdadInstitucion timestamp default current_timestamp on update current_timestamp
 );
 
-CREATE OR REPLACE VIEW Vw_EdadesInst as select idEdadInstitucion as id, nombreEdad as nombre, abreviacionEdad as abreviacion, edadEdad as edad,
-nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
+CREATE OR REPLACE VIEW Vw_EdadesInst as select idEdadInstitucion as idEdadInstitucion, idEdad as idEdad ,nombreEdad as nombre, abreviacionEdad as abreviacion, edadEdad as edad,
+idInstitucion as idInstitucion,nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
 from Tb_EdadesInstituciones as ei, Tb_Edades as e, Tb_Institucion as i
 where ei.fkEdad = e.idEdad and ei.fkInstitucion= i.idInstitucion;
 
@@ -186,8 +198,8 @@ CREATE TABLE Tb_CampamentosInstituciones(
     LUCampInst timestamp default current_timestamp on update current_timestamp
 );
 
-CREATE OR REPLACE VIEW Vw_CampInst as select idCampamentoInstitucion as id, nombreCampamento as nombre, abreviacionCampamento as abreviacion,
-nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
+CREATE OR REPLACE VIEW Vw_CampInst as select idCampamentoInstitucion as idCampamentoInstitucion,idCampamento as idCampamento, nombreCampamento as nombre, abreviacionCampamento as abreviacion,
+idInstitucion as idInstitucion,nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
 from Tb_CampamentosInstituciones as ei, Tb_Campamentos as e, Tb_Institucion as i
 where ei.fkCampamento = e.idCampamento and ei.fkInstitucion= i.idInstitucion;
 
@@ -204,8 +216,8 @@ CREATE TABLE Tb_AlojamientoCampamento(
     LUAlojCamp timestamp default current_timestamp on update current_timestamp
 );
 
-CREATE OR REPLACE VIEW Vw_AlojCamp as select idAlojamientoCampamento as id, nombreTipoAlojamiento as nombre, abreviacionTipoAlojamiento as abreviacion,statusTipoTipoAlojamiento as status,
-nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
+CREATE OR REPLACE VIEW Vw_AlojInst as select idAlojamientoCampamento,idTipoAlojamiento, nombreTipoAlojamiento as nombre, abreviacionTipoAlojamiento as abreviacion,statusTipoTipoAlojamiento as status,
+idInstitucion,nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
 from Tb_AlojamientoCampamento as ei, Tb_TipoAlojamiento as e, Tb_Institucion as i
 where ei.fkTipoAlojamiento = e.idTipoAlojamiento and ei.fkInstitucion= i.idInstitucion;
 
@@ -213,7 +225,7 @@ where ei.fkTipoAlojamiento = e.idTipoAlojamiento and ei.fkInstitucion= i.idInsti
 INSERT INTO Tb_AlojamientoCampamento (fkTipoAlojamiento,fkInstitucion) VALUES(1,1);
 
 CREATE OR REPLACE VIEW Vw_Verano as
-select nombreInstitucion,abreviacionEdad,abreviacionCampamento,abreviacionTipoAlojamiento
+select nombreInstitucion,idEdad,abreviacionEdad,idCampamento,abreviacionCampamento,idTipoAlojamiento,abreviacionTipoAlojamiento
 FROM Tb_Institucion as i, Tb_Edades as e, Tb_Campamentos as c,
 Tb_TipoAlojamiento as t,
 Tb_EdadesInstituciones as ei, Tb_CampamentosInstituciones as ci,
@@ -243,6 +255,10 @@ CREATE TABLE Tb_TipoCursosInstituciones(
     LUCurInst timestamp default current_timestamp on update current_timestamp
 );
 
+CREATE OR REPLACE VIEW Vw_CursoInst as select idTipoCursosInstituciones,idTipoCurso, nombreTipoCurso as nombre, abreviacionTipoCurso as abreviacion,
+idInstitucion,nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
+from Tb_TipoCursosInstituciones as ei, Tb_TipoCursos as e, Tb_Institucion as i
+where ei.fkTipoCurso = e.idTipoCurso and ei.fkInstitucion= i.idInstitucion;
 
 
 INSERT INTO Tb_TipoCursosInstituciones (fkTipoCurso,fkInstitucion) VALUES(1,1);
@@ -266,3 +282,23 @@ from Tb_Institucion as i, Tb_TipoCursos as tc, Tb_TipoAlojamiento as ta,
 Tb_TipoCursosInstituciones as tci,Tb_AlojamientoCurso as ac
 where tci.fkTipoCurso = tc.idTipoCurso and tci.fkInstitucion =i.idInstitucion and
 ac.fkTipoAlojamiento = ta.idTipoAlojamiento and ac.fkInstitucion=i.idInstitucion;
+
+CREATE TABLE Tb_Aspirante_E_C_A_I(
+  idACAI int primary key auto_increment,
+  fkAspirante int,
+  fkEdad int,
+  fkCampamento int,
+  fkAlojamiento int,
+  fkInstitutoOne int,
+  fkInstitutoTwo int,
+  fkInstitutoThree int,
+  FOREIGN KEY(fkAlojamiento) REFERENCES Tb_TipoAlojamiento(idTipoAlojamiento) on update cascade on delete cascade,
+  FOREIGN KEY(fkEdad) REFERENCES Tb_Edades(idEdad) on update cascade on delete cascade,
+  FOREIGN KEY(fkInstitutoOne) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
+  FOREIGN KEY(fkInstitutoTwo) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
+  FOREIGN KEY(fkInstitutoThree) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
+  FOREIGN KEY(fkCampamento) REFERENCES Tb_Campamentos(idCampamento) on update cascade on delete cascade,
+  FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
+  CD timestamp default current_timestamp,
+  LU timestamp default current_timestamp on update current_timestamp
+);
