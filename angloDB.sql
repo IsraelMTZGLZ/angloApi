@@ -455,7 +455,8 @@ CREATE TABLE Tb_InstitucionAspiranteUniversidades(
 
 CREATE OR REPLACE VIEW Vw_AspiranteUniversidad as 
 select nombreFacultad,abreviacionFacultad,idFacultad,
-fkAspirante,estudiosAspiranteUniversidad,anioMesIngreso,idAspiranteUniversidad,statusAU
+fkAspirante,estudiosAspiranteUniversidad,anioMesIngreso,idAspiranteUniversidad,statusAU,
+YEAR(anioMesIngreso) AS anio,MONTHNAME(anioMesIngreso) AS mes
 from Tb_Facultad as f, Tb_Aspirantes as a, Tb_AspiranteUniversidades as au
 where au.fkAspirante = a.idAspirante and au.fkFacultad = f.idFacultad;
 
@@ -495,11 +496,19 @@ CREATE OR REPLACE VIEW Vw_AspirantePreparatoria as
 select
 nombreTipoEstudio,abreviacionTipoEstudio,idTipoEstudio,
 nombreTipoAlojamiento,abreviacionTipoAlojamiento,idTipoAlojamiento,
-anioMesIngreso,fkAspirante,idAspirantePreparatoria
+anioMesIngreso,fkAspirante,idAspirantePreparatoria,YEAR(anioMesIngreso) AS anio,MONTHNAME(anioMesIngreso) AS mes
 from Tb_TipoEstudio as te,Tb_TipoAlojamiento as ta, Tb_AspirantePreparatorias as ap,
 Tb_Aspirantes as a 
 where ap.fkAspirante = a.idAspirante and ap.fkTipoEstudio = te.idTipoEstudio and
 ap.fkTipoAlojamiento = ta.idTipoAlojamiento;
+
+--Tb_InstitucionAspirantePreparatorias
+CREATE OR REPLACE VIEW Vw_AspiranteInstitucionesPrepas as
+select nombreInstitucion,logoInstitucion,ubicacionInstitucion,
+idAspirantePreparatoria,idInstitucion
+from Tb_Institucion as i , Tb_AspirantePreparatorias as ap, 
+Tb_InstitucionAspirantePreparatorias as iap
+where iap.fkInstitucion = i.idInstitucion and iap.fkAspirantePreparatoria = ap.idAspirantePreparatoria;
 
 CREATE TABLE Tb_Documentos(
 	idDocumento int not null AUTO_INCREMENT PRIMARY KEY,
@@ -508,7 +517,49 @@ CREATE TABLE Tb_Documentos(
 	extDocumento varchar(10),
     nombreDocumento text,
     tipo enum('Boleta','CartaMotivo','Pasaporte') not null,
-	statusDocumento enum('Activo','Inactivo') default 'Activo',
+	statusDocumento enum('Activo','Inactivo','Pendiente') default 'Activo',
+	creationDateDocumento timestamp default current_timestamp,
+	lastUpdateDocumento timestamp default current_timestamp on update current_timestamp,
+    fkAspirante int,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade
+);
+
+CREATE TABLE Tb_DocumentosMaestria(
+	idDocumento int not null AUTO_INCREMENT PRIMARY KEY,
+	urlDocumento text not null,
+	typeDocumento varchar(15),
+	extDocumento varchar(10),
+    nombreDocumento text,
+    tipo enum('Transcripcion','CartaMotivo','CartaRecomendacion') not null,
+	statusDocumento enum('Activo','Inactivo','Pendiente') default 'Activo',
+	creationDateDocumento timestamp default current_timestamp,
+	lastUpdateDocumento timestamp default current_timestamp on update current_timestamp,
+    fkAspirante int,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade
+);
+
+CREATE TABLE Tb_DocumentosPhD(
+	idDocumento int not null AUTO_INCREMENT PRIMARY KEY,
+	urlDocumento text not null,
+	typeDocumento varchar(15),
+	extDocumento varchar(10),
+    nombreDocumento text,
+    tipo enum('Transcripcion','Propuesta','CV') not null,
+	statusDocumento enum('Activo','Inactivo','Pendiente') default 'Activo',
+	creationDateDocumento timestamp default current_timestamp,
+	lastUpdateDocumento timestamp default current_timestamp on update current_timestamp,
+    fkAspirante int,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade
+);
+
+CREATE TABLE Tb_DocumentosPreparatoria(
+	idDocumento int not null AUTO_INCREMENT PRIMARY KEY,
+	urlDocumento text not null,
+	typeDocumento varchar(15),
+	extDocumento varchar(10),
+    nombreDocumento text,
+    tipo enum('Boleta','Pasaporte') not null,
+	statusDocumento enum('Activo','Inactivo','Pendiente') default 'Activo',
 	creationDateDocumento timestamp default current_timestamp,
 	lastUpdateDocumento timestamp default current_timestamp on update current_timestamp,
     fkAspirante int,

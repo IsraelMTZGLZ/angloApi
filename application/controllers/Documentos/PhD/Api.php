@@ -12,27 +12,27 @@ class Api extends REST_Controller {
         $this->load->model('DAO');
     }
 
-    public function carreraBoleta_post()
+    public function phDPropuesta_post()
     {
         $id=$this->get('id');
         if ($id) {
             $userExist=$this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
             if ($userExist) {
 
-                $carpeta = 'Documentos/Carrera/'.$id;
+                $carpeta = 'Documentos/PhD/'.$id;
                 if (!file_exists($carpeta)) {
                     mkdir($carpeta, 0777, true);
                 }
 
                 $config =array(
-                    "upload_path"=>"Documentos/Carrera/".$id,
+                    "upload_path"=>"Documentos/PhD/".$id,
                     "allowed_types"=>"pdf",
-                    "file_name"=>"boleta",
+                    "file_name"=>"propuestaInvestigacion",
                     "overwrite"=>true
                 );
 
                 $this->load->library('upload',$config);
-                if ( ! $this->upload->do_upload('Boleta'))
+                if ( ! $this->upload->do_upload('Propuesta'))
                 {
                 $response=array(
                     "status"=>"error",
@@ -47,14 +47,14 @@ class Api extends REST_Controller {
                     $data = array(
                         "nombreDocumento"=>$this->upload->data('file_name'),
                         "extDocumento"=>$this->upload->data()['file_ext'],
-                        "urlDocumento"=>'/Documentos/Carrera/'.$id.'/'.$this->upload->data('file_name'),
+                        "urlDocumento"=>'/Documentos/Maestria/'.$id.'/'.$this->upload->data('file_name'),
                         "typeDocumento"=>$this->upload->data('file_type'),
                         "fkAspirante"=>$id,
-                        "tipo"=>"Boleta",
+                        "tipo"=>"Propuesta",
                         "statusDocumento"=>"Pendiente"
                     );
 
-                    $response = $this->DAO->insertData('Tb_Documentos',$data);
+                    $response = $this->DAO->insertData('Tb_DocumentosPhD',$data);
                     if($response['status']=="success"){
                         $response['message']= "Documento subido correctamente";
                     }
@@ -84,26 +84,27 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
-    public function carreraCarta_post()
+    public function phDTranscripcion_post()
     {
         $id=$this->get('id');
         if ($id) {
             $userExist=$this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
             if ($userExist) {
 
-                $carpeta = 'Documentos/Carrera/'.$id;
+                $carpeta = 'Documentos/PhD/'.$id;
                 if (!file_exists($carpeta)) {
                     mkdir($carpeta, 0777, true);
                 }
+
                 $config =array(
-                    "upload_path"=>"Documentos/Carrera/".$id,
+                    "upload_path"=>"Documentos/PhD/".$id,
                     "allowed_types"=>"pdf",
-                    "file_name"=>"cartaMotivo",
+                    "file_name"=>"transcripcion",
                     "overwrite"=>true
                 );
 
                 $this->load->library('upload',$config);
-                if ( ! $this->upload->do_upload('CartaMotivo'))
+                if ( ! $this->upload->do_upload('Transcripcion'))
                 {
                 $response=array(
                     "status"=>"error",
@@ -118,14 +119,14 @@ class Api extends REST_Controller {
                     $data = array(
                         "nombreDocumento"=>$this->upload->data('file_name'),
                         "extDocumento"=>$this->upload->data()['file_ext'],
-                        "urlDocumento"=>'/Documentos/Carrera/'.$id.'/'.$this->upload->data('file_name'),
+                        "urlDocumento"=>'/Documentos/Maestria/'.$id.'/'.$this->upload->data('file_name'),
                         "typeDocumento"=>$this->upload->data('file_type'),
                         "fkAspirante"=>$id,
-                        "tipo"=>"CartaMotivo",
+                        "tipo"=>"Transcripcion",
                         "statusDocumento"=>"Pendiente"
                     );
 
-                    $response = $this->DAO->insertData('Tb_Documentos',$data);
+                    $response = $this->DAO->insertData('Tb_DocumentosPhD',$data);
                     if($response['status']=="success"){
                         $response['message']= "Documento subido correctamente";
                     }
@@ -155,27 +156,27 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
-    public function carreraPasaporte_post()
+    public function phDCV_post()
     {
         $id=$this->get('id');
         if ($id) {
             $userExist=$this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
             if ($userExist) {
 
-                $carpeta = 'Documentos/Carrera/'.$id;
+                $carpeta = 'Documentos/PhD/'.$id;
                 if (!file_exists($carpeta)) {
                     mkdir($carpeta, 0777, true);
                 }
 
                 $config =array(
-                    "upload_path"=>"Documentos/Carrera/".$id,
+                    "upload_path"=>"Documentos/PhD/".$id,
                     "allowed_types"=>"pdf",
-                    "file_name"=>"pasaporte",
+                    "file_name"=>"CV",
                     "overwrite"=>true
                 );
 
                 $this->load->library('upload',$config);
-                if ( ! $this->upload->do_upload('Pasaporte'))
+                if ( ! $this->upload->do_upload('CV'))
                 {
                 $response=array(
                     "status"=>"error",
@@ -190,14 +191,14 @@ class Api extends REST_Controller {
                     $data = array(
                         "nombreDocumento"=>$this->upload->data('file_name'),
                         "extDocumento"=>$this->upload->data()['file_ext'],
-                        "urlDocumento"=>'/Documentos/Carrera/'.$id.'/'.$this->upload->data('file_name'),
+                        "urlDocumento"=>'/Documentos/Maestria/'.$id.'/'.$this->upload->data('file_name'),
                         "typeDocumento"=>$this->upload->data('file_type'),
                         "fkAspirante"=>$id,
-                        "tipo"=>"Pasaporte",
+                        "tipo"=>"CV",
                         "statusDocumento"=>"Pendiente"
                     );
 
-                    $response = $this->DAO->insertData('Tb_Documentos',$data);
+                    $response = $this->DAO->insertData('Tb_DocumentosPhD',$data);
                     if($response['status']=="success"){
                         $response['message']= "Documento subido correctamente";
                     }
@@ -227,7 +228,7 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
-    function carreraByAspirante_get(){
+    function phDByAspirante_get(){
         $id=$this->get('id');
         $tipo=$this->get('tipo');
         if (count($this->get())>2) {
@@ -242,10 +243,10 @@ class Api extends REST_Controller {
             );
         }else{
             if ($id) {
-                $data = $this->DAO->selectEntity('Tb_Documentos',array('fkAspirante'=>$id,'tipo'=>$tipo),true);
+                $data = $this->DAO->selectEntity('Tb_DocumentosPhD',array('fkAspirante'=>$id,'tipo'=>$tipo),false);
             }
             else{
-                $data = $this->DAO->selectEntity('Tb_Documentos',null,false);
+                $data = $this->DAO->selectEntity('Tb_DocumentosPhD',null,false);
             }
             if ($data) {
                 $response = array(
@@ -267,5 +268,5 @@ class Api extends REST_Controller {
         }
         $this->response($response,200);
     }
-    
+
 }
