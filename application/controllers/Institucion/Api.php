@@ -22,15 +22,16 @@ class Api extends REST_Controller {
                 "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
                 "data"=>null,
                 "validations"=>array(
-                    "nombre"=>"El nombre es requerido",
-                    "ubicacion" => "La ubicacion es requerida"
+                    "nombreI"=>"El nombre es requerido",
+                    "ubicacion" => "La ubicacion es requerida",
+                    "url"=>"La Url Logo es requerida"
                 )
             );
         }else{
             $this->form_validation->set_data($data);
-            $this->form_validation->set_rules('nombre','Nombre','required');
+            $this->form_validation->set_rules('nombreI','Nombre','required');
             $this->form_validation->set_rules('ubicacion','Ubicacion','required');
-
+            $this->form_validation->set_rules('url','Url Logo','required');
 
              if($this->form_validation->run()==FALSE){
                 $response = array(
@@ -42,8 +43,9 @@ class Api extends REST_Controller {
              }else{
 
                $data=array(
-                   "nombreInstitucion"=>$this->post('nombre'),
-                   "ubicacionInstitucion"=>$this->post('ubicacion')
+                   "nombreInstitucion"=>$this->post('nombreI'),
+                   "ubicacionInstitucion"=>$this->post('ubicacion'),
+                   "logoInstitucion"=>$this->post('url')
                );
                $response = $this->DAO->insertData('Tb_Institucion',$data);
 
@@ -98,20 +100,25 @@ class Api extends REST_Controller {
         $id = $this->get('id');
         $existe = $this->DAO->selectEntity('Tb_Institucion',array('idInstitucion'=>$id),TRUE);
         if($existe){
-            if(count($data) == 0 || count($data) > 2){
+            if(count($data) == 0 || count($data) > 3){
                 $response = array(
                     "status"=>"error",
                     "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
                     "data"=>null,
                     "validations"=>array(
-                        "nombre"=>"El nombre es requerido",
-                        "ubicacion" => "La ubicacion es requerida"
+                        "nombreI"=>"El nombre es requerido",
+                        "ubicacion" => "La ubicacion es requerida",
+                        "url"=>"La Url Logo es requerida"
                     )
                 );
             }else{
                 $this->form_validation->set_data($data);
-                $this->form_validation->set_rules('nombre','Nombre','required');
+                $this->form_validation->set_rules('nombreI','Nombre','required');
                 $this->form_validation->set_rules('ubicacion','Ubicacion','required');
+<<<<<<< HEAD
+=======
+                $this->form_validation->set_rules('url','Url Logo','required');
+>>>>>>> 001e4f46608a1b945bb9496a95171a9bfb2b3f66
 
                  if($this->form_validation->run()==FALSE){
                     $response = array(
@@ -123,8 +130,9 @@ class Api extends REST_Controller {
                 }else{
 
                     $data=array(
-                       "nombreInstitucion"=>$this->put('nombre'),
-                       "ubicacionInstitucion"=>$this->put('ubicacion')
+                       "nombreInstitucion"=>$this->put('nombreI'),
+                       "ubicacionInstitucion"=>$this->put('ubicacion'),
+                       "logoInstitucion"=>$this->put('url')
                     );
 
                    $response = $this->DAO->updateData('Tb_Institucion',$data,array('idInstitucion'=>$id));

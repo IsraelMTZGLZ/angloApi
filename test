@@ -1,4 +1,3 @@
-DROP TABLE Tb_AspiranteUniversidades;
 DROP TABLE Tb_TipoAlojamientoInstitucion;
 DROP TABLE Tb_TipoEstudioInstituccion;
 DROP TABLE Tb_TipoEstudio;
@@ -66,12 +65,6 @@ CREATE TABLE Tb_TipoEstudioInstituccion(
     lastUpdateTipoEstudioInstituccion timestamp default current_timestamp on update current_timestamp
 );
 
-CREATE OR REPLACE VIEW Vw_tipoEstudio as
-select nombreTipoEstudio,abreviacionTipoEstudio,nombreInstitucion,logoInstitucion,
-ubicacionInstitucion,idInstitucion,idTipoEstudio,idTipoEstudioInstituccion
-from Tb_Institucion as i, Tb_TipoEstudio as te, Tb_TipoEstudioInstituccion as tei
-where tei.fkTipoEstudio=te.idTipoEstudio and tei.fkInstitucion=i.idInstitucion;
-
 CREATE TABLE Tb_TipoAlojamiento(
     idTipoAlojamiento INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     nombreTipoAlojamiento VARCHAR(120) NOT NULL,
@@ -88,12 +81,6 @@ CREATE TABLE Tb_TipoAlojamientoInstitucion(
     FOREIGN KEY(fkTipoAlojamiento) REFERENCES Tb_TipoAlojamiento(idTipoAlojamiento) on update cascade on delete cascade,
     FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade
 );
-
-CREATE OR REPLACE VIEW Vw_tipoAlojamiento as
-select nombreTipoAlojamiento,abreviacionTipoAlojamiento,nombreInstitucion,logoInstitucion,
-ubicacionInstitucion,idInstitucion,idTipoAlojamiento,idTipoAlojamientoInstitucion
-from Tb_Institucion as i, Tb_TipoAlojamiento as ta, Tb_TipoAlojamientoInstitucion as tai
-where tai.fkTipoAlojamiento=ta.idTipoAlojamiento and tai.fkInstitucion=i.idInstitucion;
 
 INSERT INTO Tb_Institucion(nombreInstitucion,logoInstitucion,ubicacionInstitucion) VALUES('University of Bath','https://upload.wikimedia.org/wikipedia/en/thumb/c/ca/University_of_Bath_logo.svg/1200px-University_of_Bath_logo.svg.png','test');
 INSERT INTO Tb_Institucion(nombreInstitucion,logoInstitucion) VALUES('University of Bristol',1);
@@ -131,16 +118,17 @@ INSERT INTO Tb_TipoEstudioInstituccion (fkTipoEstudio,fkInstitucion) VALUES(3,3)
 INSERT INTO Tb_TipoEstudioInstituccion (fkTipoEstudio,fkInstitucion) VALUES(1,4);
 INSERT INTO Tb_TipoEstudioInstituccion (fkTipoEstudio,fkInstitucion) VALUES(2,4);
 
+
 INSERT INTO Tb_TipoAlojamientoInstitucion (fkTipoAlojamiento,fkInstitucion) VALUES(3,3);
 INSERT INTO Tb_TipoAlojamientoInstitucion (fkTipoAlojamiento,fkInstitucion) VALUES(2,4);
 
 CREATE OR REPLACE VIEW Vw_Uni as
-select idInstitucion,nombreInstitucion,ubicacionInstitucion,logoInstitucion,idFacultad,nombreFacultad,abreviacionFacultad,idInstitucionFacultad 
+select idInstitucion,nombreInstitucion,idFacultad,nombreFacultad,abreviacionFacultad,idInstitucionFacultad 
 from Tb_Facultad as f, Tb_Institucion as i, Tb_InstitucionFacultad as insfa 
 where insfa.fkFacultad = f.idFacultad and insfa.fkInstitucion=i.idInstitucion;
 
 CREATE OR REPLACE VIEW Vw_Prep as
-select idInstitucion,nombreInstitucion,logoInstitucion,ubicacionInstitucion,
+select idInstitucion,nombreInstitucion,
 idTipoEstudio,nombreTipoEstudio,abreviacionTipoEstudio,
 idTipoAlojamiento,nombreTipoAlojamiento,abreviacionTipoAlojamiento,
 idTipoEstudioInstituccion,idTipoAlojamientoInstitucion
@@ -149,32 +137,12 @@ Tb_TipoAlojamiento as ta, Tb_TipoAlojamientoInstitucion as tai
 where tei.fkInstitucion = i.idInstitucion and tei.fkTipoEstudio = te.idTipoEstudio
 and tai.fkTipoAlojamiento = ta.idTipoAlojamiento and tai.fkInstitucion=i.idInstitucion;
 
-<<<<<<< HEAD
-
-CREATE TABLE Tb_TipoCurso_Verano(
-  int idTcv int primary key auto_increment,
-  tipocursoVerano enum ('Cursos académico de verano','Curso de verano de Inglés'),
-  CDEdad timestamp default current_timestamp,
-  LUEdad timestamp default current_timestamp on update current_timestamp
-);
-
-CREATE TABLE Tb_TipoInstitucion(
-  int idTipoInstitucion int primary key auto_increment,
-  tipoInstitucion enum('Académico','Inglés','Ninguno') default 'Ninguno',
-  CDEdad timestamp default current_timestamp,
-  LUEdad timestamp default current_timestamp on update current_timestamp,
-);
-
-=======
->>>>>>> 001e4f46608a1b945bb9496a95171a9bfb2b3f66
 --Campamento de verano
 CREATE TABLE Tb_Edades(
     idEdad INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nombreEdad VARCHAR(50) NOT NULL,
     abreviacionEdad VARCHAR(10) NOT NULL,
-    edadEdad VARCHAR(30) NOT NULL,
-    CDEdad timestamp default current_timestamp,
-    LUEdad timestamp default current_timestamp on update current_timestamp
+    edadEdad VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE Tb_EdadesInstituciones(
@@ -182,17 +150,8 @@ CREATE TABLE Tb_EdadesInstituciones(
     fkEdad INT NOT NULL,
     fkInstitucion INT NOT NULL,
     FOREIGN KEY(fkEdad) REFERENCES Tb_Edades(idEdad) on update cascade on delete cascade,
-    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
-    CDEdadInstitucion timestamp default current_timestamp,
-    LUEdadInstitucion timestamp default current_timestamp on update current_timestamp
+    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade
 );
-
-CREATE OR REPLACE VIEW Vw_EdadesInst as select idEdadInstitucion as idEdadInstitucion, idEdad as idEdad ,nombreEdad as nombre, abreviacionEdad as abreviacion, edadEdad as edad,
-idInstitucion as idInstitucion,nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
-from Tb_EdadesInstituciones as ei, Tb_Edades as e, Tb_Institucion as i
-where ei.fkEdad = e.idEdad and ei.fkInstitucion= i.idInstitucion;
-
-
 
 INSERT INTO Tb_Edades (nombreEdad,abreviacionEdad,edadEdad) VALUES('Junior','J','7-13');
 INSERT INTO Tb_EdadesInstituciones (fkEdad,fkInstitucion) VALUES(1,1);
@@ -200,9 +159,7 @@ INSERT INTO Tb_EdadesInstituciones (fkEdad,fkInstitucion) VALUES(1,1);
 CREATE TABLE Tb_Campamentos(
     idCampamento INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nombreCampamento VARCHAR(50) NOT NULL,
-    abreviacionCampamento VARCHAR(10) NOT NULL,
-    CDCampamento timestamp default current_timestamp,
-    LUCampamento timestamp default current_timestamp on update current_timestamp
+    abreviacionCampamento VARCHAR(10) NOT NULL
 );
 
 CREATE TABLE Tb_CampamentosInstituciones(
@@ -210,15 +167,8 @@ CREATE TABLE Tb_CampamentosInstituciones(
     fkCampamento INT NOT NULL,
     fkInstitucion INT NOT NULL,
     FOREIGN KEY(fkCampamento) REFERENCES Tb_Campamentos(idCampamento) on update cascade on delete cascade,
-    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
-    CDCampInst timestamp default current_timestamp,
-    LUCampInst timestamp default current_timestamp on update current_timestamp
+    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade
 );
-
-CREATE OR REPLACE VIEW Vw_CampInst as select idCampamentoInstitucion as idCampamentoInstitucion,idCampamento as idCampamento, nombreCampamento as nombre, abreviacionCampamento as abreviacion,
-idInstitucion as idInstitucion,nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
-from Tb_CampamentosInstituciones as ei, Tb_Campamentos as e, Tb_Institucion as i
-where ei.fkCampamento = e.idCampamento and ei.fkInstitucion= i.idInstitucion;
 
 INSERT INTO Tb_Campamentos (nombreCampamento,abreviacionCampamento) VALUES('Ingles','In');
 INSERT INTO Tb_CampamentosInstituciones (fkCampamento,fkInstitucion) VALUES(1,1);
@@ -228,24 +178,16 @@ CREATE TABLE Tb_AlojamientoCampamento(
     fkTipoAlojamiento INT NOT NULL,
     fkInstitucion INT NOT NULL,
     FOREIGN KEY(fkTipoAlojamiento) REFERENCES Tb_TipoAlojamiento(idTipoAlojamiento) on update cascade on delete cascade,
-    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
-    CDAlojCamp timestamp default current_timestamp,
-    LUAlojCamp timestamp default current_timestamp on update current_timestamp
+    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade
 );
-
-CREATE OR REPLACE VIEW Vw_AlojInst as select idAlojamientoCampamento,idTipoAlojamiento, nombreTipoAlojamiento as nombre, abreviacionTipoAlojamiento as abreviacion,statusTipoTipoAlojamiento as status,
-idInstitucion,nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
-from Tb_AlojamientoCampamento as ei, Tb_TipoAlojamiento as e, Tb_Institucion as i
-where ei.fkTipoAlojamiento = e.idTipoAlojamiento and ei.fkInstitucion= i.idInstitucion;
-
 
 INSERT INTO Tb_AlojamientoCampamento (fkTipoAlojamiento,fkInstitucion) VALUES(1,1);
 
 CREATE OR REPLACE VIEW Vw_Verano as
-select nombreInstitucion,idEdad,abreviacionEdad,idCampamento,abreviacionCampamento,idTipoAlojamiento,abreviacionTipoAlojamiento
-FROM Tb_Institucion as i, Tb_Edades as e, Tb_Campamentos as c,
+select nombreInstitucion,abreviacionEdad,abreviacionCampamento,abreviacionTipoAlojamiento
+FROM Tb_Institucion as i, Tb_Edades as e, Tb_Campamentos as c, 
 Tb_TipoAlojamiento as t,
-Tb_EdadesInstituciones as ei, Tb_CampamentosInstituciones as ci,
+Tb_EdadesInstituciones as ei, Tb_CampamentosInstituciones as ci, 
 Tb_AlojamientoCampamento as ac
 where ei.fkEdad = e.idEdad and ei.fkInstitucion=i.idInstitucion and
 ci.fkCampamento = c.idCampamento and ci.fkInstitucion = i.idInstitucion and
@@ -255,9 +197,7 @@ ac.fkTipoAlojamiento = t.idTipoAlojamiento and ac.fkInstitucion= i.idInstitucion
 CREATE TABLE Tb_TipoCursos(
     idTipoCurso INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nombreTipoCurso VARCHAR(50) NOT NULL,
-    abreviacionTipoCurso VARCHAR(10) NOT NULL,
-    CDTipoCurso timestamp default current_timestamp,
-    LUTipoCurso timestamp default current_timestamp on update current_timestamp
+    abreviacionTipoCurso VARCHAR(10) NOT NULL
 );
 
 INSERT INTO Tb_TipoCursos (nombreTipoCurso,abreviacionTipoCurso) VALUES('Ingles General','G');
@@ -267,16 +207,8 @@ CREATE TABLE Tb_TipoCursosInstituciones(
     fkTipoCurso  INT NOT NULL,
     fkInstitucion INT NOT NULL,
     FOREIGN KEY(fkTipoCurso) REFERENCES Tb_TipoCursos(idTipoCurso) on update cascade on delete cascade,
-    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
-    CDCurInst timestamp default current_timestamp,
-    LUCurInst timestamp default current_timestamp on update current_timestamp
+    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade
 );
-
-CREATE OR REPLACE VIEW Vw_CursoInst as select idTipoCursosInstituciones,idTipoCurso, nombreTipoCurso as nombre, abreviacionTipoCurso as abreviacion,
-idInstitucion,nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
-from Tb_TipoCursosInstituciones as ei, Tb_TipoCursos as e, Tb_Institucion as i
-where ei.fkTipoCurso = e.idTipoCurso and ei.fkInstitucion= i.idInstitucion;
-
 
 INSERT INTO Tb_TipoCursosInstituciones (fkTipoCurso,fkInstitucion) VALUES(1,1);
 
@@ -286,9 +218,7 @@ CREATE TABLE Tb_AlojamientoCurso(
     fkTipoAlojamiento INT NOT NULL,
     fkInstitucion INT NOT NULL,
     FOREIGN KEY(fkTipoAlojamiento) REFERENCES Tb_TipoAlojamiento(idTipoAlojamiento) on update cascade on delete cascade,
-    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
-    CDAlojCur timestamp default current_timestamp,
-    LUAlojCur timestamp default current_timestamp on update current_timestamp
+    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade
 );
 
 INSERT INTO Tb_AlojamientoCurso (fkTipoAlojamiento,fkInstitucion) VALUES(1,1);
@@ -299,55 +229,3 @@ from Tb_Institucion as i, Tb_TipoCursos as tc, Tb_TipoAlojamiento as ta,
 Tb_TipoCursosInstituciones as tci,Tb_AlojamientoCurso as ac
 where tci.fkTipoCurso = tc.idTipoCurso and tci.fkInstitucion =i.idInstitucion and
 ac.fkTipoAlojamiento = ta.idTipoAlojamiento and ac.fkInstitucion=i.idInstitucion;
-
-<<<<<<< HEAD
-CREATE TABLE Tb_Aspirante_E_C_A_I(
-  idACAI int primary key auto_increment,
-  fkAspirante int,
-  fkEdad int,
-  fkCampamento int,
-  fkAlojamiento int,
-  fkInstitutoOne int,
-  fkInstitutoTwo int,
-  fkInstitutoThree int,
-  FOREIGN KEY(fkAlojamiento) REFERENCES Tb_TipoAlojamiento(idTipoAlojamiento) on update cascade on delete cascade,
-  FOREIGN KEY(fkEdad) REFERENCES Tb_Edades(idEdad) on update cascade on delete cascade,
-  FOREIGN KEY(fkInstitutoOne) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
-  FOREIGN KEY(fkInstitutoTwo) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
-  FOREIGN KEY(fkInstitutoThree) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
-  FOREIGN KEY(fkCampamento) REFERENCES Tb_Campamentos(idCampamento) on update cascade on delete cascade,
-  FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
-  CD timestamp default current_timestamp,
-  LU timestamp default current_timestamp on update current_timestamp
-);
-=======
-CREATE TABLE Tb_AspiranteUniversidades(
-    idAspiranteUniversidad INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    fkAspirante int,
-    fkFacultad int,
-    estudiosAspiranteUniversidad enum('Carrera','Masters','PhD'),
-    añoIngreso VARCHAR(10),
-    mesIngreso VARCHAR(10),
-    statusAU enum('Activo','Inactivo') default 'Inactivo',
-    FOREIGN KEY(fkFacultad) REFERENCES Tb_Facultad(idFacultad) on update cascade on delete cascade,
-    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
-    CAU timestamp default current_timestamp,
-    LUAU timestamp default current_timestamp on update current_timestamp
-);
-
-CREATE TABLE Tb_InstitucionAspiranteUniversidades(
-    idInstitucionAspiranteUniversidades INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    fkInstitucion int,
-    fkAspiranteUniversidad int,
-    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
-    FOREIGN KEY(fkAspiranteUniversidad) REFERENCES Tb_AspiranteUniversidades(idAspiranteUniversidad) on update cascade on delete cascade,
-    CIAU timestamp default current_timestamp,
-    LUIAU timestamp default current_timestamp on update current_timestamp
-);
-
-CREATE OR REPLACE VIEW Vw_AspiranteUniversidad as 
-select nombreFacultad,abreviacionFacultad,idFacultad,
-fkAspirante,estudiosAspiranteUniversidad,añoIngreso,mesIngreso,idAspiranteUniversidad,statusAU
-from Tb_Facultad as f, Tb_Aspirantes as a, Tb_AspiranteUniversidades as au
-where au.fkAspirante = a.idAspirante and au.fkFacultad = f.idFacultad;
->>>>>>> 001e4f46608a1b945bb9496a95171a9bfb2b3f66

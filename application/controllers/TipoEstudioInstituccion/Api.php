@@ -54,7 +54,7 @@ class Api extends REST_Controller {
     }
 
     //traer solo los id 
-    function tipoEstudioInstituccion_get(){
+    function tipoEstudioInstituccionBYInstitucion_get(){
         $id=$this->get('id');
         if (count($this->get())>1) {
             $response = array(
@@ -68,10 +68,10 @@ class Api extends REST_Controller {
             );
         }else{
             if ($id) {
-                $data = $this->DAO->selectEntity('Tb_TipoEstudioInstituccion',array('idTipoEstudioInstituccion'=>$id),true);
+                $data = $this->DAO->selectEntity('Vw_tipoEstudio',array('idInstitucion'=>$id),false);
             }
             else{
-                $data = $this->DAO->selectEntity('Tb_TipoEstudioInstituccion',null,false);
+                $data = $this->DAO->selectEntity('Vw_tipoEstudio',null,false);
             }
             if ($data) {
                 $response = array(
