@@ -56,11 +56,11 @@ CREATE TABLE Tb_Usuarios(
 
 CREATE TABLE Tb_Aspirantes(
     idAspirante int not null auto_increment primary key,
-    fechaNacimientoAspirante text,
+    fechaNacimientoAspirante date,
     telefonoAspirante varchar(15),
     ciudadAspirante varchar(150),
     programaDeInteres enum('Universidad','Preparatoria','CursoIngles','CursoVerano'),
-    statusAspirante('0','1') default '0',
+    statusAspirante enum('0','1') default '0',
     creationDateAspirante timestamp default current_timestamp,
     lastUpdateAspirante timestamp default current_timestamp on update current_timestamp,
     fkPersona int not null,
@@ -108,7 +108,7 @@ CREATE OR REPLACE View Vw_Aspirante as
 select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,concat(firstNamePersona,' ',lastNamePersona) as fullname,generoPersona as genero,photoPersona as photo,
 if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where i.idImagen=p.photoPersona limit 1)) as photoUrl,
 emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsuario as statusU,
-idUsuario as usuario,
+idUsuario as usuario,typeOauthUsuario,
 CASE
     WHEN typeUsuario="Aspirante" THEN
         (select idAspirante from Tb_Aspirantes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
@@ -517,7 +517,7 @@ CREATE TABLE Tb_Documentos(
 	typeDocumento varchar(15),
 	extDocumento varchar(10),
     nombreDocumento text,
-    tipo enum('Boleta','CartaMotivo','Pasaporte') not null,
+    tipo enum('Boleta','CartaMotivo','Pasaporte','BoletaTraduccion') not null,
 	statusDocumento enum('Activo','Inactivo','Pendiente','Rechazado','Aceptado') default 'Activo',
 	creationDateDocumento timestamp default current_timestamp,
 	lastUpdateDocumento timestamp default current_timestamp on update current_timestamp,
@@ -531,7 +531,7 @@ CREATE TABLE Tb_DocumentosMaestria(
 	typeDocumento varchar(15),
 	extDocumento varchar(10),
     nombreDocumento text,
-    tipo enum('Transcripcion','CartaMotivo','CartaRecomendacion') not null,
+    tipo enum('Transcripcion','CartaMotivo','CartaRecomendacion','TranscripcionTraduccion') not null,
 	statusDocumento enum('Activo','Inactivo','Pendiente','Rechazado','Aceptado') default 'Activo',
 	creationDateDocumento timestamp default current_timestamp,
 	lastUpdateDocumento timestamp default current_timestamp on update current_timestamp,
@@ -539,13 +539,29 @@ CREATE TABLE Tb_DocumentosMaestria(
     FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade
 );
 
+CREATE TABLE Tb_DocumentosMaestriaCartaMotivos(
+    idDMCM int not null AUTO_INCREMENT PRIMARY KEY,
+    fkDM int,
+    fkInstitucion int, 
+    FOREIGN KEY(fkDM) REFERENCES Tb_DocumentosMaestria(idDocumento) on update cascade on delete cascade,
+    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade
+);
+
+CREATE OR REPLACE View Vw_DocumentoMaestriaCartaMotivo as
+select 
+urlDocumento,typeDocumento,extDocumento,tipo,statusDocumento,creationDateDocumento,
+lastUpdateDocumento,fkAspirante,
+idDocumento,idInstitucion
+from Tb_Institucion as i, Tb_DocumentosMaestria as dm, Tb_DocumentosMaestriaCartaMotivos as dmcm
+where dmcm.fkDM = dm.idDocumento and dmcm.fkInstitucion = i.idInstitucion;
+
 CREATE TABLE Tb_DocumentosPhD(
 	idDocumento int not null AUTO_INCREMENT PRIMARY KEY,
 	urlDocumento text not null,
 	typeDocumento varchar(15),
 	extDocumento varchar(10),
     nombreDocumento text,
-    tipo enum('Transcripcion','Propuesta','CV') not null,
+    tipo enum('Transcripcion','Propuesta','CV','TranscripcionTraduccion') not null,
 	statusDocumento enum('Activo','Inactivo','Pendiente','Rechazado','Aceptado') default 'Activo',
 	creationDateDocumento timestamp default current_timestamp,
 	lastUpdateDocumento timestamp default current_timestamp on update current_timestamp,
@@ -559,7 +575,7 @@ CREATE TABLE Tb_DocumentosPreparatoria(
 	typeDocumento varchar(15),
 	extDocumento varchar(10),
     nombreDocumento text,
-    tipo enum('Boleta','Pasaporte') not null,
+    tipo enum('Boleta','Pasaporte','BoletaTraduccion') not null,
 	statusDocumento enum('Activo','Inactivo','Pendiente','Rechazado','Aceptado') default 'Activo',
 	creationDateDocumento timestamp default current_timestamp,
 	lastUpdateDocumento timestamp default current_timestamp on update current_timestamp,

@@ -84,6 +84,78 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
+    public function carreraBoletaDOC_post()
+    {
+        $id=$this->get('id');
+        if ($id) {
+            $userExist=$this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
+            if ($userExist) {
+
+                $carpeta = 'Documentos/Carrera/'.$id;
+                if (!file_exists($carpeta)) {
+                    mkdir($carpeta, 0777, true);
+                }
+
+                $config =array(
+                    "upload_path"=>"Documentos/Carrera/".$id,
+                    "allowed_types"=>"docx|doc|pdf|",
+                    "file_name"=>"boletaTraduccion",
+                    "overwrite"=>true
+                );
+
+                $this->load->library('upload',$config);
+                if ( ! $this->upload->do_upload('BoletaDOC'))
+                {
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"La subida fallo",
+                    "validations"=>$this->upload->display_errors(),
+                    "data"=>$this->post()
+                ); 
+                }
+                else
+                {
+                    $data = array(
+                        "nombreDocumento"=>$this->upload->data('file_name'),
+                        "extDocumento"=>$this->upload->data()['file_ext'],
+                        "urlDocumento"=>'/Documentos/Carrera/'.$id.'/'.$this->upload->data('file_name'),
+                        "typeDocumento"=>$this->upload->data('file_type'),
+                        "fkAspirante"=>$id,
+                        "tipo"=>"BoletaTraduccion",
+                        "statusDocumento"=>"Pendiente"
+                    );
+
+                    $response = $this->DAO->insertData('Tb_Documentos',$data);
+                    if($response['status']=="success"){
+                        $response['message']= "Documento subido correctamente";
+                    }
+                }
+            }else{
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"id does not exist",
+                    "validations"=>array(
+                        "id"=>"required (get)"
+                    ),
+                    "data"=>null
+                );
+            }
+        }else{
+            $response=array(
+                "status"=>"error",
+                "status_code"=>409,
+                "message"=>"id was not sent",
+                "validations"=>array(
+                    "id"=>"required (get)"
+                ),
+                "data"=>null
+            );
+        }
+        $this->response($response,200);
+    }
+
     public function carreraCarta_post()
     {
         $id=$this->get('id');
@@ -97,7 +169,7 @@ class Api extends REST_Controller {
                 }
                 $config =array(
                     "upload_path"=>"Documentos/Carrera/".$id,
-                    "allowed_types"=>"pdf",
+                    "allowed_types"=>"pdf|docx|doc",
                     "file_name"=>"cartaMotivo",
                     "overwrite"=>true
                 );
@@ -242,7 +314,7 @@ class Api extends REST_Controller {
             );
         }else{
             if ($id) {
-                $data = $this->DAO->selectEntity('Tb_Documentos',array('fkAspirante'=>$id,'tipo'=>$tipo),true);
+                $data = $this->DAO->selectEntity('Tb_Documentos',array('fkAspirante'=>$id,'tipo'=>$tipo),false);
             }
             else{
                 $data = $this->DAO->selectEntity('Tb_Documentos',null,false);

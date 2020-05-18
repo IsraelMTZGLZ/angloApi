@@ -84,6 +84,78 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
+    public function prepartoriaBoletaTraduccion_post()
+    {
+        $id=$this->get('id');
+        if ($id) {
+            $userExist=$this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
+            if ($userExist) {
+
+                $carpeta = 'Documentos/Preparatoria/'.$id;
+                if (!file_exists($carpeta)) {
+                    mkdir($carpeta, 0777, true);
+                }
+
+                $config =array(
+                    "upload_path"=>"Documentos/Preparatoria/".$id,
+                    "allowed_types"=>"pdf|doc|docx",
+                    "file_name"=>"boletaTraduccion",
+                    "overwrite"=>true
+                );
+
+                $this->load->library('upload',$config);
+                if ( ! $this->upload->do_upload('Boleta'))
+                {
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"Upload fails",
+                    "validations"=>$this->upload->display_errors(),
+                    "data"=>$this->post()
+                ); 
+                }
+                else
+                {
+                    $data = array(
+                        "nombreDocumento"=>$this->upload->data('file_name'),
+                        "extDocumento"=>$this->upload->data()['file_ext'],
+                        "urlDocumento"=>'/Documentos/Preparatoria/'.$id.'/'.$this->upload->data('file_name'),
+                        "typeDocumento"=>$this->upload->data('file_type'),
+                        "fkAspirante"=>$id,
+                        "tipo"=>"BoletaTraduccion",
+                        "statusDocumento"=>"Pendiente"
+                    );
+
+                    $response = $this->DAO->insertData('Tb_DocumentosPreparatoria',$data);
+                    if($response['status']=="success"){
+                        $response['message']= "Documento subido correctamente";
+                    }
+                }
+            }else{
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"id does not exist",
+                    "validations"=>array(
+                        "id"=>"required (get)"
+                    ),
+                    "data"=>null
+                );
+            }
+        }else{
+            $response=array(
+                "status"=>"error",
+                "status_code"=>409,
+                "message"=>"id was not sent",
+                "validations"=>array(
+                    "id"=>"required (get)"
+                ),
+                "data"=>null
+            );
+        }
+        $this->response($response,200);
+    }
+
     public function prepartoriaPasaporte_post()
     {
         $id=$this->get('id');

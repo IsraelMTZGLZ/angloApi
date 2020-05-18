@@ -43,7 +43,8 @@ class DAO extends CI_Model{
 
     public function insertData($entityName,$data,$returnData=false)
     {
-        $query=$this->db->insert($entityName,$data);
+        $this->db->insert($entityName,$data);
+        $id = ($returnData) ? $this->db->insert_id() : null;
         if ($this->db->error()['message']!='') {
             $message = "";
             switch ($this->db->error()['code']) {
@@ -67,7 +68,7 @@ class DAO extends CI_Model{
               "status"=>"success",
               "status_code"=>201,
               "message"=>"Artículo creado con éxito",
-              "data"=>$returnData ? $query->inserted_id() : null
+              "data"=>$id
             );
         }
 
