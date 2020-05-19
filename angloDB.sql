@@ -60,7 +60,7 @@ CREATE TABLE Tb_Aspirantes(
     telefonoAspirante varchar(15),
     ciudadAspirante varchar(150),
     programaDeInteres enum('Universidad','Preparatoria','CursoIngles','CursoVerano'),
-    statusAspirante enum('0','1') default '0',
+    statusAspirante enum('0','1','2') default '0',
     creationDateAspirante timestamp default current_timestamp,
     lastUpdateAspirante timestamp default current_timestamp on update current_timestamp,
     fkPersona int not null,
@@ -126,6 +126,10 @@ CASE
         (select ciudadAspirante from Tb_Aspirantes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
 END as ciudad,
 CASE
+    WHEN typeUsuario="Aspirante" THEN
+        (select statusAspirante from Tb_Aspirantes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
+END as statusAspirante,
+CASE
 WHEN typeUsuario="Aspirante" THEN
    (select programaDeInteres from Tb_Aspirantes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
 END as programaDeInteres
@@ -137,7 +141,7 @@ CREATE OR REPLACE View Vw_Agente as
 select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,concat(firstNamePersona,' ',lastNamePersona) as fullname,generoPersona as genero,photoPersona as photo,
 if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where i.idImagen=p.photoPersona limit 1)) as photoUrl,
 emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsuario as statusU,
-idUsuario as usuario,
+idUsuario as usuario,typeOauthUsuario,
 CASE
     WHEN typeUsuario="Agente" THEN
         (select idAgente from Tb_Agentes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)

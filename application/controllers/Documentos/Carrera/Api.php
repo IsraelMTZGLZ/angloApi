@@ -57,6 +57,7 @@ class Api extends REST_Controller {
                     $response = $this->DAO->insertData('Tb_Documentos',$data);
                     if($response['status']=="success"){
                         $response['message']= "Documento subido correctamente";
+                        $this->cambiarEstatus($id);
                     }
                 }
             }else{
@@ -129,6 +130,7 @@ class Api extends REST_Controller {
                     $response = $this->DAO->insertData('Tb_Documentos',$data);
                     if($response['status']=="success"){
                         $response['message']= "Documento subido correctamente";
+                        $this->cambiarEstatus($id);
                     }
                 }
             }else{
@@ -200,6 +202,7 @@ class Api extends REST_Controller {
                     $response = $this->DAO->insertData('Tb_Documentos',$data);
                     if($response['status']=="success"){
                         $response['message']= "Documento subido correctamente";
+                        $this->cambiarEstatus($id);
                     }
                 }
             }else{
@@ -272,6 +275,7 @@ class Api extends REST_Controller {
                     $response = $this->DAO->insertData('Tb_Documentos',$data);
                     if($response['status']=="success"){
                         $response['message']= "Documento subido correctamente";
+                        $this->cambiarEstatus($id);
                     }
                 }
             }else{
@@ -379,6 +383,18 @@ class Api extends REST_Controller {
             }
         }
         $this->response($response,200);
+    }
+
+    public function cambiarEstatus($id)
+    {
+        $item = $this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
+
+        if($item->statusAspirante!='2'){
+            $data=array(
+                "statusAspirante"=>'2'
+            );
+            $this->DAO->updateData('Tb_Aspirantes',$data,array('idAspirante'=>$id));
+        }
     }
     
 }

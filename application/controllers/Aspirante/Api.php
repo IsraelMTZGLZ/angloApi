@@ -149,6 +149,88 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
+    public function aspiranteByStatus0_get()
+    {
+        $id=$this->get('id');
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            if ($id) {
+                $data = $this->DAO->selectEntity('Vw_Aspirante',array('usuario'=>$id),true);
+            }
+            else{
+                $data = $this->DAO->selectEntity('Vw_Aspirante',array('statusAspirante'=>null),false);
+            }
+            if ($data) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$data
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
+    public function aspiranteByStatus1_get()
+    {
+        $id=$this->get('id');
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            if ($id) {
+                $data = $this->DAO->selectEntity('Vw_Aspirante',array('usuario'=>$id),true);
+            }
+            else{
+                $data = $this->DAO->selectEntity('Vw_Aspirante',array('statusAspirante'=>'0'),false);
+            }
+            if ($data) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$data
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
     function check_persona($str){
         if (!$str) {
             $this->form_validation->set_message('check_persona','The {field} campo es requerido');

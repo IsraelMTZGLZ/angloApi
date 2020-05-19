@@ -148,6 +148,169 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
+    //editar toda la informacion del aspirante 
+    function informacionChange_post(){
+        $data = $this->post();
 
+        if(count($data) == 0 || count($data) > 8){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No se recibio datos' : 'Demasiados datos recibidos',
+                "data"=>null,
+                "validations"=>array(
+                    "persona"=>"La fk Persona es requerido",
+                    "aspirante"=>"La fk aspirante es requerido",
+                    "nombre" => "El nombre es requerido",
+                    "apellido" => "El nombre es requerido",
+                    "gender" => "El genero es requerido",
+                    "fechaNacimiento" => "La fecha de nacimiento es requerido",
+                    "ciudad" => "El ciudad es requerido",
+                    "telefono" => "El telefono es requerido",
+                )
+            );
+        }else{
+            $this->form_validation->set_data($data);
+            $this->form_validation->set_rules('persona','Fk Persona','required');
+            $this->form_validation->set_rules('aspirante','Fk aspirante','required');
+            $this->form_validation->set_rules('nombre','Nombre','required');
+            $this->form_validation->set_rules('apellido','Apellido','required');
+            $this->form_validation->set_rules('persona','Fk Persona','required');
+            $this->form_validation->set_rules('gender','Gender','required');
+            $this->form_validation->set_rules('fechaNacimiento','Fecha De Nacimiento','required');
+            $this->form_validation->set_rules('ciudad','Ciudad','required');
+            $this->form_validation->set_rules('telefono','Telefono','required');
+
+            if($this->form_validation->run()==FALSE){
+                $response = array(
+                    "status"=>"error",
+                    "message"=>'Revisa las validaciones',
+                    "data"=>null,
+                    "validations"=>$this->form_validation->error_array()
+                );
+            }else{
+
+                $dataPersona=array(
+                    "firstNamePersona"=>$this->post('nombre'),
+                    "lastNamePersona"=>$this->post('apellido'),
+                    "generoPersona"=>$this->post('gender')
+                );
+
+                $dataAspirante=array(
+                    "fechaNacimientoAspirante"=>$this->post('fechaNacimiento'),
+                    "telefonoAspirante"=>$this->post('telefono'),
+                    "ciudadAspirante"=>$this->post('ciudad')
+                );
+                
+                $this->db->trans_begin();
+                
+                $this->db->where('idPersona', $this->post('persona'));
+                $this->db->update('Tb_Personas',$dataPersona); 
+
+                $this->db->where('idAspirante', $this->post('aspirante'));
+                $this->db->update('Tb_Aspirantes',$dataAspirante); 
+                
+                if ($this->db->trans_status() == FALSE) {
+                    $this->db->trans_rollback();
+                    $response=array(
+                        "status"=>"error",
+                        "status_code"=>409,
+                        "message"=>$this->db->error()['message'],
+                        "data"=>$data
+                    );
+                }else{
+                    $this->db->trans_commit();
+                    $response=array(
+                        "status"=>"success",
+                        "status_code"=>201,
+                        "message"=>"Datos editados correctamente",
+                        "data"=>null,
+                        "password"=>null
+                    );
+                }
+            }
+        }
+
+        $this->response($response,200);
+    }
+
+    function informacionChangeAgente_post(){
+        $data = $this->post();
+
+        if(count($data) == 0 || count($data) > 7){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No se recibio datos' : 'Demasiados datos recibidos',
+                "data"=>null,
+                "validations"=>array(
+                    "persona"=>"La fk Persona es requerido",
+                    "agente"=>"La fk agente es requerido",
+                    "nombre" => "El nombre es requerido",
+                    "apellido" => "El nombre es requerido",
+                    "gender" => "El genero es requerido",
+                    "numeroEmpleado" => "El Numero De Empleado es requerido",
+                    "puesto" => "El puesto es requerido"
+                )
+            );
+        }else{
+            $this->form_validation->set_data($data);
+            $this->form_validation->set_rules('persona','Fk Persona','required');
+            $this->form_validation->set_rules('agente','Fk Agente','required');
+            $this->form_validation->set_rules('nombre','Nombre','required');
+            $this->form_validation->set_rules('apellido','Apellido','required');
+            $this->form_validation->set_rules('gender','Gender','required');
+            $this->form_validation->set_rules('numeroEmpleado','Numero De Empleado','required');
+            $this->form_validation->set_rules('puesto','Puesto','required');
+
+            if($this->form_validation->run()==FALSE){
+                $response = array(
+                    "status"=>"error",
+                    "message"=>'Revisa las validaciones',
+                    "data"=>null,
+                    "validations"=>$this->form_validation->error_array()
+                );
+            }else{
+
+                $dataPersona=array(
+                    "firstNamePersona"=>$this->post('nombre'),
+                    "lastNamePersona"=>$this->post('apellido'),
+                    "generoPersona"=>$this->post('gender')
+                );
+
+                $dataAgente=array(
+                    "numeroEmpleado"=>$this->post('numeroEmpleado'),
+                    "puestoAgente"=>$this->post('puesto')
+                );
+                
+                $this->db->trans_begin();
+                
+                $this->db->where('idPersona', $this->post('persona'));
+                $this->db->update('Tb_Personas',$dataPersona); 
+
+                $this->db->where('idAgente', $this->post('agente'));
+                $this->db->update('Tb_Agentes',$dataAgente); 
+                
+                if ($this->db->trans_status() == FALSE) {
+                    $this->db->trans_rollback();
+                    $response=array(
+                        "status"=>"error",
+                        "status_code"=>409,
+                        "message"=>$this->db->error()['message'],
+                        "data"=>$data
+                    );
+                }else{
+                    $this->db->trans_commit();
+                    $response=array(
+                        "status"=>"success",
+                        "status_code"=>201,
+                        "message"=>"Datos editados correctamente",
+                        "data"=>null,
+                        "password"=>null
+                    );
+                }
+            }
+        }
+
+        $this->response($response,200);
+    }
     
 }
