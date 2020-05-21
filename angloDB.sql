@@ -108,7 +108,7 @@ CREATE OR REPLACE View Vw_Aspirante as
 select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,concat(firstNamePersona,' ',lastNamePersona) as fullname,generoPersona as genero,photoPersona as photo,
 if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where i.idImagen=p.photoPersona limit 1)) as photoUrl,
 emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsuario as statusU,
-idUsuario as usuario,typeOauthUsuario,
+idUsuario as usuario,typeOauthUsuario,MONTH(creationDateUsuario) as mesCreation,YEAR(creationDateUsuario)  as yearCreation,concat(MONTH(creationDateUsuario),'-',YEAR(creationDateUsuario)) as completeFecha,
 CASE
     WHEN typeUsuario="Aspirante" THEN
         (select idAspirante from Tb_Aspirantes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
