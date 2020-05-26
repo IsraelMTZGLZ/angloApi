@@ -586,3 +586,38 @@ CREATE TABLE Tb_DocumentosPreparatoria(
     fkAspirante int,
     FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade
 );
+
+CREATE TABLE Tb_EventosImages(
+    idEventoI int not null AUTO_INCREMENT PRIMARY KEY,
+	urlEventoI text not null,
+	typeEventoI varchar(15),
+	extEventoI varchar(10),
+    nombreEventoI text,
+	statusEventoI enum('Activo','Inactivo') default 'Activo',
+	creationDateEventoI timestamp default current_timestamp,
+	lastUpdateEventoI timestamp default current_timestamp on update current_timestamp
+);
+
+CREATE TABLE Tb_Eventos(
+    idEvento int not null AUTO_INCREMENT PRIMARY KEY,
+    tituloEvento text not null,
+    fechaEvento varchar(30) not null,
+    horarioEvento VARCHAR(20) not null,
+    descEvento text,
+    urlEvento text not null,
+    fkEventoI int,
+    statusEvento enum('Activo','Inactivo') default 'Activo',
+	creationDateEvento timestamp default current_timestamp,
+	lastUpdateEvento timestamp default current_timestamp on update current_timestamp,
+    FOREIGN KEY(fkEventoI) REFERENCES Tb_EventosImages(idEventoI) on update cascade on delete cascade
+);
+
+CREATE OR REPLACE View Vw_Eventos as
+select
+tituloEvento as titulo,fechaEvento as fecha,
+horarioEvento as horario,descEvento as descE,
+statusEvento,urlEvento as urlE,idEvento,
+if(e.fkEventoI is null,'NULL',(select idEventoI from Tb_EventosImages as ei,Tb_Eventos where ei.idEventoI=e.fkEventoI limit 1)) as idEventoI,
+if(e.fkEventoI is null,'NULL',(select urlEventoI from Tb_EventosImages as ei,Tb_Eventos where ei.idEventoI=e.fkEventoI limit 1)) as urlImagen
+from Tb_Eventos as e
+order by idEvento desc;
