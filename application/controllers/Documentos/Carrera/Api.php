@@ -84,6 +84,7 @@ class Api extends REST_Controller {
         }
         $this->response($response,200);
     }
+    
 
     public function carreraBoletaDOC_post()
     {

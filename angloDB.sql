@@ -540,6 +540,7 @@ CREATE TABLE Tb_DocumentosMaestria(
 	creationDateDocumento timestamp default current_timestamp,
 	lastUpdateDocumento timestamp default current_timestamp on update current_timestamp,
     fkAspirante int,
+    descMaestriaDocumento text,
     FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade
 );
 
