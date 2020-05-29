@@ -115,12 +115,11 @@ class Api extends REST_Controller {
                 $this->form_validation->set_data($data);
                 $this->form_validation->set_rules('nombreI','Nombre','required');
                 $this->form_validation->set_rules('ubicacion','Ubicacion','required');
-<<<<<<< HEAD
+
 
                 $this->form_validation->set_rules('url','Url Logo','required');
 
-=======
->>>>>>> f9fb464e43fddc03a3cad57cbece6e2d28c2fdeb
+
 
                  if($this->form_validation->run()==FALSE){
                     $response = array(

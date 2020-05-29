@@ -537,6 +537,8 @@ CREATE TABLE Tb_DocumentosMaestria(
     nombreDocumento text,
     tipo enum('Transcripcion','CartaMotivo','CartaRecomendacion','TranscripcionTraduccion') not null,
 	statusDocumento enum('Activo','Inactivo','Pendiente','Rechazado','Aceptado') default 'Activo',
+<<<<<<< HEAD
+=======
 	creationDateDocumento timestamp default current_timestamp,
 	lastUpdateDocumento timestamp default current_timestamp on update current_timestamp,
     fkAspirante int,
@@ -544,6 +546,53 @@ CREATE TABLE Tb_DocumentosMaestria(
     FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade
 );
 
+CREATE TABLE Tb_DocumentosMaestriaCartaMotivos(
+    idDMCM int not null AUTO_INCREMENT PRIMARY KEY,
+    fkDM int,
+    fkInstitucion int, 
+    FOREIGN KEY(fkDM) REFERENCES Tb_DocumentosMaestria(idDocumento) on update cascade on delete cascade,
+    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade
+);
+
+CREATE OR REPLACE View Vw_DocumentoMaestriaCartaMotivo as
+select 
+urlDocumento,typeDocumento,extDocumento,tipo,statusDocumento,creationDateDocumento,
+lastUpdateDocumento,fkAspirante,
+idDocumento,idInstitucion
+from Tb_Institucion as i, Tb_DocumentosMaestria as dm, Tb_DocumentosMaestriaCartaMotivos as dmcm
+where dmcm.fkDM = dm.idDocumento and dmcm.fkInstitucion = i.idInstitucion;
+
+CREATE TABLE Tb_DocumentosPhD(
+	idDocumento int not null AUTO_INCREMENT PRIMARY KEY,
+	urlDocumento text not null,
+	typeDocumento varchar(15),
+	extDocumento varchar(10),
+    nombreDocumento text,
+    tipo enum('Transcripcion','Propuesta','CV','TranscripcionTraduccion') not null,
+	statusDocumento enum('Activo','Inactivo','Pendiente','Rechazado','Aceptado') default 'Activo',
+	creationDateDocumento timestamp default current_timestamp,
+	lastUpdateDocumento timestamp default current_timestamp on update current_timestamp,
+    fkAspirante int,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade
+);
+
+CREATE TABLE Tb_DocumentosPreparatoria(
+	idDocumento int not null AUTO_INCREMENT PRIMARY KEY,
+	urlDocumento text not null,
+	typeDocumento varchar(15),
+	extDocumento varchar(10),
+    nombreDocumento text,
+    tipo enum('Boleta','Pasaporte','BoletaTraduccion') not null,
+	statusDocumento enum('Activo','Inactivo','Pendiente','Rechazado','Aceptado') default 'Activo',
+>>>>>>> f9fb464e43fddc03a3cad57cbece6e2d28c2fdeb
+	creationDateDocumento timestamp default current_timestamp,
+	lastUpdateDocumento timestamp default current_timestamp on update current_timestamp,
+    fkAspirante int,
+    descMaestriaDocumento text,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade
+);
+
+<<<<<<< HEAD
 CREATE TABLE Tb_DocumentosMaestriaCartaMotivos(
     idDMCM int not null AUTO_INCREMENT PRIMARY KEY,
     fkDM int,
@@ -590,6 +639,8 @@ CREATE TABLE Tb_DocumentosPreparatoria(
 <<<<<<< HEAD
 =======
 
+=======
+>>>>>>> f9fb464e43fddc03a3cad57cbece6e2d28c2fdeb
 CREATE TABLE Tb_EventosImages(
     idEventoI int not null AUTO_INCREMENT PRIMARY KEY,
 	urlEventoI text not null,
@@ -623,5 +674,9 @@ statusEvento,urlEvento as urlE,idEvento,
 if(e.fkEventoI is null,'NULL',(select idEventoI from Tb_EventosImages as ei,Tb_Eventos where ei.idEventoI=e.fkEventoI limit 1)) as idEventoI,
 if(e.fkEventoI is null,'NULL',(select urlEventoI from Tb_EventosImages as ei,Tb_Eventos where ei.idEventoI=e.fkEventoI limit 1)) as urlImagen
 from Tb_Eventos as e
+<<<<<<< HEAD
+order by idEvento desc;
+>>>>>>> f9fb464e43fddc03a3cad57cbece6e2d28c2fdeb
+=======
 order by idEvento desc;
 >>>>>>> f9fb464e43fddc03a3cad57cbece6e2d28c2fdeb
