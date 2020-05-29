@@ -13,25 +13,24 @@ class Api extends REST_Controller {
         $this->load->model('UserDAO');
     }
 
-    function institucion_post(){
+    function tipoAlojamientoCurso_post(){
         $data = $this->post();
 
-        if(count($data) == 0 || count($data) > 3){
+        if(count($data) == 0 || count($data) > 2){
             $response = array(
                 "status"=>"error",
                 "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
                 "data"=>null,
                 "validations"=>array(
-                    "nombreI"=>"El nombre es requerido",
-                    "ubicacion" => "La ubicacion es requerida",
-                    "url"=>"La Url Logo es requerida"
+                    "nombre"=>"El nombre es requerido",
+                    "abreviacion" => "La abreviacion es requerida"
                 )
             );
         }else{
             $this->form_validation->set_data($data);
-            $this->form_validation->set_rules('nombreI','Nombre','required');
-            $this->form_validation->set_rules('ubicacion','Ubicacion','required');
-            $this->form_validation->set_rules('url','Url Logo','required');
+            $this->form_validation->set_rules('nombre','Nombre','required');
+            $this->form_validation->set_rules('abreviacion','Abreviacion','required');
+
 
              if($this->form_validation->run()==FALSE){
                 $response = array(
@@ -43,11 +42,10 @@ class Api extends REST_Controller {
              }else{
 
                $data=array(
-                   "nombreInstitucion"=>$this->post('nombreI'),
-                   "ubicacionInstitucion"=>$this->post('ubicacion'),
-                   "logoInstitucion"=>$this->post('url')
+                   "nombreTipoAlojamiento"=>$this->post('nombre'),
+                   "abreviacionTipoAlojamiento"=>$this->post('abreviacion')
                );
-               $response = $this->DAO->insertData('Tb_Institucion',$data);
+               $response = $this->DAO->insertData('Tb_TipoAlojamientoCurso',$data);
 
              }
         }
@@ -55,7 +53,7 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
-    function institucion_get(){
+    function tipoAlojamientoCurso_get(){
         $id=$this->get('id');
         if (count($this->get())>1) {
             $response = array(
@@ -69,10 +67,10 @@ class Api extends REST_Controller {
             );
         }else{
             if ($id) {
-                $data = $this->DAO->selectEntity('Tb_Institucion',array('idInstitucion'=>$id),true);
+                $data = $this->DAO->selectEntity('Tb_TipoAlojamientoCurso',array('idTipoAlojamiento'=>$id),true);
             }
             else{
-                $data = $this->DAO->selectEntity('Tb_Institucion',null,false);
+                $data = $this->DAO->selectEntity('Tb_TipoAlojamientoCurso',null,false);
             }
             if ($data) {
                 $response = array(
@@ -95,29 +93,25 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
-    function institucion_put(){
+    function tipoAlojamientoCurso_put(){
         $data = $this->put();
         $id = $this->get('id');
-        $existe = $this->DAO->selectEntity('Tb_Institucion',array('idInstitucion'=>$id),TRUE);
+        $existe = $this->DAO->selectEntity('Tb_TipoAlojamientoCurso',array('idTipoAlojamiento'=>$id),TRUE);
         if($existe){
-            if(count($data) == 0 || count($data) > 3){
+            if(count($data) == 0 || count($data) > 2){
                 $response = array(
                     "status"=>"error",
                     "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
                     "data"=>null,
                     "validations"=>array(
-                        "nombreI"=>"El nombre es requerido",
-                        "ubicacion" => "La ubicacion es requerida",
-                        "url"=>"La Url Logo es requerida"
+                        "nombre"=>"El nombre es requerido",
+                        "abreviacion" => "La abreviacion es requerida"
                     )
                 );
             }else{
                 $this->form_validation->set_data($data);
-                $this->form_validation->set_rules('nombreI','Nombre','required');
-                $this->form_validation->set_rules('ubicacion','Ubicacion','required');
-
-                $this->form_validation->set_rules('url','Url Logo','required');
-
+                $this->form_validation->set_rules('nombre','Nombre','required');
+                $this->form_validation->set_rules('abreviacion','Abreviacion','required');
 
                  if($this->form_validation->run()==FALSE){
                     $response = array(
@@ -129,12 +123,11 @@ class Api extends REST_Controller {
                 }else{
 
                     $data=array(
-                       "nombreInstitucion"=>$this->put('nombreI'),
-                       "ubicacionInstitucion"=>$this->put('ubicacion'),
-                       "logoInstitucion"=>$this->put('url')
+                       "nombreTipoAlojamiento"=>$this->put('nombre'),
+                       "abreviacionTipoAlojamiento"=>$this->put('abreviacion')
                     );
 
-                   $response = $this->DAO->updateData('Tb_Institucion',$data,array('idInstitucion'=>$id));
+                   $response = $this->DAO->updateData('Tb_TipoAlojamientoCurso',$data,array('idTipoAlojamiento'=>$id));
 
                 }
             }
@@ -150,13 +143,13 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
-    public function institucion_delete(){
+    public function tipoAlojamientoCurso_delete(){
         $id = $this->get('id');
       if ($id) {
-        $IdExists = $this->DAO->selectEntity('Tb_Institucion',array('idInstitucion'=>$id),TRUE);
+        $IdExists = $this->DAO->selectEntity('Tb_TipoAlojamientoCurso',array('idTipoAlojamiento'=>$id),TRUE);
 
         if($IdExists){
-          $response = $this->DAO->deleteData('Tb_Institucion',array('idInstitucion'=>$id));
+          $response = $this->DAO->deleteData('Tb_TipoAlojamientoCurso',array('idTipoAlojamiento'=>$id));
         }else{
           $response = array(
             "status"=>"error",

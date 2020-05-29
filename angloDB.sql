@@ -287,8 +287,8 @@ INSERT INTO Tb_TipoAlojamientoInstitucion (fkTipoAlojamiento,fkInstitucion) VALU
 INSERT INTO Tb_TipoAlojamientoInstitucion (fkTipoAlojamiento,fkInstitucion) VALUES(2,4);
 
 CREATE OR REPLACE VIEW Vw_Uni as
-select idInstitucion,nombreInstitucion,ubicacionInstitucion,logoInstitucion,idFacultad,nombreFacultad,abreviacionFacultad,idInstitucionFacultad 
-from Tb_Facultad as f, Tb_Institucion as i, Tb_InstitucionFacultad as insfa 
+select idInstitucion,nombreInstitucion,ubicacionInstitucion,logoInstitucion,idFacultad,nombreFacultad,abreviacionFacultad,idInstitucionFacultad
+from Tb_Facultad as f, Tb_Institucion as i, Tb_InstitucionFacultad as insfa
 where insfa.fkFacultad = f.idFacultad and insfa.fkInstitucion=i.idInstitucion;
 
 CREATE OR REPLACE VIEW Vw_Prep as
@@ -453,7 +453,7 @@ CREATE TABLE Tb_InstitucionAspiranteUniversidades(
     LUIAU timestamp default current_timestamp on update current_timestamp
 );
 
-CREATE OR REPLACE VIEW Vw_AspiranteUniversidad as 
+CREATE OR REPLACE VIEW Vw_AspiranteUniversidad as
 select nombreFacultad,abreviacionFacultad,idFacultad,
 fkAspirante,estudiosAspiranteUniversidad,anioMesIngreso,idAspiranteUniversidad,statusAU
 from Tb_Facultad as f, Tb_Aspirantes as a, Tb_AspiranteUniversidades as au
@@ -463,7 +463,7 @@ where au.fkAspirante = a.idAspirante and au.fkFacultad = f.idFacultad;
 CREATE OR REPLACE VIEW Vw_AspiranteInstituciones as
 select nombreInstitucion,logoInstitucion,ubicacionInstitucion,
 idAspiranteUniversidad,idInstitucion
-from Tb_Institucion as i , Tb_AspiranteUniversidades as au, 
+from Tb_Institucion as i , Tb_AspiranteUniversidades as au,
 Tb_InstitucionAspiranteUniversidades as iau
 where iau.fkInstitucion = i.idInstitucion and iau.fkAspiranteUniversidad = au.idAspiranteUniversidad;
 
@@ -491,13 +491,13 @@ CREATE TABLE Tb_InstitucionAspirantePreparatorias(
     LUIAU timestamp default current_timestamp on update current_timestamp
 );
 
-CREATE OR REPLACE VIEW Vw_AspirantePreparatoria as 
+CREATE OR REPLACE VIEW Vw_AspirantePreparatoria as
 select
 nombreTipoEstudio,abreviacionTipoEstudio,idTipoEstudio,
 nombreTipoAlojamiento,abreviacionTipoAlojamiento,idTipoAlojamiento,
 anioMesIngreso,fkAspirante,idAspirantePreparatoria
 from Tb_TipoEstudio as te,Tb_TipoAlojamiento as ta, Tb_AspirantePreparatorias as ap,
-Tb_Aspirantes as a 
+Tb_Aspirantes as a
 where ap.fkAspirante = a.idAspirante and ap.fkTipoEstudio = te.idTipoEstudio and
 ap.fkTipoAlojamiento = ta.idTipoAlojamiento;
 

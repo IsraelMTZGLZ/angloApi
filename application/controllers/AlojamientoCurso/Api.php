@@ -22,7 +22,7 @@ class Api extends REST_Controller {
                 "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
                 "data"=>null,
                 "validations"=>array(
-                    "tipoalojamiento"=>"La facultad es requerido",
+                    "tipoalojamiento"=>"EL alojamiento es requerido",
                     "institucion" => "La institucion es requerida"
                 )
             );
@@ -50,6 +50,23 @@ class Api extends REST_Controller {
             }
         }
 
+        $this->response($response,200);
+    }
+    function alojamientoByInstituciones_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selEntityMany('Vw_AlojInstIngles',array('idInstitucion'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selEntityMany('Vw_AlojInstIngles'),
+            );
+        }
         $this->response($response,200);
     }
 
@@ -186,13 +203,13 @@ class Api extends REST_Controller {
       if ($Exists) {
         return TRUE;
       } else {
-      $this->form_validation->set_message('check_tipoalojamiento','The edad does not exist.');
+      $this->form_validation->set_message('check_tipoalojamiento','The  alojamiento does not exist.');
 
         return FALSE;
       }
 
     } else {
-      $this->form_validation->set_message('check_tipoalojamiento','The edad must have characters in length');
+      $this->form_validation->set_message('check_tipoalojamiento','The alojamiento must have characters in length');
         return FALSE;
     }
   }

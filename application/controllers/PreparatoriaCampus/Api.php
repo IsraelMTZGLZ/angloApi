@@ -200,7 +200,7 @@ class Api extends REST_Controller {
     function files_post(){
       $data = $this->post();
       $config_upload["upload_path"] = "./files/";
-      $config_upload['allowed_types'] = "jpg|gif|png";
+      $config_upload['allowed_types'] = "jpg|gif|png|pdf";
       $config_upload['max_size'] = 2048;
 
       $this->load->library('upload',$config_upload);
@@ -237,7 +237,7 @@ class Api extends REST_Controller {
         $data = $this->post();
 
         $config_upload["upload_path"] = "./files/";
-        $config_upload['allowed_types'] = "jpg|gif|png";
+        $config_upload['allowed_types'] = "jpg|gif|png|pdf";
         $config_upload['max_size'] = 2048;
 
         $this->load->library('upload',$config_upload);

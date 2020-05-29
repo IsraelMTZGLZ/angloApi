@@ -302,3 +302,140 @@ create table Tb_Preparatoria_Aspirante(
      fk_Aspirante int,
      FOREIGN KEY(fk_Aspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade
    );
+
+
+
+
+
+
+
+
+
+   --Campamento de verano
+   CREATE TABLE Tb_Edades(
+       idEdad INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+       nombreEdad VARCHAR(50) NOT NULL,
+       abreviacionEdad VARCHAR(10) NOT NULL,
+       edadEdad VARCHAR(30) NOT NULL,
+       CDEdad timestamp default current_timestamp,
+       LUEdad timestamp default current_timestamp on update current_timestamp
+   );
+
+   CREATE TABLE Tb_EdadesInstituciones(
+       idEdadInstitucion INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+       fkEdad INT NOT NULL,
+       fkInstitucion INT NOT NULL,
+       FOREIGN KEY(fkEdad) REFERENCES Tb_Edades(idEdad) on update cascade on delete cascade,
+       FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
+       CDEdadInstitucion timestamp default current_timestamp,
+       LUEdadInstitucion timestamp default current_timestamp on update current_timestamp
+   );
+
+   CREATE OR REPLACE VIEW Vw_EdadesInst as select idEdadInstitucion as id, nombreEdad as nombre, abreviacionEdad as abreviacion, edadEdad as edad,
+   nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
+   from Tb_EdadesInstituciones as ei, Tb_Edades as e, Tb_Institucion as i
+   where ei.fkEdad = e.idEdad and ei.fkInstitucion= i.idInstitucion;
+
+
+
+   INSERT INTO Tb_Edades (nombreEdad,abreviacionEdad,edadEdad) VALUES('Junior','J','7-13');
+   INSERT INTO Tb_EdadesInstituciones (fkEdad,fkInstitucion) VALUES(1,1);
+
+   CREATE TABLE Tb_Campamentos(
+       idCampamento INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+       nombreCampamento VARCHAR(50) NOT NULL,
+       abreviacionCampamento VARCHAR(10) NOT NULL,
+       CDCampamento timestamp default current_timestamp,
+       LUCampamento timestamp default current_timestamp on update current_timestamp
+   );
+
+   CREATE TABLE Tb_CampamentosInstituciones(
+       idCampamentoInstitucion INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+       fkCampamento INT NOT NULL,
+       fkInstitucion INT NOT NULL,
+       FOREIGN KEY(fkCampamento) REFERENCES Tb_Campamentos(idCampamento) on update cascade on delete cascade,
+       FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
+       CDCampInst timestamp default current_timestamp,
+       LUCampInst timestamp default current_timestamp on update current_timestamp
+   );
+
+   CREATE OR REPLACE VIEW Vw_CampInst as select idCampamentoInstitucion as id, nombreCampamento as nombre, abreviacionCampamento as abreviacion,
+   nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
+   from Tb_CampamentosInstituciones as ei, Tb_Campamentos as e, Tb_Institucion as i
+   where ei.fkCampamento = e.idCampamento and ei.fkInstitucion= i.idInstitucion;
+
+   INSERT INTO Tb_Campamentos (nombreCampamento,abreviacionCampamento) VALUES('Ingles','In');
+   INSERT INTO Tb_CampamentosInstituciones (fkCampamento,fkInstitucion) VALUES(1,1);
+
+   CREATE TABLE Tb_AlojamientoCampamento(
+       idAlojamientoCampamento INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+       fkTipoAlojamiento INT NOT NULL,
+       fkInstitucion INT NOT NULL,
+       FOREIGN KEY(fkTipoAlojamiento) REFERENCES Tb_TipoAlojamiento(idTipoAlojamiento) on update cascade on delete cascade,
+       FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
+       CDAlojCamp timestamp default current_timestamp,
+       LUAlojCamp timestamp default current_timestamp on update current_timestamp
+   );
+
+   CREATE OR REPLACE VIEW Vw_AlojCamp as select idAlojamientoCampamento as id, nombreTipoAlojamiento as nombre, abreviacionTipoAlojamiento as abreviacion,statusTipoTipoAlojamiento as status,
+   nombreInstitucion as institucion, statusInstitucion as statusInstitucion, ubicacionInstitucion as ubicacion
+   from Tb_AlojamientoCampamento as ei, Tb_TipoAlojamiento as e, Tb_Institucion as i
+   where ei.fkTipoAlojamiento = e.idTipoAlojamiento and ei.fkInstitucion= i.idInstitucion;
+
+
+   INSERT INTO Tb_AlojamientoCampamento (fkTipoAlojamiento,fkInstitucion) VALUES(1,1);
+
+   CREATE OR REPLACE VIEW Vw_Verano as
+   select nombreInstitucion,abreviacionEdad,abreviacionCampamento,abreviacionTipoAlojamiento
+   FROM Tb_Institucion as i, Tb_Edades as e, Tb_Campamentos as c,
+   Tb_TipoAlojamiento as t,
+   Tb_EdadesInstituciones as ei, Tb_CampamentosInstituciones as ci,
+   Tb_AlojamientoCampamento as ac
+   where ei.fkEdad = e.idEdad and ei.fkInstitucion=i.idInstitucion and
+   ci.fkCampamento = c.idCampamento and ci.fkInstitucion = i.idInstitucion and
+   ac.fkTipoAlojamiento = t.idTipoAlojamiento and ac.fkInstitucion= i.idInstitucion;
+
+   --curso de ingles
+   CREATE TABLE Tb_TipoCursos(
+       idTipoCurso INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+       nombreTipoCurso VARCHAR(50) NOT NULL,
+       abreviacionTipoCurso VARCHAR(10) NOT NULL,
+       CDTipoCurso timestamp default current_timestamp,
+       LUTipoCurso timestamp default current_timestamp on update current_timestamp
+   );
+
+   INSERT INTO Tb_TipoCursos (nombreTipoCurso,abreviacionTipoCurso) VALUES('Ingles General','G');
+
+   CREATE TABLE Tb_TipoCursosInstituciones(
+       idTipoCursosInstituciones INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+       fkTipoCurso  INT NOT NULL,
+       fkInstitucion INT NOT NULL,
+       FOREIGN KEY(fkTipoCurso) REFERENCES Tb_TipoCursos(idTipoCurso) on update cascade on delete cascade,
+       FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
+       CDCurInst timestamp default current_timestamp,
+       LUCurInst timestamp default current_timestamp on update current_timestamp
+   );
+
+
+
+   INSERT INTO Tb_TipoCursosInstituciones (fkTipoCurso,fkInstitucion) VALUES(1,1);
+
+
+   CREATE TABLE Tb_AlojamientoCurso(
+       idAlojamientoCampamento INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+       fkTipoAlojamiento INT NOT NULL,
+       fkInstitucion INT NOT NULL,
+       FOREIGN KEY(fkTipoAlojamiento) REFERENCES Tb_TipoAlojamiento(idTipoAlojamiento) on update cascade on delete cascade,
+       FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
+       CDAlojCur timestamp default current_timestamp,
+       LUAlojCur timestamp default current_timestamp on update current_timestamp
+   );
+
+   INSERT INTO Tb_AlojamientoCurso (fkTipoAlojamiento,fkInstitucion) VALUES(1,1);
+
+   CREATE OR REPLACE VIEW Vw_Ingles as
+   select nombreInstitucion,abreviacionTipoCurso,abreviacionTipoAlojamiento
+   from Tb_Institucion as i, Tb_TipoCursos as tc, Tb_TipoAlojamiento as ta,
+   Tb_TipoCursosInstituciones as tci,Tb_AlojamientoCurso as ac
+   where tci.fkTipoCurso = tc.idTipoCurso and tci.fkInstitucion =i.idInstitucion and
+   ac.fkTipoAlojamiento = ta.idTipoAlojamiento and ac.fkInstitucion=i.idInstitucion;

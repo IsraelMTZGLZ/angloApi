@@ -26,6 +26,20 @@ class DAO extends CI_Model{
         }
     }
 
+		public function select($entityName,$whereClause = null,$uniqueResult =false)
+	 {
+
+					 $this->db->where($whereClause);
+
+			 $result = $this->db->get($entityName);
+			 if ($this->db->error()['message']!='') {
+					 return null;
+			 }
+			 else{
+							 return $result->row();
+			 }
+	 }
+
 
 	 function selectEntityVerano($entity, $whereClauseOne = null,$whereClauseTwo = null,$whereClauseThree = null){
 		 if($whereClauseOne and $whereClauseTwo and $whereClauseThree){
@@ -39,6 +53,16 @@ class DAO extends CI_Model{
 		 return  $query->result();
 	 }
 
+	 function selectEntityIngles($entity,$whereClauseTwo = null,$whereClauseThree = null){
+		 if( $whereClauseTwo and $whereClauseThree){
+		 $this->db->where($whereClauseTwo);
+		 $this->db->where($whereClauseThree);
+			$query = $this->db->get($entity);
+		 }else{
+			 $query = $this->db->get($entity);
+		 }
+		 return  $query->result();
+	 }
 
 
     public function insertData($entityName,$data,$returnData=false)
