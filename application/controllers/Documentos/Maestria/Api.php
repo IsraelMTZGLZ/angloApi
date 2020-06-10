@@ -707,4 +707,302 @@ class Api extends REST_Controller {
         }
     }
 
+    function maestriaByAspiranteTRansc_get(){
+        $id=$this->get('id');
+        $tipo=$this->get('tipo');
+        $name=$this->get('name');
+        if (count($this->get())>2) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            if ($id) {
+                $data = $this->DAO->selectEntity('Tb_Documentos',array('fkAspirante'=>$id,'nameDocumento'=>'Transcripcion.pdf'),true);
+            }
+            else{
+                $data = $this->DAO->selectEntity('Tb_Documentos',null,false);
+            }
+            if ($data) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$data
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
+    function carreraByAspiranteTransRaduccion_get(){
+        $id=$this->get('id');
+        $tipo=$this->get('tipo');
+        $name=$this->get('name');
+        if (count($this->get())>2) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            if ($id) {
+                $data = $this->DAO->selectEntity('Tb_Documentos',array('fkAspirante'=>$id,'tipo'=>'Transcripcion'),false);
+            }
+            else{
+                $data = $this->DAO->selectEntity('Tb_Documentos',null,false);
+            }
+            if ($data) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$data
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
+    function cartasMotivosUnis_get(){
+        $id=$this->get('id');
+        if (count($this->get())>2) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            $item = $this->DAO->selectEntity('Tb_AspiranteUniversidades',array('fkAspirante'=>$id),true);
+            $item2 = $this->DAO->selectEntity('Vw_AspiranteInstituciones',array('idAspiranteUniversidad'=>$item->idAspiranteUniversidad),false);
+            $item3 = $this->DAO->selectEntity('Tb_Documentos',array('fkAspirante'=>$id,'tipo'=>'CartaMotivo'),false);
+            
+            $cartasUniversidad = array();
+            for ($j=0; $j < count($item3); $j++) { 
+                $new = explode('Carta Motivo de la ',$item3[$j]->nameDocumento); 
+                $test = explode('.',$new[1]);
+                for ($i=0; $i < count($item2); $i++) { 
+                    if($test[0]==$item2[$i]->nombreInstitucion){
+                        array_push($cartasUniversidad,$test[0]);
+                        break;
+                    }
+                }
+            }
+
+            $unis = array();
+            for ($j=0; $j < count($item2); $j++) {  
+                array_push($unis,$item2[$j]->nombreInstitucion);
+            }
+
+            $resultado = array_diff($unis, $cartasUniversidad);
+            $res = array();
+            foreach ($resultado as &$valor) {
+                array_push($res,$valor);
+            }
+            
+            $final = array();
+            for ($i=0; $i < count($res); $i++) { 
+                $item4 = $this->DAO->selectEntity('Vw_AspiranteInstituciones',array('idAspiranteUniversidad'=>$item->idAspiranteUniversidad,'nombreInstitucion'=>$res[$i]),true);
+                array_push($final,$item4);
+            }
+
+            if ($res) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$final
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+
+
+        }
+        $this->response($response,200);
+    }
+
+    function cartasRecomendacionUnisPrimera_get(){
+        $id=$this->get('id');
+        if (count($this->get())>2) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            $item = $this->DAO->selectEntity('Tb_AspiranteUniversidades',array('fkAspirante'=>$id),true);
+            $item2 = $this->DAO->selectEntity('Vw_AspiranteInstituciones',array('idAspiranteUniversidad'=>$item->idAspiranteUniversidad),false);
+            $item3 = $this->DAO->selectEntity('Tb_Documentos',array('fkAspirante'=>$id,'tipo'=>'CartaRecomendacion'),false);
+            
+            $cartasUniversidad = array();
+            for ($j=0; $j < count($item3); $j++) { 
+                $new = explode('Primera Carta Recomendacion de la ',$item3[$j]->nameDocumento); 
+                $test = explode('.',$new[1]);
+                for ($i=0; $i < count($item2); $i++) { 
+                    if($test[0]==$item2[$i]->nombreInstitucion){
+                        array_push($cartasUniversidad,$test[0]);
+                        break;
+                    }
+                }
+            }
+
+            $unis = array();
+            for ($j=0; $j < count($item2); $j++) {  
+                array_push($unis,$item2[$j]->nombreInstitucion);
+            }
+
+            $resultado = array_diff($unis, $cartasUniversidad);
+            $res = array();
+            foreach ($resultado as &$valor) {
+                array_push($res,$valor);
+            }
+            
+            $final = array();
+            for ($i=0; $i < count($res); $i++) { 
+                $item4 = $this->DAO->selectEntity('Vw_AspiranteInstituciones',array('idAspiranteUniversidad'=>$item->idAspiranteUniversidad,'nombreInstitucion'=>$res[$i]),true);
+                array_push($final,$item4);
+            }
+
+            if ($res) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$final
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+
+
+        }
+        $this->response($response,200);
+    }
+
+    function cartasRecomendacionUnisSegunda_get(){
+        $id=$this->get('id');
+        if (count($this->get())>2) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            $item = $this->DAO->selectEntity('Tb_AspiranteUniversidades',array('fkAspirante'=>$id),true);
+            $item2 = $this->DAO->selectEntity('Vw_AspiranteInstituciones',array('idAspiranteUniversidad'=>$item->idAspiranteUniversidad),false);
+            $item3 = $this->DAO->selectEntity('Tb_Documentos',array('fkAspirante'=>$id,'tipo'=>'CartaRecomendacion'),false);
+            
+            $cartasUniversidad = array();
+            for ($j=0; $j < count($item3); $j++) { 
+                $new = explode('Segunda Carta Recomendacion de la ',$item3[$j]->nameDocumento);
+                if(@$new[1]){
+                    $test = explode('.',$new[1]);
+                }else{
+                    $test = explode('.',$new[0]);
+                }
+                
+                for ($i=0; $i < count($item2); $i++) { 
+                    if($test[0]==$item2[$i]->nombreInstitucion){
+                        array_push($cartasUniversidad,$test[0]);
+                        break;
+                    }
+                }
+            }
+
+            $unis = array();
+            for ($j=0; $j < count($item2); $j++) {  
+                array_push($unis,$item2[$j]->nombreInstitucion);
+            }
+
+            $resultado = array_diff($unis, $cartasUniversidad);
+            $res = array();
+            foreach ($resultado as &$valor) {
+                array_push($res,$valor);
+            }
+            
+            $final = array();
+            for ($i=0; $i < count($res); $i++) { 
+                $item4 = $this->DAO->selectEntity('Vw_AspiranteInstituciones',array('idAspiranteUniversidad'=>$item->idAspiranteUniversidad,'nombreInstitucion'=>$res[$i]),true);
+                array_push($final,$item4);
+            }
+
+            if ($res) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$final
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+
+
+        }
+        $this->response($response,200);
+    }
+
+    
+
 }
