@@ -205,10 +205,10 @@ class Api extends REST_Controller {
             );
         }else{
             if ($id) {
-                $data = $this->DAO->selectEntity('Vw_Aspirante',array('usuario'=>$id),true);
+                $data = $this->DAO->selectEntity('View_Aspirantes_Uni_Prepa',array('usuario'=>$id),true);
             }
             else{
-                $data = $this->DAO->selectEntity('Vw_Aspirante',array('statusAspirante'=>'0'),false);
+                $data = $this->DAO->selectEntity('View_Aspirantes_Uni_Prepa',array('statusAspirante'=>'0'),false);
             }
             if ($data) {
                 $response = array(
@@ -246,10 +246,10 @@ class Api extends REST_Controller {
             );
         }else{
             if ($id) {
-                $data = $this->DAO->selectEntity('Vw_Aspirante',array('aspirante'=>$id,'statusAspirante'=>'2'),true);
+                $data = $this->DAO->selectEntity('View_Aspirantes_By_Status',array('aspirante'=>$id),true);
             }
             else{
-                $data = $this->DAO->selectEntity('Vw_Aspirante',array('statusAspirante'=>'2'),false);
+                $data = $this->DAO->selectEntity('View_Aspirantes_By_Status',false);
             }
             if ($data) {
                 $response = array(

@@ -512,14 +512,6 @@ Tb_Aspirantes as a
 where ap.fkAspirante = a.idAspirante and ap.fkTipoEstudio = te.idTipoEstudio and
 ap.fkTipoAlojamiento = ta.idTipoAlojamiento;
 
---Tb_InstitucionAspirantePreparatorias
-CREATE OR REPLACE VIEW Vw_AspiranteInstitucionesPrepas as
-select nombreInstitucion,logoInstitucion,ubicacionInstitucion,
-idAspirantePreparatoria,idInstitucion
-from Tb_Institucion as i , Tb_AspirantePreparatorias as ap,
-Tb_InstitucionAspirantePreparatorias as iap
-where iap.fkInstitucion = i.idInstitucion and iap.fkAspirantePreparatoria = ap.idAspirantePreparatoria;
-
 CREATE TABLE Tb_EventosImages(
     idEventoI int not null AUTO_INCREMENT PRIMARY KEY,
 	urlEventoI text not null,
@@ -580,3 +572,46 @@ CREATE TABLE Tb_Documentos(
 	lastUpdate timestamp default current_timestamp on update current_timestamp
 );
 
+CREATE OR REPLACE VIEW View_Aspirantes_Uni_Prepa as
+select * from Vw_Aspirante where programaDeInteres="Universidad" or programaDeInteres="Preparatoria" or programaDeInteres is null;
+
+CREATE TABLE Tb_DocumentosAgente(
+	idDA int not null AUTO_INCREMENT PRIMARY KEY,
+	urlDA text not null,
+    nameDocumento text,
+	typeDA varchar(15),
+	extDA varchar(10),
+	statusDA enum('Activo','Inactivo') default 'Activo',
+    fkAspirante int,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
+	creationDateDA timestamp default current_timestamp,
+	lastUpdateDA timestamp default current_timestamp on update current_timestamp
+);
+
+ALTER TABLE Tb_InstitucionAspiranteUniversidades ADD numeroAceptacion varchar(50);
+ALTER TABLE Tb_InstitucionAspiranteUniversidades ADD fechaAceptacion date;
+
+CREATE OR REPLACE VIEW Vw_AspiranteInstituciones as
+select nombreInstitucion,logoInstitucion,ubicacionInstitucion,
+idAspiranteUniversidad,idInstitucion,numeroAceptacion,idInstitucionAspiranteUniversidades,fechaAceptacion
+from Tb_Institucion as i , Tb_AspiranteUniversidades as au,
+Tb_InstitucionAspiranteUniversidades as iau
+where iau.fkInstitucion = i.idInstitucion and iau.fkAspiranteUniversidad = au.idAspiranteUniversidad;
+
+ALTER TABLE Tb_Aspirantes change statusAspirante statusAspirante enum('0','1','2','2R','3') default '0';
+
+CREATE OR REPLACE VIEW View_Aspirantes_By_Status as
+select * from View_Aspirantes_Uni_Prepa
+where statusAspirante='2' OR statusAspirante='2R' OR statusAspirante='3';
+
+ALTER TABLE  Tb_Documentos change tipo tipo enum('Transcripcion','CartaMotivo','CartaRecomendacion','Boleta','Pasaporte','Propuesta','CV','CartaAutorizacion','FormatoSolicitud','examenIngles','calificacionFinal','visa','TranscripcionFinal','ATAS','Titulo') not null;
+
+ALTER TABLE Tb_InstitucionAspirantePreparatorias ADD numeroAceptacion varchar(50);
+ALTER TABLE Tb_InstitucionAspirantePreparatorias ADD fechaAceptacion date;
+
+CREATE OR REPLACE VIEW Vw_AspiranteInstitucionesPrepas as
+select nombreInstitucion,logoInstitucion,ubicacionInstitucion,
+idAspirantePreparatoria,idInstitucion,idInstitucionAspirantePreparatorias,numeroAceptacion,fechaAceptacion
+from Tb_Institucion as i , Tb_AspirantePreparatorias as ap,
+Tb_InstitucionAspirantePreparatorias as iap
+where iap.fkInstitucion = i.idInstitucion and iap.fkAspirantePreparatoria = ap.idAspirantePreparatoria;
