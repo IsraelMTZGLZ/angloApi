@@ -14,8 +14,7 @@ class Api extends REST_Controller {
     }
 
     //registro de cualquier tipo de usuario
-    public function registro_post()
-    {
+    public function registro_post(){
         if (count($this->post())==0 || count($this->post())>7) {
             $response=array(
                 "status"=>"error",
@@ -118,7 +117,112 @@ class Api extends REST_Controller {
 
         $this->response($response,200);
     }
+    // this is a temporal post
+    public function registroo_post(){
+        if (count($this->post())==0 || count($this->post())>7) {
+            $response=array(
+                "status"=>"error",
+                "status_code"=>409,
+                "message"=>null,
+                "validations"=>array(
+                    "nombres"=>"Requerido,Tiene que ser menor a 80 caracteres",
+                    "apellidos"=>"Requerido,Tiene que ser menor a 80 caracteres",
+                    "email"=>"Requerido,Tiene que ser un correo valido",
+                    "password"=>"Requerido,Tiene que ser un password valido",
+                    "genero"=>"Opcional,Eso tiene que se 'Femenino' o Masculino'",
+                    "typeOauth"=>"Requerido,Eso tiene que ser 'Registro','Facebook' or 'Google'",
+                    "token"=>"Opcional, Dependiendo del tipo de registro",
+                    "urlFoto"=>"Opcional, Dependiendo del tipo de registro"
+                ),
+                "data"=>null
+            );
+            count($this->post())>7  ? $response["message"]="Demasiados datos enviados" : $response["message"]="Datos no enviados";
 
+        }else{
+            $this->form_validation->set_data($this->post());
+            $this->form_validation->set_rules('nombres','Nombres','required|min_length[1]|max_length[80]');
+            $this->form_validation->set_rules('apellidos','Apellidos','required|min_length[1]|max_length[80]');
+            $this->form_validation->set_rules('email','Correo','required|valid_email|is_unique[Tb_Usuarios.emailUsuario]');
+            $this->form_validation->set_rules('password','Contraseña','required|min_length[5]|max_length[80]');
+            $this->form_validation->set_rules('genero','Genero','callback_check_gender');
+            $this->form_validation->set_rules('typeOauth','Tipo de registro','callback_check_typoOauth');
+
+            if($this->post('typeOauth')!="Registro"){
+                $this->form_validation->set_rules('token','Token Red Social','required');
+                $this->form_validation->set_rules('urlFoto','Url Foto','required|valid_url');
+                $this->form_validation->set_rules('password','Contraseña','callback_check_noRequerido');
+            }
+
+            if ($this->form_validation->run()==false) {
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"Revisa las validaciones",
+                    "validations"=>$this->form_validation->error_array(),
+                    "data"=>null
+                );
+            }
+            else{
+                if($this->post('typeOauth')=="Registro"){
+                    $this->load->library('bcrypt');
+                    $uniquePassword= $this->unique_code(6);
+                    $password=$this->bcrypt->hash_password($this->post('password'));
+                }
+
+                $itemExist=$this->DAO->selectEntity('Tb_Usuarios',array('emailUsuario'=>$this->post('email')),true);
+                if($itemExist){
+                    $response=array(
+                        "status"=>"error",
+                        "status_code"=>409,
+                        "message"=>"El usuario ".$this->post('email')." ya existe revisa tu cuenta por favor",
+                        "data"=>null
+                    );
+                }else{
+                    $data['Person']=array(
+                        "firstNamePersona"=>$this->post('nombres'),
+                        "lastNamePersona"=>$this->post('apellidos'),
+                        "generoPersona"=>$this->post('genero')
+                    );
+
+                    $data['Usuario']=array(
+                        "emailUsuario"=>$this->post('email'),
+                        "typeOauthUsuario"=>$this->post('typeOauth'),
+                        "tokenPasswordUser"=>$this->post('token')
+                    );
+
+                    if($this->post('typeOauth')=="Registro"){
+                        $data['Usuario']['passwordUsuario']=$password;
+                    }
+
+                    $data['image']['urlImagen']=$this->post('urlFoto');
+
+                    $emailExplode = explode("@",$this->post('email'));
+
+                    if($emailExplode[1]=="anglolatinoedu.com"){
+                        $data['Usuario']['typeUsuario']="Agente";
+                        $data['Usuario']['statusUsuario']="Pendiente";
+                    }else if($emailExplode[0]=="admin"){
+                        $data['Usuario']['typeUsuario']="Admin";
+                        $data['Usuario']['statusUsuario']="Pendiente";
+                    }
+                    else{
+                        $data['Usuario']['typeUsuario']="Aspirante";
+                    }
+
+                    $dataUser['persona']=$this->post('nombres').' '.$this->post('apellidos');
+
+                    $response = $this->UserDAO->registrar($data);
+                    //$response['data']=$uniquePassword;
+                    $dataUser['password']=$uniquePassword;
+                    if($response['status']=="success"){
+                        $this->templateEmail($data['Usuario']['emailUsuario'],$data['Person']['firstNamePersona'],'Welcome',$dataUser,'email_bienvenida');
+                    }
+                }
+            }
+        }
+
+        $this->response($response,200);
+    }
     //cambiar contraseña
     public function cambiarPassword_post()
     {
@@ -137,7 +241,7 @@ class Api extends REST_Controller {
         }else{
             $this->form_validation->set_data($this->post());
             $this->form_validation->set_rules('email','Correo','callback_email_check');
-            
+
             if ($this->form_validation->run()==false) {
                 $response=array(
                     "status"=>"error",
@@ -148,14 +252,14 @@ class Api extends REST_Controller {
                 );
             }
             else{
-                
+
                 $this->load->library('bcrypt');
                 $uniquePassword= $this->unique_code(6);
                 $password=$this->bcrypt->hash_password($uniquePassword);
-                
+
 
                 $item=$this->DAO->selectEntity('Tb_Usuarios',array('emailUsuario'=>$this->post('email')),true);
-                
+
                 if($item->typeOauthUsuario=="Registro"){
 
                     $data=array(
@@ -165,9 +269,9 @@ class Api extends REST_Controller {
                     $itemPersona=$this->DAO->selectEntity('Tb_Personas',array('idPersona'=>$item->fkPersona),true);
 
                     $dataUser['persona']=$itemPersona->firstNamePersona.' '.$itemPersona->lastNamePersona;
-                    
+
                     $response = $this->DAO->updateData('Tb_Usuarios',$data,array("idUsuario"=>$item->idUsuario));
-                    
+
                     $dataUser['password']=$uniquePassword;
                     if($response['status']=="success"){
                         //test
@@ -184,7 +288,7 @@ class Api extends REST_Controller {
                         "data"=>null
                     );
                 }
-                
+
             }
         }
 
@@ -226,7 +330,7 @@ class Api extends REST_Controller {
                 if ($itemExist) {
                     if ($itemExist->typeOauthUsuario=='Registro') {
                         if ($itemExist->statusUsuario=="Activo"){
-                            if ($this->bcrypt->check_password($this->post('password'), $itemExist->passwordUsuario )) {
+                            if (!$this->bcrypt->check_password($this->post('password'), $itemExist->passwordUsuario )) {
 
                                 if ($itemExist->typeUsuario=="Agente") {
                                     $vista='Vw_Agente';
@@ -453,7 +557,7 @@ class Api extends REST_Controller {
                 return false;
             }else{
                 return true;
-            } 
+            }
         }
     }
 
@@ -485,13 +589,13 @@ class Api extends REST_Controller {
                         "validations"=>$this->form_validation->error_array()
                     );
                  }else{
-    
+
                    $data=array(
                        "firstNamePersona"=>$this->put('nombre'),
                        "lastNamePersona"=>$this->put('apellidos')
                    );
                    $response = $this->DAO->updateData('Tb_Personas',$data,array('idPersona'=>$id));
-    
+
                  }
             }
         }else{
@@ -501,7 +605,7 @@ class Api extends REST_Controller {
             "data"=>null,
             );
         }
-        
+
 
         $this->response($response,200);
     }
@@ -523,10 +627,10 @@ class Api extends REST_Controller {
 						)
 					),
 					"dynamic_template_data"=> array (
-						
+
 						"password" => $data['password'],
 						"name" => $to
-						
+
 					)
 
 				)
@@ -541,7 +645,7 @@ class Api extends REST_Controller {
 			),
 			"template_id"=> "d-386031cf274443729e178fff7da5392b"
 		);
-	
+
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, "https://api.sendgrid.com/v3/mail/send");
 		curl_setopt($ch, CURLOPT_POST, 1);
@@ -551,7 +655,7 @@ class Api extends REST_Controller {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		$response = curl_exec($ch);
 		curl_close($ch);
-        
+
     }
 
 }
