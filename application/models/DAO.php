@@ -44,7 +44,7 @@ class DAO extends CI_Model{
  		 if ($whereClause) {
  				 $this->db->where($whereClause);
  				 $this->db->where($whereClauseTwo);
- 		 }
+ 		 } 
  		 $result = $this->db->get($entityName);
  		 if ($this->db->error()['message']!='') {
  				 return null;
