@@ -212,4 +212,109 @@ class Api extends REST_Controller {
         }
         $this->response($response,200);
     }
+
+    function cambiarStatus2R_get(){
+        $id=$this->get('id');
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            if ($id) {
+                $data = $this->DAO->selectEntity('Vw_AspiranteInstituciones',array('idAspiranteUniversidad'=>$id),false);
+            }
+            else{
+                $data = $this->DAO->selectEntity('Vw_AspiranteInstituciones',null,false);
+            }
+            if ($data) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$data
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
+    function numeroSolicitud_put(){
+        $data = $this->put();
+        $id = $this->get('id');
+        $existe = $this->DAO->selectEntity('Tb_InstitucionAspiranteUniversidades',array('idInstitucionAspiranteUniversidades'=>$id),TRUE);
+        $traerAspirante = $this->DAO->selectEntity('Tb_AspiranteUniversidades',array('idAspiranteUniversidad'=>$existe->fkAspiranteUniversidad),TRUE);
+        if($existe && $traerAspirante){
+            if(count($data) == 0 || count($data) > 2){
+                $response = array(
+                    "status"=>"error",
+                    "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
+                    "data"=>null,
+                    "validations"=>array(
+                        "numero"=>"El numero es requerido",
+                        "fecha" => "La fecha es requerida"
+                    )
+                );
+            }else{
+                $this->form_validation->set_data($data);
+                $this->form_validation->set_rules('numero','Numero De Solicitud','required');
+                $this->form_validation->set_rules('fecha','Fecha De La Solicitud','required');
+    
+                 if($this->form_validation->run()==FALSE){
+                    $response = array(
+                        "status"=>"error",
+                        "message"=>'check the validations',
+                        "data"=>null,
+                        "validations"=>$this->form_validation->error_array()
+                    );
+                }else{
+    
+                    $data=array(
+                       "numeroAceptacion"=>$this->put('numero'),
+                       "fechaAceptacion"=>$this->put('fecha')
+                    );
+
+                    $response = $this->DAO->updateData('Tb_InstitucionAspiranteUniversidades',$data,array('idInstitucionAspiranteUniversidades'=>$id));
+                    if($response['status']=="success"){
+                        $this->cambiarEstatus($traerAspirante->fkAspirante);
+                    }
+                }
+            }
+        }else{
+            $response = array(
+            "status"=>"error",
+            "message"=> "Revisa el id",
+            "data"=>null,
+            );
+        }
+        
+
+        $this->response($response,200);
+    }
+
+    public function cambiarEstatus($id)
+    {
+        $item = $this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
+
+        if($item->statusAspirante!='3'){
+            $data=array(
+                "statusAspirante"=>'3'
+            );
+            $this->DAO->updateData('Tb_Aspirantes',$data,array('idAspirante'=>$id));
+        }
+    }
 }
