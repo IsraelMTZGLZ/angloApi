@@ -265,14 +265,12 @@ class Api extends REST_Controller {
                     "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
                     "data"=>null,
                     "validations"=>array(
-                        "numero"=>"El numero es requerido",
-                        "fecha" => "La fecha es requerida"
+                        "numero"=>"El numero es requerido"
                     )
                 );
             }else{
                 $this->form_validation->set_data($data);
                 $this->form_validation->set_rules('numero','Numero De Solicitud','required');
-                $this->form_validation->set_rules('fecha','Fecha De La Solicitud','required');
     
                  if($this->form_validation->run()==FALSE){
                     $response = array(
@@ -310,11 +308,77 @@ class Api extends REST_Controller {
     {
         $item = $this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
 
-        if($item->statusAspirante!='3'){
+        if($item->statusAspirante!='3' && $item->statusAspirante!='4U' && $item->statusAspirante!='4C'){
+            
             $data=array(
                 "statusAspirante"=>'3'
             );
             $this->DAO->updateData('Tb_Aspirantes',$data,array('idAspirante'=>$id));
         }
+    }
+
+    function change4C4U_post(){
+        $id = $this->get('id');
+        $data = $this->post();
+
+        if(count($data) == 0 || count($data) >1){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No se recibio datos' : 'Demasiados datos recibidos',
+                "data"=>null,
+                "validations"=>array(
+                    "statusAspirante"=>"Las statusAspirante son requeridas",
+                )
+            );
+        }else{
+            $this->form_validation->set_data($data);
+            $this->form_validation->set_rules('status','statusAspirante','required');
+
+            if($this->form_validation->run()==FALSE){
+                $response = array(
+                    "status"=>"error",
+                    "message"=>'Revisa las validaciones',
+                    "data"=>null,
+                    "validations"=>$this->form_validation->error_array()
+                );
+            }else{
+
+                $data2=array(
+                    "statusAspirante"=>$this->post('status')
+                );
+
+                $this->db->trans_begin();
+
+                
+                $this->db->where(array('idReal'=>$id));
+                $this->db->update('Tb_DocumentosOfertaCU',$data2);
+                if($this->db->error()['message']){
+                    $responseDB['message'] = $this->db->error()['message'];
+                }
+                
+
+                if ($this->db->trans_status() == FALSE) {
+                    $this->db->trans_rollback();
+                    $response=array(
+                        "status"=>"error",
+                        "status_code"=>409,
+                        "message"=>$responseDB['message'],
+                        "data"=>null
+                    );
+                  }
+                  else{
+                      $this->db->trans_commit();
+                      $response=array(
+                        "status"=>"success",
+                        "status_code"=>201,
+                        "message"=>"Articulo Creado Exitosamente",
+                        "data"=>$data2,
+                        "id"=>$id
+                      );
+                  }
+            }
+        }
+
+        $this->response($response,200);
     }
 }

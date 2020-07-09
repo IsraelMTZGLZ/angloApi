@@ -101,4 +101,55 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
+    public function statusPorcentaje_get()
+    {
+        $id = $this->get('id');
+        $existe = $this->DAO->selectEntity('Vw_Aspirante',array('aspirante'=>$id),TRUE); 
+        if($existe){
+            $porcentaje = 0;
+            switch($existe->statusAspirante){
+                case '0':
+                    $porcentaje = 17; 
+                    break;
+                case '1':
+                    $porcentaje = 33; 
+                    break;
+                case '2':
+                    $porcentaje = 50; 
+                    break;
+                case '2R':
+                    $porcentaje = 60; 
+                    break;
+                case '3':
+                    $porcentaje = 67; 
+                    break;
+                case '4C':
+                    $porcentaje = 75; 
+                    break;
+                case '4U':
+                    $porcentaje = 83; 
+                    break;
+                case 'D':
+                    $porcentaje = 70; 
+                    break;
+                default:
+                    $porcentaje = 100; 
+                    break;
+            }
+
+            $response = array(
+                "status"=>"success",
+                "message"=> "Porcentaje obtenido con exito",
+                "data"=>$porcentaje,
+            );
+        }else{
+            $response = array(
+                "status"=>"error",
+                "message"=> "Revisa el id",
+                "data"=>null,
+                );
+        } 
+        $this->response($response,200);
+    }
+
 }

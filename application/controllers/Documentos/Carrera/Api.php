@@ -915,7 +915,7 @@ class Api extends REST_Controller {
     {
         $item = $this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
 
-        if($item->statusAspirante!='2'){
+        if($item->statusAspirante!='2' && $item->statusAspirante!='4U' && $item->statusAspirante!='4C'  && $item->statusAspirante!='3'  && $item->statusAspirante!='2R'){
             $data=array(
                 "statusAspirante"=>'2'
             );
@@ -1185,7 +1185,7 @@ class Api extends REST_Controller {
         $id = $this->get('id');
         $data = $this->post();
 
-        if(count($data) > 0){
+        if(count($data) > 1){
             $response = array(
                 "status"=>"error",
                 "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
@@ -1197,7 +1197,8 @@ class Api extends REST_Controller {
         }else{
             
             $data=array(
-                "statusDocumento"=>'Aceptado'
+                "statusDocumento"=>'Aceptado',
+                "BoletaTipo"=>$this->post('BoletaTipo')
             );
 
             $response = $this->DAO->updateData('Tb_Documentos',$data,array('idReal'=>$id));
@@ -1351,7 +1352,7 @@ class Api extends REST_Controller {
 
     function cambiarStatusN_post(){
         $id=$this->get('id');
-
+        $existe = $this->DAO->selectEntity('Vw_Aspirante',array('aspirante'=>$id),TRUE); 
         $data = $this->post();
 
         if(count($data) == 0 || count($data) > 1){
@@ -1364,27 +1365,36 @@ class Api extends REST_Controller {
                 )
             );
         }else{
-            $this->form_validation->set_data($data);
-            $this->form_validation->set_rules('status','Status','required');
-
-
-             if($this->form_validation->run()==FALSE){
+            if($existe->statusAspirante=='4U'){
                 $response = array(
-                    "status"=>"error",
-                    "message"=>'El status tiene que ser seleccionado',
-                    "data"=>null,
-                    "validations"=>$this->form_validation->error_array()
+                    "status"=>"success",
+                    "message"=> 'Gracias por la espera',
+                    "data"=>null
                 );
-            }else{
+            }else {
+                $this->form_validation->set_data($data);
+                $this->form_validation->set_rules('status','Status','required');
 
-                $data=array(
-                    "statusAspirante"=>$this->post('status')
-                );
-    
-                $response = $this->DAO->updateData('Tb_Aspirantes',$data,array('idAspirante'=>$id));
-    
 
+                if($this->form_validation->run()==FALSE){
+                    $response = array(
+                        "status"=>"error",
+                        "message"=>'El status tiene que ser seleccionado',
+                        "data"=>null,
+                        "validations"=>$this->form_validation->error_array()
+                    );
+                }else{
+
+                    $data=array(
+                        "statusAspirante"=>$this->post('status')
+                    );
+        
+                    $response = $this->DAO->updateData('Tb_Aspirantes',$data,array('idAspirante'=>$id));
+        
+
+                }
             }
+            
         }
 
         $this->response($response,200);
@@ -1484,10 +1494,10 @@ class Api extends REST_Controller {
             );
         }else{
             if ($id) {
-                $data = $this->DAO->selectEntity('Tb_Documentos',array('fkAspirante'=>$id,'tipo'=>'visa'),true);
+                $data = $this->DAO->selectEntity('Tb_DocVisa',array('fkAspirante'=>$id,'tipoDocumento'=>'Visa'),true);
             }
             else{
-                $data = $this->DAO->selectEntity('Tb_Documentos',null,false);
+                $data = $this->DAO->selectEntity('Tb_DocVisa',null,false);
             }
             if ($data) {
                 $response = array(
@@ -1541,6 +1551,434 @@ class Api extends REST_Controller {
             );
 
             $response = $this->DAO->insertData('Tb_Documentos',$data);
+             
+        }
+
+        $this->response($response,200);
+    }
+
+    function dropboxVisa_post(){
+        $data = $this->post();
+
+        if(count($data) == 0 || count($data) > 20){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No se recibio datos' : 'Demasiados datos recibidos',
+                "data"=>null,
+                "validations"=>null
+            );
+        }else{
+            $capertaExist=$this->DAO->selectEntity('Tb_Documentos',array('fkAspirante'=>$this->post('fkAspirante')),true);
+
+            $data= array(
+                "idDocumento"=>$this->post('idDocumento'),
+                "nameDocumento"=>$this->post('nameDocumento'),
+                "sizeDocumento"=>$this->post('sizeDocumento'),
+                "pathDisplayDocumento"=>$this->post('pathDisplayDocumento'),
+                "pathLowerDocumento"=>$this->post('pathLowerDocumento'),
+                "contentHashDocumento"=>$this->post('contentHashDocumento'),
+                "clientModifiedDocumento"=>$this->post('clientModifiedDocumento'),
+                "nameCarpeta"=>$capertaExist->nameCarpeta,
+                "fkAspirante"=>$this->post('fkAspirante')
+            );
+
+            $response = $this->DAO->insertData('Tb_DocumentosVisa',$data);
+             
+        }
+
+        $this->response($response,200);
+    }
+
+    function aplicacionVisa_get(){
+        $id=$this->get('id');
+        if (count($this->get())>2) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            if ($id) {
+                $data = $this->DAO->selectEntity('Tb_DocumentosVisa',array('fkAspirante'=>$id),false);
+            }
+            else{
+                $data = $this->DAO->selectEntity('Tb_DocumentosVisa',null,false);
+            }
+            if ($data) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$data
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
+    //borrar los documentos para la aplicacion de la beca
+    public function docAplicacion_delete(){
+        $id = $this->get('id');
+      if ($id) {
+        $IdExists = $this->DAO->selectEntity('Tb_DocumentosVisa',array('idReal'=>$id),TRUE);
+
+        if($IdExists){
+          $response = $this->DAO->deleteData('Tb_DocumentosVisa',array('idReal'=>$id));
+        }else{
+          $response = array(
+            "status"=>"error",
+            "status_code"=>409,
+            "message"=>"Id no existe",
+            "validations"=>null,
+            "data"=>null
+          );
+        }
+      } else {
+        $response = array(
+          "status"=>"error",
+          "status_code"=>409,
+          "message"=>"Id no fue encontrado",
+          "validations"=>array(
+            "id"=>"Required (get)",
+          ),
+          "data"=>null
+        );
+      }
+
+      $this->response($response,200);
+    }
+
+    function documentosChangeActiveAplicacion_post(){
+        $id = $this->get('id');
+        $data = $this->post();
+
+        if(count($data) > 0){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
+                "data"=>null,
+                "validations"=>array(
+                    "data"=>"Data no es requerido",
+                )
+            );
+        }else{
+            
+            $data=array(
+                "statusDocumento"=>'Aceptado'
+            );
+
+            $response = $this->DAO->updateData('Tb_DocumentosVisa',$data,array('idReal'=>$id));
+
+             
+        }
+
+        $this->response($response,200);
+    }
+
+    function dropboxVisaFinal_post(){
+        $data = $this->post();
+
+        if(count($data) == 0 || count($data) > 20){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No se recibio datos' : 'Demasiados datos recibidos',
+                "data"=>null,
+                "validations"=>null
+            );
+        }else{
+            $capertaExist=$this->DAO->selectEntity('Tb_Documentos',array('fkAspirante'=>$this->post('fkAspirante')),true);
+
+            $data= array(
+                "idDocumento"=>$this->post('idDocumento'),
+                "nameDocumento"=>$this->post('nameDocumento'),
+                "sizeDocumento"=>$this->post('sizeDocumento'),
+                "pathDisplayDocumento"=>$this->post('pathDisplayDocumento'),
+                "pathLowerDocumento"=>$this->post('pathLowerDocumento'),
+                "contentHashDocumento"=>$this->post('contentHashDocumento'),
+                "clientModifiedDocumento"=>$this->post('clientModifiedDocumento'),
+                "nameCarpeta"=>$capertaExist->nameCarpeta,
+                "fkAspirante"=>$this->post('fkAspirante'),
+                "tipoDocumento"=>$this->post('tipoDocumento')
+            );
+
+            $response = $this->DAO->insertData('Tb_DocVisa',$data);
+             
+        }
+
+        $this->response($response,200);
+    }
+
+    function visaAll_get(){
+        $id=$this->get('id');
+        if (count($this->get())>2) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            if ($id) {
+                $data = $this->DAO->selectEntity('Tb_DocVisa',array('fkAspirante'=>$id),false);
+            }
+            else{
+                $data = $this->DAO->selectEntity('Tb_DocVisa',null,false);
+            }
+            if ($data) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$data
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
+    function documentosChangeActiveVisa_post(){
+        $id = $this->get('id');
+        $data = $this->post();
+
+        if(count($data) > 1){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
+                "data"=>null,
+                "validations"=>array(
+                    "data"=>"Data no es requerido",
+                )
+            );
+        }else{
+            $Exist=$this->DAO->selectEntity('Tb_DocVisa',array('idReal'=>$id),true);
+
+            $data=array(
+                "statusDocumento"=>'Aceptado',
+            );
+
+            
+            
+
+            $response = $this->DAO->updateData('Tb_DocVisa',$data,array('idReal'=>$id));
+
+            if ($Exist->tipoDocumento=='Visa') {
+                $dataAspirante=array(
+                    "statusAspirante"=>'5',
+                );
+    
+                $this->DAO->updateData('Tb_Aspirantes',$dataAspirante,array('idAspirante'=>$Exist->fkAspirante));
+            }
+
+            
+             
+        }
+
+        $this->response($response,200);
+    }
+
+    function documentosDescAddVisa_post(){
+        $id = $this->get('id');
+        $data = $this->post();
+
+        if(count($data) == 0 || count($data) > 1){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
+                "data"=>null,
+                "validations"=>array(
+                    "descDocumento"=>"La descripcion es requerido",
+                )
+            );
+        }else{
+            $this->form_validation->set_data($data);
+            $this->form_validation->set_rules('descDocumento','Descripcion Documento','required');
+
+
+             if($this->form_validation->run()==FALSE){
+                $response = array(
+                    "status"=>"error",
+                    "message"=>'check the validations',
+                    "data"=>null,
+                    "validations"=>$this->form_validation->error_array()
+                );
+             }else{
+
+                $data=array(
+                   "descDocumento"=>$this->post('descDocumento'),
+                   "statusDocumento"=>'Rechazado'
+                );
+
+                $response = $this->DAO->updateData('Tb_DocVisa',$data,array('idReal'=>$id));
+
+             }
+        }
+
+        $this->response($response,200);
+    }
+
+    function resubirDocDropboxVisa_put(){
+        $data = $this->put();
+        $id = $this->get('id');
+
+        if(count($data) == 0 || count($data) > 20){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No se recibio datos' : 'Demasiados datos recibidos',
+                "data"=>null,
+                "validations"=>null
+            );
+        }else{
+
+            $data= array(
+                "idDocumento"=>$this->put('idDocumento'),
+                "nameDocumento"=>$this->put('nameDocumento'),
+                "sizeDocumento"=>$this->put('sizeDocumento'),
+                "pathDisplayDocumento"=>$this->put('pathDisplayDocumento'),
+                "pathLowerDocumento"=>$this->put('pathLowerDocumento'),
+                "contentHashDocumento"=>$this->put('contentHashDocumento'),
+                "clientModifiedDocumento"=>$this->put('clientModifiedDocumento'),
+                "statusDocumento"=>'Pendiente'
+            );
+
+            $response = $this->DAO->updateData('Tb_DocVisa',$data,array('idReal'=>$id));
+             
+        }
+
+        $this->response($response,200);
+    }
+
+    function dropboxATASFinal_post(){
+        $data = $this->post();
+
+        if(count($data) == 0 || count($data) > 20){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No se recibio datos' : 'Demasiados datos recibidos',
+                "data"=>null,
+                "validations"=>null
+            );
+        }else{
+            $capertaExist=$this->DAO->selectEntity('Tb_Documentos',array('fkAspirante'=>$this->post('fkAspirante')),true);
+
+            $data= array(
+                "idDocumento"=>$this->post('idDocumento'),
+                "nameDocumento"=>$this->post('nameDocumento'),
+                "sizeDocumento"=>$this->post('sizeDocumento'),
+                "pathDisplayDocumento"=>$this->post('pathDisplayDocumento'),
+                "pathLowerDocumento"=>$this->post('pathLowerDocumento'),
+                "contentHashDocumento"=>$this->post('contentHashDocumento'),
+                "clientModifiedDocumento"=>$this->post('clientModifiedDocumento'),
+                "nameCarpeta"=>$capertaExist->nameCarpeta,
+                "fkAspirante"=>$this->post('fkAspirante'),
+                "tipoDocumento"=>$this->post('tipoDocumento')
+            );
+
+            $response = $this->DAO->insertData('Tb_DocVisa',$data);
+             
+        }
+
+        $this->response($response,200);
+    }
+
+    function ATAS_get(){
+        $id=$this->get('id');
+        if (count($this->get())>2) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            if ($id) {
+                $data = $this->DAO->selectEntity('Tb_DocVisa',array('fkAspirante'=>$id,'tipoDocumento'=>'ATAS'),true);
+            }
+            else{
+                $data = $this->DAO->selectEntity('Tb_DocVisa',null,false);
+            }
+            if ($data) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$data
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
+    function deferralDropbox_post(){
+        $data = $this->post();
+
+        if(count($data) == 0 || count($data) > 20){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No se recibio datos' : 'Demasiados datos recibidos',
+                "data"=>null,
+                "validations"=>null
+            );
+        }else{
+            $capertaExist=$this->DAO->selectEntity('Tb_Documentos',array('fkAspirante'=>$this->post('fkAspirante')),true);
+
+            $data= array(
+                "idDocumento"=>$this->post('idDocumento'),
+                "nameDocumento"=>$this->post('nameDocumento'),
+                "sizeDocumento"=>$this->post('sizeDocumento'),
+                "pathDisplayDocumento"=>$this->post('pathDisplayDocumento'),
+                "pathLowerDocumento"=>$this->post('pathLowerDocumento'),
+                "contentHashDocumento"=>$this->post('contentHashDocumento'),
+                "clientModifiedDocumento"=>$this->post('clientModifiedDocumento'),
+                "nameCarpeta"=>$capertaExist->nameCarpeta,
+                "pathDisplayCarpeta"=>$capertaExist->pathDisplayCarpeta,
+                "pathLowerCarpeta"=>$capertaExist->pathLowerCarpeta,
+                "fkAspirante"=>$this->post('fkAspirante')
+            );
+
+            $response = $this->DAO->insertData('Tb_DocDeferral',$data);
+
+            $dataAspirante=array(
+                "statusAspirante"=>'D',
+            );
+
+            $this->DAO->updateData('Tb_Aspirantes',$dataAspirante,array('idAspirante'=>$this->post('fkAspirante')));
              
         }
 
