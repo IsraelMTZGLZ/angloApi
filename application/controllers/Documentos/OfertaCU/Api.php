@@ -130,4 +130,106 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
+    function aspiranteInstitucionesBYKeyUniqueValue_get(){
+        $id=$this->get('id');
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Demasiados datos enviados",
+                "validations" =>array(
+                        "id"=>"Envia Id (get) para obtener un especifico articulo o vacio para obtener todos los articulos"
+                ),
+                "data"=>null
+            );
+        }else{
+            if ($id) {
+                $data = $this->DAO->selectEntity('Vw_UnisOfertaAspirantes',array('idInstitucionAspiranteUniversidades'=>$id),true);
+            }
+            else{
+                $data = $this->DAO->selectEntity('',null,false);
+            }
+            if ($data) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo Cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$data
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No se recibio datos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+        }
+        $this->response($response,200);
+    }
+
+    public function deleteOfertaUni_delete(){
+        $id = $this->get('id');
+      if ($id) {
+        $IdExists = $this->DAO->selectEntity('Tb_DocumentosOfertaCU',array('idReal'=>$id),TRUE);
+
+        if($IdExists){
+          $response = $this->DAO->deleteData('Tb_DocumentosOfertaCU',array('idReal'=>$id));
+        }else{
+          $response = array(
+            "status"=>"error",
+            "status_code"=>409,
+            "message"=>"Id no existe",
+            "validations"=>null,
+            "data"=>null
+          );
+        }
+      } else {
+        $response = array(
+          "status"=>"error",
+          "status_code"=>409,
+          "message"=>"Id no fue encontrado",
+          "validations"=>array(
+            "id"=>"Required (get)",
+          ),
+          "data"=>null
+        );
+      }
+
+      $this->response($response,200);
+    }
+
+    public function deleteOfertaPrepa_delete(){
+        $id = $this->get('id');
+      if ($id) {
+        $IdExists = $this->DAO->selectEntity('Tb_DocumentosOfertaCUPrepa',array('idReal'=>$id),TRUE);
+
+        if($IdExists){
+          $response = $this->DAO->deleteData('Tb_DocumentosOfertaCUPrepa',array('idReal'=>$id));
+        }else{
+          $response = array(
+            "status"=>"error",
+            "status_code"=>409,
+            "message"=>"Id no existe",
+            "validations"=>null,
+            "data"=>null
+          );
+        }
+      } else {
+        $response = array(
+          "status"=>"error",
+          "status_code"=>409,
+          "message"=>"Id no fue encontrado",
+          "validations"=>array(
+            "id"=>"Required (get)",
+          ),
+          "data"=>null
+        );
+      }
+
+      $this->response($response,200);
+    }
+
 }

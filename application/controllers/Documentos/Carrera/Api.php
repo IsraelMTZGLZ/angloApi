@@ -915,7 +915,7 @@ class Api extends REST_Controller {
     {
         $item = $this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
 
-        if($item->statusAspirante!='2' && $item->statusAspirante!='4U' && $item->statusAspirante!='4C'  && $item->statusAspirante!='3'  && $item->statusAspirante!='2R'){
+        if($item->statusAspirante!='2' && $item->statusAspirante!='4U' && $item->statusAspirante!='4C'  && $item->statusAspirante!='3'  && $item->statusAspirante!='2R' && $item->statusAspirante!='5'){
             $data=array(
                 "statusAspirante"=>'2'
             );
@@ -1969,7 +1969,9 @@ class Api extends REST_Controller {
                 "nameCarpeta"=>$capertaExist->nameCarpeta,
                 "pathDisplayCarpeta"=>$capertaExist->pathDisplayCarpeta,
                 "pathLowerCarpeta"=>$capertaExist->pathLowerCarpeta,
-                "fkAspirante"=>$this->post('fkAspirante')
+                "fkAspirante"=>$this->post('fkAspirante'),
+                "fkInstitucion"=>$this->post('fkInstitucion'),
+                "keyDocumentoEliminar"=>$this->post('keyDocumentoEliminar')
             );
 
             $response = $this->DAO->insertData('Tb_DocDeferral',$data);
@@ -1982,6 +1984,50 @@ class Api extends REST_Controller {
              
         }
 
+        $this->response($response,200);
+    }
+
+    public function defeatDocs_delete(){
+        $id = $this->get('id');
+      if ($id) {
+        $IdExists = $this->DAO->selectEntity('Tb_DocumentosOfertaCU',array('idReal'=>$id),TRUE);
+
+        if($IdExists){
+          $response = $this->DAO->deleteData('Tb_DocumentosOfertaCU',array('idReal'=>$id));
+        }else{
+          $response = array(
+            "status"=>"error",
+            "status_code"=>409,
+            "message"=>"Id no existe",
+            "validations"=>null,
+            "data"=>null
+          );
+        }
+      } else {
+        $response = array(
+          "status"=>"error",
+          "status_code"=>409,
+          "message"=>"Id no fue encontrado",
+          "validations"=>array(
+            "id"=>"Required (get)",
+          ),
+          "data"=>null
+        );
+      }
+
+      $this->response($response,200);
+    }
+
+    function deferralDropboxStatus_post(){
+        
+        $id = $this->get('id');
+
+        $data= array(
+            "statusDocumento"=>'Aceptado',
+        );
+
+        $response = $this->DAO->updateData('Tb_DocDeferral',$data,array('idReal'=>$id));
+             
         $this->response($response,200);
     }
 

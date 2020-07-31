@@ -15,7 +15,7 @@ class Api extends REST_Controller {
     function aspiranteUniversidades_post(){
         $data = $this->post();
 
-        if(count($data) == 0 || count($data) >3){
+        if(count($data) == 0 || count($data) >4){
             $response = array(
                 "status"=>"error",
                 "message"=> count($data) == 0 ? 'No se recibio datos' : 'Demasiados datos recibidos',
@@ -44,7 +44,8 @@ class Api extends REST_Controller {
                 $data=array(
                    "fkAspirante"=>$this->post('aspirante'),
                    "estudiosAspiranteUniversidad"=>$this->post('eau'),
-                   "fkFacultad"=>$this->post('facultad')
+                   "fkFacultad"=>$this->post('facultad'),
+                   "carrera"=>$this->post('carrera')
                 );
 
                 $response = $this->DAO->insertData('Tb_AspiranteUniversidades',$data);
@@ -99,7 +100,7 @@ class Api extends REST_Controller {
     function aspiranteUniversidadesFacultades_post(){
         $data = $this->post();
 
-        if(count($data) == 0 || count($data) >3){
+        if(count($data) == 0 || count($data) >4){
             $response = array(
                 "status"=>"error",
                 "message"=> count($data) == 0 ? 'No se recibio datos' : 'Demasiados datos recibidos',
@@ -128,6 +129,10 @@ class Api extends REST_Controller {
                     "anioMesIngreso"=>$this->post('anioMes')
                 );
 
+                $dataStatus=array(
+                    "statusAspiranteControl"=>'Activo'
+                );
+
                 $this->db->trans_begin();
 
                 $this->db->where(array('idAspiranteUniversidad'=>$this->post('aspiranteUniversidad')));
@@ -145,6 +150,13 @@ class Api extends REST_Controller {
                     if($this->db->error()['message']){
                         $responseDB['message'] = $this->db->error()['message'];
                     }
+                }
+
+                $this->db->where(array('idAspirante'=>$this->post('aspirante')));
+                $this->db->update('Tb_Aspirantes',$dataStatus);
+
+                if($this->db->error()['message']){
+                    $responseDB['message'] = $this->db->error()['message'];
                 }
 
                 if ($this->db->trans_status() == FALSE) {
@@ -308,7 +320,7 @@ class Api extends REST_Controller {
     {
         $item = $this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
 
-        if($item->statusAspirante!='3' && $item->statusAspirante!='4U' && $item->statusAspirante!='4C'){
+        if($item->statusAspirante!='3' && $item->statusAspirante!='4U' && $item->statusAspirante!='4C' && $item->statusAspirante!='5'){
             
             $data=array(
                 "statusAspirante"=>'3'
@@ -344,7 +356,8 @@ class Api extends REST_Controller {
             }else{
 
                 $data2=array(
-                    "statusAspirante"=>$this->post('status')
+                    "statusAspirante"=>$this->post('status'),
+                    "statusDocumento"=>'Aceptado'
                 );
 
                 $this->db->trans_begin();
@@ -374,6 +387,71 @@ class Api extends REST_Controller {
                         "message"=>"Articulo Creado Exitosamente",
                         "data"=>$data2,
                         "id"=>$id
+                      );
+                  }
+            }
+        }
+
+        $this->response($response,200);
+    }
+
+    function aspiranteUniversidadesFacultadesOnlyOne_post(){
+        $data = $this->post();
+
+        if(count($data) == 0 || count($data) >4){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No se recibio datos' : 'Demasiados datos recibidos',
+                "data"=>null,
+                "validations"=>array(
+                    "instituciones"=>"Las instituciones son requeridas",
+                    "aspiranteUniversidad" => "La fk aspirante universidad es requerida",
+                    "anioMes" => "El año y mes es requerido"
+                )
+            );
+        }else{
+            $this->form_validation->set_data($data);
+            $this->form_validation->set_rules('instituciones','Instituciones','required');
+            $this->form_validation->set_rules('aspiranteUniversidad','Aspirante Universidad','required');
+
+            if($this->form_validation->run()==FALSE){
+                $response = array(
+                    "status"=>"error",
+                    "message"=>'Revisa las validaciones',
+                    "data"=>null,
+                    "validations"=>$this->form_validation->error_array()
+                );
+            }else{
+
+
+               
+                $dataIn = array(
+                    "fkAspiranteUniversidad"=>$this->post('aspiranteUniversidad'),
+                    "fkInstitucion"=>$this->post('instituciones')
+                );
+                $this->db->insert('Tb_InstitucionAspiranteUniversidades',$dataIn);
+                if($this->db->error()['message']){
+                    $responseDB['message'] = $this->db->error()['message'];
+                }
+                
+
+                if ($this->db->trans_status() == FALSE) {
+                    $this->db->trans_rollback();
+                    $response=array(
+                        "status"=>"error",
+                        "status_code"=>409,
+                        "message"=>$responseDB['message'],
+                        "data"=>$dataIn
+                    );
+                  }
+                  else{
+                      $this->db->trans_commit();
+                      $response=array(
+                        "status"=>"success",
+                        "status_code"=>201,
+                        "message"=>"Articulo Creado Exitosamente",
+                        "data"=>null,
+                        "password"=>null
                       );
                   }
             }
