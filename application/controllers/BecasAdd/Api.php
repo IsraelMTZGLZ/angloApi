@@ -13,47 +13,55 @@ class Api extends REST_Controller {
         $this->load->model('UserDAO');
     }
 
-    function facultad_post(){
+    function becasAdd_post(){
         $data = $this->post();
 
-        if(count($data) == 0 || count($data) > 2){
+        if(count($data) == 0 || count($data) > 12){
             $response = array(
                 "status"=>"error",
                 "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
                 "data"=>null,
-                "validations"=>array(
-                    "nombre"=>"El nombre es requerido",
-                    "abreviacion" => "La abreviacion es requerida"
-                )
+                "validations"=>null
             );
         }else{
             $this->form_validation->set_data($data);
+            $this->form_validation->set_rules('pais','Pais','required');
             $this->form_validation->set_rules('nombre','Nombre','required');
-            $this->form_validation->set_rules('abreviacion','Abreviacion','required');
+            $this->form_validation->set_rules('link','Link','required');
 
-
-             if($this->form_validation->run()==FALSE){
+            if($this->form_validation->run()==FALSE){
                 $response = array(
                     "status"=>"error",
                     "message"=>'check the validations',
                     "data"=>null,
                     "validations"=>$this->form_validation->error_array()
                 );
-             }else{
+            }else{
 
-               $data=array(
-                   "nombreFacultad"=>$this->post('nombre'),
-                   "abreviacionFacultad"=>$this->post('abreviacion')
-               );
-               $response = $this->DAO->insertData('Tb_Facultad',$data);
+                $data=array(
+                    "paisBeca"=>$this->post('pais'),
+                    "nombreBeca"=>$this->post('nombre'),
+                    "linkBeca"=>$this->post('link'),
+                    "aperturaFechaBeca"=>$this->post('apertura'),
+                    "cierreFcehaBeca"=>$this->post('cierre'),
+                    "periodoEvaluacionBeca"=>$this->post('periodoEvaluacion'),
+                    "procesoAsignacionBeca"=>$this->post('asignacion'),
+                    "montoBeca"=>$this->post('monto'),
+                    "programaBeca"=>$this->post('programa'),
+                    "descripcionBeca"=>$this->post('descripcion'),
+                    "convenioBeca"=>$this->post('convenio'),
+                    "resultadosBecas"=>$this->post('resultados')
+                );
 
-             }
+                $response = $this->DAO->insertData('Tb_Becas',$data);
+
+            }
         }
 
         $this->response($response,200);
     }
 
-    function facultad_get(){
+    function becas_get(){
         $id=$this->get('id');
         if (count($this->get())>1) {
             $response = array(
@@ -67,10 +75,10 @@ class Api extends REST_Controller {
             );
         }else{
             if ($id) {
-                $data = $this->DAO->selectEntity('Tb_Facultad',array('idFacultad'=>$id),true);
+                $data = $this->DAO->selectEntity('Tb_Becas',array('idBeca'=>$id),true);
             }
             else{
-                $data = $this->DAO->selectEntity('Tb_Facultad',null,false);
+                $data = $this->DAO->selectEntity('Tb_Becas',null,false);
             }
             if ($data) {
                 $response = array(
@@ -93,63 +101,62 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
-    function facultad_put(){
-        $data = $this->put();
+    function becasPUT_put(){
         $id = $this->get('id');
-        $existe = $this->DAO->selectEntity('Tb_Facultad',array('idFacultad'=>$id),TRUE);
-        if($existe){
-            if(count($data) == 0 || count($data) > 2){
+        $data = $this->put();
+
+        if(count($data) == 0 || count($data) > 12){
+            $response = array(
+                "status"=>"error",
+                "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
+                "data"=>null,
+                "validations"=>null
+            );
+        }else{
+            $this->form_validation->set_data($data);
+            $this->form_validation->set_rules('paisPut','Pais','required');
+            $this->form_validation->set_rules('nombrePut','Nombre','required');
+            $this->form_validation->set_rules('linkPut','Link','required');
+
+            if($this->form_validation->run()==FALSE){
                 $response = array(
                     "status"=>"error",
-                    "message"=> count($data) == 0 ? 'No data received' : 'Too many data received',
+                    "message"=>'check the validations',
                     "data"=>null,
-                    "validations"=>array(
-                        "nombre"=>"El nombre es requerido",
-                        "abreviacion" => "La abreviacion es requerida"
-                    )
+                    "validations"=>$this->form_validation->error_array()
                 );
             }else{
-                $this->form_validation->set_data($data);
-                $this->form_validation->set_rules('nombre','Nombre','required');
-                $this->form_validation->set_rules('abreviacion','Abreviacion','required');
-    
-                 if($this->form_validation->run()==FALSE){
-                    $response = array(
-                        "status"=>"error",
-                        "message"=>'check the validations',
-                        "data"=>null,
-                        "validations"=>$this->form_validation->error_array()
-                    );
-                }else{
-    
-                    $data=array(
-                       "nombreFacultad"=>$this->put('nombre'),
-                       "abreviacionFacultad"=>$this->put('abreviacion')
-                    );
 
-                   $response = $this->DAO->updateData('Tb_Facultad',$data,array('idFacultad'=>$id));
-    
-                }
+                $data=array(
+                    "paisBeca"=>$this->put('paisPut'),
+                    "nombreBeca"=>$this->put('nombrePut'),
+                    "linkBeca"=>$this->put('linkPut'),
+                    "aperturaFechaBeca"=>$this->put('aperturaPut'),
+                    "cierreFcehaBeca"=>$this->put('cierrePut'),
+                    "periodoEvaluacionBeca"=>$this->put('periodoEvaluacionPut'),
+                    "procesoAsignacionBeca"=>$this->put('asignacionPut'),
+                    "montoBeca"=>$this->put('montoPut'),
+                    "programaBeca"=>$this->put('programaPut'),
+                    "descripcionBeca"=>$this->put('descripcionPut'),
+                    "convenioBeca"=>$this->put('convenioPut'),
+                    "resultadosBecas"=>$this->put('resultadosPut')
+                );
+
+                $response = $this->DAO->updateData('Tb_Becas',$data,array('idBeca'=>$id));
+
             }
-        }else{
-            $response = array(
-            "status"=>"error",
-            "message"=> "check the id",
-            "data"=>null,
-            );
         }
-        
 
         $this->response($response,200);
     }
 
-    public function facultad_delete(){
+    public function becasQuitar_delete(){
         $id = $this->get('id');
       if ($id) {
-        $IdExists = $this->DAO->selectEntity('Tb_Facultad',array('idFacultad'=>$id),TRUE);
+        $IdExists = $this->DAO->selectEntity('Tb_Becas',array('idBeca'=>$id),TRUE);
 
         if($IdExists){
-          $response = $this->DAO->deleteData('Tb_Facultad',array('idFacultad'=>$id));
+          $response = $this->DAO->deleteData('Tb_Becas',array('idBeca'=>$id));
         }else{
           $response = array(
             "status"=>"error",

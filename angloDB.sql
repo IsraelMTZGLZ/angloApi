@@ -817,8 +817,6 @@ CREATE TABLE Tb_DocBecasUP(
 	lastUpdate timestamp default current_timestamp on update current_timestamp
 );
 
---Becas test
-
 CREATE TABLE Tb_Becas (
     idBeca int not null AUTO_INCREMENT  primary key,
     paisBeca text not null,
@@ -827,6 +825,7 @@ CREATE TABLE Tb_Becas (
     aperturaFechaBeca text,
     cierreFcehaBeca text,
     periodoEvaluacionBeca text,
+    resultadosBecas text,
     procesoAsignacionBeca text,
     montoBeca text,
     programaBeca text,
