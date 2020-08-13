@@ -107,13 +107,13 @@ class Api extends REST_Controller {
              $response = array(
                 "status"=>"success",
                 "message"=> '',
-                "data"=>$this->DAO->select('Tb_Institucion',array('idInstitucion'=>$id)),
+                "data"=>$this->DAO->select('Vw_InstitutoInformation',array('idInstitucion'=>$id)),
             );
         }else{
             $response = array(
                 "status"=>"success",
                 "message"=> '',
-                "data"=>$this->DAO->selectEntity('Tb_Institucion'),
+                "data"=>$this->DAO->selectEntity('Vw_InstitutoInformation'),
             );
         }
         $this->response($response,200);
@@ -126,6 +126,23 @@ class Api extends REST_Controller {
                 "status"=>"success",
                 "message"=> '',
                 "data"=>$this->DAO->select('Tb_DocumentosVerano',array('fkAspirante'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selectEntity('Tb_DocumentosVerano'),
+            );
+        }
+        $this->response($response,200);
+    }
+    function aspirante_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->select('Tb_Aspirantes',array('idAspirante'=>$id)),
             );
         }else{
             $response = array(
@@ -322,6 +339,7 @@ class Api extends REST_Controller {
                  if($Camp  == 1){
 
                     $this->cambiarProgramaVerano($this->post('aspirante'),'CursoVeranoIngles');
+                    $this->cambiarEstatus($this->post('aspirante'),'1');
                     $data=array(
                         "fkAspirante"=>$this->post('aspirante'),
                         "fkTipoCampamento"=>$this->post('tipoCampamento')
@@ -330,6 +348,7 @@ class Api extends REST_Controller {
 
                  }else if($Camp  == 2){
                    $this->cambiarProgramaVerano($this->post('aspirante'),'CursoVeranoAcademico');
+                   $this->cambiarEstatus($this->post('aspirante'),'1');
                    $data=array(
                        "fkAspirante"=>$this->post('aspirante'),
                        "fkTipoCampamento"=>$this->post('tipoCampamento')

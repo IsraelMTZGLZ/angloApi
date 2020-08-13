@@ -110,6 +110,133 @@ class Api extends REST_Controller {
         }
         $this->response($response,200);
     }
+
+
+
+    function statusUno_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->select('Vw_InglesStatus',array('idPersona'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selectRow('Vw_InglesStatus',array('statusAspirante'=>'1')),
+            );
+        }
+        $this->response($response,200);
+    }
+
+    function statusDos_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->select('Vw_InglesStatus',array('idPersona'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selectRow('Vw_InglesStatus',array('statusAspirante'=>'2')),
+            );
+        }
+        $this->response($response,200);
+    }
+
+    function statusDosR_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->select('Vw_InglesStatus',array('idPersona'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selectRow('Vw_InglesStatus',array('statusAspirante'=>'2R')),
+            );
+        }
+        $this->response($response,200);
+    }
+
+    function statusTres_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->select('Vw_InglesStatus',array('idPersona'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selectRow('Vw_InglesStatus',array('statusAspirante'=>'3')),
+            );
+        }
+        $this->response($response,200);
+    }
+
+    function statusCuatroC_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->select('Vw_InglesStatus',array('idPersona'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selectRow('Vw_InglesStatus',array('statusAspirante'=>'4C')),
+            );
+        }
+        $this->response($response,200);
+    }
+    function statusCuatroU_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->select('Vw_InglesStatus',array('idPersona'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selectRow('Vw_InglesStatus',array('statusAspirante'=>'4U')),
+            );
+        }
+        $this->response($response,200);
+    }
+    function statusCinco_get(){
+        $id = $this->get('id');
+        if($id){
+             $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->select('Vw_InglesStatus',array('idPersona'=>$id)),
+            );
+        }else{
+            $response = array(
+                "status"=>"success",
+                "message"=> '',
+                "data"=>$this->DAO->selectRow('Vw_InglesStatus',array('statusAspirante'=>'5')),
+            );
+        }
+        $this->response($response,200);
+    }
+
     public function aspiranteDos_get(){
         $id=$this->get('id');
         if (count($this->get())>1) {
@@ -148,7 +275,11 @@ class Api extends REST_Controller {
             }
         }
         $this->response($response,200);
+
     }
+
+
+
     function preparatoria_get(){
         $id = $this->get('id');
         if($id){
@@ -166,6 +297,627 @@ class Api extends REST_Controller {
         }
         $this->response($response,200);
     }
+
+    //new
+    public function pago_post(){
+        $id=$this->get('id');
+        if ($id) {
+            $userExist=$this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
+
+            if ($userExist) {
+
+                $carpeta = 'files/Ingles/'.$id;
+                if (!file_exists($carpeta)) {
+                    mkdir($carpeta, 0777, true);
+                }
+
+                $config =array(
+                    "upload_path"=>"files/Ingles/".$id,
+                    "allowed_types"=>"pdf",
+                    "file_name"=>"Pago",
+                    "overwrite"=>true
+                );
+
+                $this->load->library('upload',$config);
+                if ( ! $this->upload->do_upload('Pago'))
+                {
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"Upload fails",
+                    "validations"=>$this->upload->display_errors(),
+                    "data"=>$this->post()
+                );
+                }
+                else
+                {
+                    $data = array(
+
+                        "nombreDocumento"=>$this->upload->data('file_name'),
+                        "extDocumento"=>$this->upload->data()['file_ext'],
+                        "urlDocumento"=>base_url('files/Ingles/'.$id.'/'.$this->upload->data('file_name')),
+                        "typeDocumento"=>$this->upload->data('file_type'),
+                        "tipo"=>"Pago",
+                        "statusDocumento"=>"Revision",
+                        "fkAspirante"=>$this->post('aspirante')
+                    );
+
+                    $response = $this->DAO->insertData('Tb_DocumentosVerano',$data);
+                    if($response['status']=="success"){
+                      // $this->cambiarEstatus($id,'2');
+                      $response = array(
+                        "status"=>"success",
+                        "message"=>"Fichero fue subido correctamente",
+                        "data"=>$data
+                      );
+                    }
+                }
+
+
+            }else{
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"id does not exist",
+                    "validations"=>array(
+                        "id"=>"required (get)"
+                    ),
+                    "data"=>null
+                );
+            }
+
+
+            //a
+        }else{
+            $response=array(
+                "status"=>"error",
+                "status_code"=>409,
+                "message"=>"id was not sent",
+                "validations"=>array(
+                    "id"=>"required (get)"
+                ),
+                "data"=>null
+            );
+        }
+        $this->response($response,200);
+    }
+    public function pagoUpdate_post(){
+        $id=$this->get('id');
+        if ($id) {
+            $userExist=$this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
+
+            if ($userExist) {
+              $Eixist = $this->DAO->selectbyTwoEntity('Tb_DocumentosVerano',array('fkAspirante'=>$id),array('tipo'=>'Pago'),TRUE);
+              if($Eixist){
+                $response = $this->DAO->deleteDataTwoClause('Tb_DocumentosVerano',array('fkAspirante'=>$id),array('tipo'=>'Pago'));
+                if($response['status']=="success"){
+
+                  $carpeta = 'files/Ingles/'.$id;
+                  if (!file_exists($carpeta)) {
+                      mkdir($carpeta, 0777, true);
+                  }
+
+                  $config =array(
+                      "upload_path"=>"files/Ingles/".$id,
+                      "allowed_types"=>"pdf",
+                      "file_name"=>"Pago",
+                      "overwrite"=>true
+                  );
+
+                  $this->load->library('upload',$config);
+                  if ( ! $this->upload->do_upload('Pago'))
+                  {
+                  $response=array(
+                      "status"=>"error",
+                      "status_code"=>409,
+                      "message"=>"Upload fails",
+                      "validations"=>$this->upload->display_errors(),
+                      "data"=>$this->post()
+                  );
+                  }
+                  else
+                  {
+                      $data = array(
+
+                          "nombreDocumento"=>$this->upload->data('file_name'),
+                          "extDocumento"=>$this->upload->data()['file_ext'],
+                          "urlDocumento"=>base_url('files/Ingles/'.$id.'/'.$this->upload->data('file_name')),
+                          "typeDocumento"=>$this->upload->data('file_type'),
+                          "tipo"=>"Pago",
+                          "statusDocumento"=>"Revision",
+                          "fkAspirante"=>$this->post('aspirante')
+                      );
+
+                      $response = $this->DAO->insertData('Tb_DocumentosVerano',$data);
+                      if($response['status']=="success"){
+                      //  $this->cambiarEstatus($id,'2');
+                        $response = array(
+                          "status"=>"success",
+                          "message"=>"Fichero fue subido correctamente",
+                          "data"=>$data
+                        );
+                      }
+                  }
+                }else{
+                  $response=array(
+                      "status"=>"error",
+                      "status_code"=>409,
+                      "message"=>"The documento was not deleted correctly",
+                      "data"=>null
+                  );
+                }
+              }else{
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"Document does not exists",
+                    "data"=>null
+                );
+              }
+            }else{
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"id does not exist",
+                    "validations"=>array(
+                        "id"=>"required (get)"
+                    ),
+                    "data"=>null
+                );
+            }
+
+
+            //a
+        }else{
+            $response=array(
+                "status"=>"error",
+                "status_code"=>409,
+                "message"=>"id was not sent",
+                "validations"=>array(
+                    "id"=>"required (get)"
+                ),
+                "data"=>null
+            );
+        }
+        $this->response($response,200);
+    }
+    public function pagoFile_put($id=null){
+        $data = $this->put();
+        $Eixist = $this->DAO->selectbyTwoEntity('Tb_DocumentosVerano',array('fkAspirante'=>$id),array('tipo'=>'Pago'),TRUE);
+        if($Eixist){
+          if(count($data) == 0 || count($data) > 2){
+              $response = array(
+                  "status"=>"error",
+                  "message"=> count($data),
+                  "data"=>null,
+                  "validations"=>array(
+                    "status"=>"Required, The Status is required",
+                  )
+              );
+          }else{
+              $this->form_validation->set_data($data);
+              $this->form_validation->set_rules('status','Status','required');
+
+             if($this->form_validation->run()==FALSE){
+                  $response = array(
+                      "status"=>"error",
+                      "message"=> 'data received',
+                      "data"=>$data,
+                      "validations"=>$this->form_validation->error_array()
+                  );
+               }else{
+
+                 if($this->put('status') == "Rechazado"){
+                   $this->db->trans_begin();
+                   $status = array(
+                     "statusDocumento"=>$this->put('status')
+                   );
+                   $statusResponse =$this->DAO->updateByTwoData('Tb_DocumentosVerano',$status,array('fkAspirante'=>$id),array('tipo'=>'Pago'));
+                    if($statusResponse['status']=="success"){
+
+                      $recomendation = array(
+                        "descripcion"=>$this->put('desc'),
+                        "fkAspirante"=>$id,
+                        "tipo"=>'Pago'
+                      );
+                      $recomendationResponse = $this->DAO->saveOrUpdateItem('Tb_RecomendacionAspirante',$recomendation,null,true);
+
+                      if($recomendationResponse['status']=="success"){
+                          $response = array(
+                             "status"=>"success",
+                             "message"=>"update successfully",
+                             "data"=>null,
+                         );
+
+                      }else{
+                          $response = array(
+                              "status"=>"error",
+                              "message"=>  $recomendationResponse['message'],
+                              "data"=>null,
+                          );
+                      }
+                      if($this->db->trans_status()==FALSE){
+                          $this->db->trans_rollback();
+                      }else{
+                          $this->db->trans_commit();
+                      }
+                    }else{
+                      $response = array(
+                          "status"=>"error",
+                          "message"=>  'error',
+                          "data"=>null,
+                      );
+                    }
+
+                 }else if($this->put('status') == "Aceptado"){
+                   $this->db->trans_begin();
+                   $status = array(
+                     "statusDocumento"=>"Aceptado"
+                   );
+                   $statusResponse = $this->DAO->saveOrUpdateItemByTwoEntity('Tb_DocumentosVerano',$status,array('fkAspirante'=>$id),array('tipo'=>'Pago'),true);
+                    if($statusResponse['status']=="success"){
+                      $this->cambiarEstatus($id,'4U');
+                      $recomendationResponse = $this->DAO->deleteDataTwoClause('Tb_RecomendacionAspirante',array('fkAspirante'=>$id),array('tipo'=>'Pago'));
+
+                      if($recomendationResponse['status']=="success"){
+                          $response = array(
+                             "status"=>"success",
+                             "message"=>"update successfully",
+                             "data"=>$statusResponse,
+                         );
+
+                      }else{
+                          $response = array(
+                              "status"=>"error",
+                              "message"=>  $recomendationResponse['message'],
+                              "data"=>null,
+                          );
+                      }
+                      if($this->db->trans_status()==FALSE){
+                          $this->db->trans_rollback();
+                      }else{
+                          $this->db->trans_commit();
+                      }
+                    }else{
+                      $response = array(
+                          "status"=>"error",
+                          "message"=>  'error',
+                          "data"=>null,
+                      );
+                    }
+                 }else {
+                   $response = array(
+                       "status"=>"error",
+                       "message"=>  'error',
+                       "data"=>null,
+                   );
+                 }
+               // $data = array(
+               //   "statusDocumento"=>$this->put('status'),
+               // );
+               // $response = $this->DAO->updateData('Tb_DocumentosVerano',$data,array('fkAspirante'=>$id));
+               }
+          }
+        }else{
+          $response = array(
+            "status"=>"error",
+            "message"=> "check the id",
+            "data"=>$Eixist,
+            );
+        }
+        $this->response($response,200);
+    }
+
+    //new today
+
+    public function visaIngles_post(){
+        $id=$this->get('id');
+        if ($id) {
+            $userExist=$this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
+
+            if ($userExist) {
+
+                $carpeta = 'files/Ingles/'.$id;
+                if (!file_exists($carpeta)) {
+                    mkdir($carpeta, 0777, true);
+                }
+
+                $config =array(
+                    "upload_path"=>"files/Ingles/".$id,
+                    "allowed_types"=>"pdf",
+                    "file_name"=>"Visa",
+                    "overwrite"=>true
+                );
+
+                $this->load->library('upload',$config);
+                if ( ! $this->upload->do_upload('Visa'))
+                {
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"Upload fails",
+                    "validations"=>$this->upload->display_errors(),
+                    "data"=>$this->post()
+                );
+                }
+                else
+                {
+                    $data = array(
+
+                        "nombreDocumento"=>$this->upload->data('file_name'),
+                        "extDocumento"=>$this->upload->data()['file_ext'],
+                        "urlDocumento"=>base_url('files/Ingles/'.$id.'/'.$this->upload->data('file_name')),
+                        "typeDocumento"=>$this->upload->data('file_type'),
+                        "tipo"=>"Visa",
+                        "statusDocumento"=>"Revision",
+                        "fkAspirante"=>$this->post('aspirante')
+                    );
+
+                    $response = $this->DAO->insertData('Tb_DocumentosVerano',$data);
+                    if($response['status']=="success"){
+                      $response = array(
+                        "status"=>"success",
+                        "message"=>"Fichero fue subido correctamente",
+                        "data"=>$data
+                      );
+                    }
+                }
+
+
+            }else{
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"id does not exist",
+                    "validations"=>array(
+                        "id"=>"required (get)"
+                    ),
+                    "data"=>null
+                );
+            }
+
+
+            //a
+        }else{
+            $response=array(
+                "status"=>"error",
+                "status_code"=>409,
+                "message"=>"id was not sent",
+                "validations"=>array(
+                    "id"=>"required (get)"
+                ),
+                "data"=>null
+            );
+        }
+        $this->response($response,200);
+    }
+    public function visaInglesUpdate_post(){
+        $id=$this->get('id');
+        if ($id) {
+            $userExist=$this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
+
+            if ($userExist) {
+              $Eixist = $this->DAO->selectbyTwoEntity('Tb_DocumentosVerano',array('fkAspirante'=>$id),array('tipo'=>'Visa'),TRUE);
+              if($Eixist){
+                $response = $this->DAO->deleteDataTwoClause('Tb_DocumentosVerano',array('fkAspirante'=>$id),array('tipo'=>'Visa'));
+                if($response['status']=="success"){
+
+                  $carpeta = 'files/Ingles/'.$id;
+                  if (!file_exists($carpeta)) {
+                      mkdir($carpeta, 0777, true);
+                  }
+
+                  $config =array(
+                      "upload_path"=>"files/Ingles/".$id,
+                      "allowed_types"=>"pdf",
+                      "file_name"=>"Visa",
+                      "overwrite"=>true
+                  );
+
+                  $this->load->library('upload',$config);
+                  if ( ! $this->upload->do_upload('Visa'))
+                  {
+                  $response=array(
+                      "status"=>"error",
+                      "status_code"=>409,
+                      "message"=>"Upload fails",
+                      "validations"=>$this->upload->display_errors(),
+                      "data"=>$this->post()
+                  );
+                  }
+                  else
+                  {
+                      $data = array(
+
+                          "nombreDocumento"=>$this->upload->data('file_name'),
+                          "extDocumento"=>$this->upload->data()['file_ext'],
+                          "urlDocumento"=>base_url('files/Ingles/'.$id.'/'.$this->upload->data('file_name')),
+                          "typeDocumento"=>$this->upload->data('file_type'),
+                          "tipo"=>"Visa",
+                          "statusDocumento"=>"Revision",
+                          "fkAspirante"=>$this->post('aspirante')
+                      );
+
+                      $response = $this->DAO->insertData('Tb_DocumentosVerano',$data);
+                      if($response['status']=="success"){
+                      //  $this->cambiarEstatus($id,'2');
+                        $response = array(
+                          "status"=>"success",
+                          "message"=>"Fichero fue subido correctamente",
+                          "data"=>$data
+                        );
+                      }
+                  }
+                }else{
+                  $response=array(
+                      "status"=>"error",
+                      "status_code"=>409,
+                      "message"=>"The documento was not deleted correctly",
+                      "data"=>null
+                  );
+                }
+              }else{
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"Document does not exists",
+                    "data"=>null
+                );
+              }
+            }else{
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"id does not exist",
+                    "validations"=>array(
+                        "id"=>"required (get)"
+                    ),
+                    "data"=>null
+                );
+            }
+
+
+            //a
+        }else{
+            $response=array(
+                "status"=>"error",
+                "status_code"=>409,
+                "message"=>"id was not sent",
+                "validations"=>array(
+                    "id"=>"required (get)"
+                ),
+                "data"=>null
+            );
+        }
+        $this->response($response,200);
+    }
+    public function visaStatusIngles_put($id=null){
+        $data = $this->put();
+        $Eixist = $this->DAO->selectbyTwoEntity('Tb_DocumentosVerano',array('fkAspirante'=>$id),array('tipo'=>'Visa'),TRUE);
+        if($Eixist){
+          if(count($data) == 0 || count($data) > 2){
+              $response = array(
+                  "status"=>"error",
+                  "message"=> count($data),
+                  "data"=>null,
+                  "validations"=>array(
+                    "status"=>"Required, The Status is required",
+                  )
+              );
+          }else{
+              $this->form_validation->set_data($data);
+              $this->form_validation->set_rules('status','Status','required');
+
+             if($this->form_validation->run()==FALSE){
+                  $response = array(
+                      "status"=>"error",
+                      "message"=> 'data received',
+                      "data"=>$data,
+                      "validations"=>$this->form_validation->error_array()
+                  );
+               }else{
+
+                 if($this->put('status') == "Rechazado"){
+                   $this->db->trans_begin();
+                   $status = array(
+                     "statusDocumento"=>$this->put('status')
+                   );
+                   $statusResponse =$this->DAO->updateByTwoData('Tb_DocumentosVerano',$status,array('fkAspirante'=>$id),array('tipo'=>'Visa'));
+                    if($statusResponse['status']=="success"){
+
+                      $recomendation = array(
+                        "descripcion"=>$this->put('desc'),
+                        "fkAspirante"=>$id,
+                        "tipo"=>'Visa'
+                      );
+                      $recomendationResponse = $this->DAO->saveOrUpdateItem('Tb_RecomendacionAspirante',$recomendation,null,true);
+
+                      if($recomendationResponse['status']=="success"){
+                          $response = array(
+                             "status"=>"success",
+                             "message"=>"update successfully",
+                             "data"=>null,
+                         );
+
+                      }else{
+                          $response = array(
+                              "status"=>"error",
+                              "message"=>  $recomendationResponse['message'],
+                              "data"=>null,
+                          );
+                      }
+                      if($this->db->trans_status()==FALSE){
+                          $this->db->trans_rollback();
+                      }else{
+                          $this->db->trans_commit();
+                      }
+                    }else{
+                      $response = array(
+                          "status"=>"error",
+                          "message"=>  'error',
+                          "data"=>null,
+                      );
+                    }
+
+                 }else if($this->put('status') == "Aceptado"){
+                   $this->db->trans_begin();
+                   $status = array(
+                     "statusDocumento"=>"Aceptado"
+                   );
+                   $statusResponse = $this->DAO->saveOrUpdateItemByTwoEntity('Tb_DocumentosVerano',$status,array('fkAspirante'=>$id),array('tipo'=>'Visa'),true);
+                    if($statusResponse['status']=="success"){
+                      $this->cambiarEstatus($id,'5');
+                      $recomendationResponse = $this->DAO->deleteDataTwoClause('Tb_RecomendacionAspirante',array('fkAspirante'=>$id),array('tipo'=>'Visa'));
+
+                      if($recomendationResponse['status']=="success"){
+                          $response = array(
+                             "status"=>"success",
+                             "message"=>"update successfully",
+                             "data"=>$statusResponse,
+                         );
+
+                      }else{
+                          $response = array(
+                              "status"=>"error",
+                              "message"=>  $recomendationResponse['message'],
+                              "data"=>null,
+                          );
+                      }
+                      if($this->db->trans_status()==FALSE){
+                          $this->db->trans_rollback();
+                      }else{
+                          $this->db->trans_commit();
+                      }
+                    }else{
+                      $response = array(
+                          "status"=>"error",
+                          "message"=>  'error',
+                          "data"=>null,
+                      );
+                    }
+                 }else {
+                   $response = array(
+                       "status"=>"error",
+                       "message"=>  'error',
+                       "data"=>null,
+                   );
+                 }
+               // $data = array(
+               //   "statusDocumento"=>$this->put('status'),
+               // );
+               // $response = $this->DAO->updateData('Tb_DocumentosVerano',$data,array('fkAspirante'=>$id));
+               }
+          }
+        }else{
+          $response = array(
+            "status"=>"error",
+            "message"=> "check the id",
+            "data"=>$Eixist,
+            );
+        }
+        $this->response($response,200);
+    }
+    //
 
 
     function preparatoria_post(){
@@ -514,7 +1266,305 @@ class Api extends REST_Controller {
             }
             $this->response($response,200);
         }
+        public function referencia_post(){
+            $id=$this->get('id');
+            if ($id) {
+                $userExist=$this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
 
+                if ($userExist) {
+
+                    $carpeta = 'files/Ingles/'.$id;
+                    if (!file_exists($carpeta)) {
+                        mkdir($carpeta, 0777, true);
+                    }
+
+                    $config =array(
+                        "upload_path"=>"files/Ingles/".$id,
+                        "allowed_types"=>"pdf",
+                        "file_name"=>$this->post('nameDoc'),
+                        "overwrite"=>true
+                    );
+
+                    $this->load->library('upload',$config);
+                    if ( ! $this->upload->do_upload('Docs'))
+                    {
+                    $response=array(
+                        "status"=>"error",
+                        "status_code"=>409,
+                        "message"=>"Upload fails",
+                        "validations"=>$this->upload->display_errors(),
+                        "data"=>$this->post()
+                    );
+                    }
+                    else{
+                      $this->db->trans_begin();
+                        $data = array(
+
+                            "nombreDocumento"=>$this->post('nameDoc'),
+                            "extDocumento"=>$this->upload->data()['file_ext'],
+                            "urlDocumento"=>base_url('files/Ingles/'.$id.'/'.$this->upload->data('file_name')),
+                            "typeDocumento"=>$this->upload->data('file_type'),
+                            "tipo"=>"referenciaDePago",
+                            "statusDocumento"=>"Activo"
+                        );
+
+
+                        $docResponse = $this->DAO->saveOrUpdateItem('Tb_DocumentosVeranoIngles',$data,null,true);
+                        if($docResponse['status']=="success"){
+
+                          $docExtra = array(
+                              "fkAspirante"=>$this->post('aspirante'),
+                              "fkDocumento"=>$docResponse['key']
+                          );
+                          $responseDocExtra = $this->DAO->saveOrUpdateItem('Tb_DocumentosAspirante',$docExtra,null,true);
+
+                          if($responseDocExtra['status']=="success"){
+                              $response = array(
+                                 "status"=>"success",
+                                 "message"=>"item update successfully",
+                                 "data"=>null,
+                             );
+
+                          }else{
+                              $response = array(
+                                  "status"=>"error",
+                                  "message"=>$responseDocExtra['message'],
+                                  "data"=>null,
+                              );
+                          }
+                          if($this->db->trans_status()==FALSE){
+                              $this->db->trans_rollback();
+                          }else{
+                              $this->db->trans_commit();
+                          }
+
+                        }else{
+                          $response = array(
+                            "status"=>"error",
+                            "message"=>"Fichero no fue subido correctamente",
+                            "data"=>$data
+                          );
+                        }
+                    }
+
+
+                }else{
+                    $response=array(
+                        "status"=>"error",
+                        "status_code"=>409,
+                        "message"=>"id does not exist",
+                        "validations"=>array(
+                            "id"=>"required (get)"
+                        ),
+                        "data"=>null
+                    );
+                }
+
+
+                //a
+            }else{
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"id was not sent",
+                    "validations"=>array(
+                        "id"=>"required (get)"
+                    ),
+                    "data"=>null
+                );
+            }
+            $this->response($response,200);
+        }
+        public function cartaCondicionalIncondicional_post(){
+            $id=$this->get('id');
+            if ($id) {
+                $userExist=$this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
+
+                if ($userExist) {
+
+                    $carpeta = 'files/VeranoIngles/'.$id;
+                    if (!file_exists($carpeta)) {
+                        mkdir($carpeta, 0777, true);
+                    }
+
+                    $config =array(
+                        "upload_path"=>"files/VeranoIngles/".$id,
+                        "allowed_types"=>"pdf",
+                        "file_name"=>$this->post('name'),
+                        "overwrite"=>true
+                    );
+
+                    $this->load->library('upload',$config);
+                    if ( ! $this->upload->do_upload($this->post('name')))
+                    {
+                    $response=array(
+                        "status"=>"error",
+                        "status_code"=>409,
+                        "message"=>"Upload fails",
+                        "validations"=>$this->upload->display_errors(),
+                        "data"=>$this->post()
+                    );
+                    }
+                    else
+                    {
+                        $data = array(
+
+                            "nombreDocumento"=>$this->upload->data('file_name'),
+                            "extDocumento"=>$this->upload->data()['file_ext'],
+                            "urlDocumento"=>base_url('files/VeranoIngles/'.$id.'/'.$this->upload->data('file_name')),
+                            "typeDocumento"=>$this->upload->data('file_type'),
+                            "type"=>$this->post('tipo'),
+                            "typeUser"=>$this->post('tipoUsuario'),
+                            "statusDocumento"=>$this->post('status'),
+                            "fkAspirante"=>$this->post('aspirante'),
+                            "fkInstitucion"=>$this->post('institucion')
+                        );
+
+                        $response = $this->DAO->insertData('Tb_DocsApiranteVIA',$data);
+                        if($response['status']=="success"){
+                          // $this->cambiarEstatus($id,$this->post('statusAspirante'));
+                          $response = array(
+                            "status"=>"success",
+                            "message"=>"Fichero fue subido correctamente",
+                            "data"=>'3'
+                          );
+                        }
+                    }
+
+
+                }else{
+                    $response=array(
+                        "status"=>"error",
+                        "status_code"=>409,
+                        "message"=>"id does not exist",
+                        "validations"=>array(
+                            "id"=>"required (get)"
+                        ),
+                        "data"=>null
+                    );
+                }
+
+
+                //a
+            }else{
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"id was not sent",
+                    "validations"=>array(
+                        "id"=>"required (get)"
+                    ),
+                    "data"=>null
+                );
+            }
+            $this->response($response,200);
+        }
+        public function ticketUpdate_post(){
+            $id=$this->get('id');
+            if ($id) {
+                $userExist=$this->DAO->selectEntity('Tb_Aspirantes',array('idAspirante'=>$id),true);
+
+                if ($userExist) {
+                  $Eixist = $this->DAO->selectbyThreeEntity('Tb_DocsApiranteVIA',array('fkAspirante'=>$id),array('fkInstitucion'=>$this->post('institucion')),array('type'=>$this->post('tipo')),TRUE);
+                  if($Eixist){
+                    $EixistRecomendation = $this->DAO->selectbyTwoEntity('Tb_RecomendationDocsApiranteVIA',array('fkAspirante'=>$id),array('fkDocumento'=>$this->post('idDocument')),TRUE);
+                    if($EixistRecomendation){
+                      $response = $this->DAO->deleteDataTwoClause('Tb_RecomendationDocsApiranteVIA',array('fkAspirante'=>$id),array('fkDocumento'=>$this->post('idDocument')));
+                    }
+                    $response = $this->DAO->deleteDataThreeClause('Tb_DocsApiranteVIA',array('fkAspirante'=>$id),array('fkInstitucion'=>$this->post('institucion')),array('type'=>$this->post('tipo')));
+                    if($response['status']=="success"){
+
+                      $carpeta = 'files/VeranoIngles/'.$id;
+                      if (!file_exists($carpeta)) {
+                          mkdir($carpeta, 0777, true);
+                      }
+
+                      $config =array(
+                          "upload_path"=>"files/VeranoIngles/".$id,
+                          "allowed_types"=>"pdf",
+                          "file_name"=>$this->post('name'),
+                          "overwrite"=>true
+                      );
+
+                      $this->load->library('upload',$config);
+                      if ( ! $this->upload->do_upload($this->post('name')))
+                      {
+                      $response=array(
+                          "status"=>"error",
+                          "status_code"=>409,
+                          "message"=>"Upload fails",
+                          "validations"=>$this->upload->display_errors(),
+                          "data"=>$this->post()
+                      );
+                      }
+                      else
+                      {
+                          $data = array(
+
+                              "nombreDocumento"=>$this->upload->data('file_name'),
+                              "extDocumento"=>$this->upload->data()['file_ext'],
+                              "urlDocumento"=>base_url('files/VeranoIngles/'.$id.'/'.$this->upload->data('file_name')),
+                              "typeDocumento"=>$this->upload->data('file_type'),
+                              "type"=>$this->post('tipo'),
+                              "typeUser"=>$this->post('tipoUsuario'),
+                              "statusDocumento"=>$this->post('status'),
+                              "fkAspirante"=>$this->post('aspirante'),
+                              "fkInstitucion"=>$this->post('institucion')
+                          );
+
+                          $response = $this->DAO->insertData('Tb_DocsApiranteVIA',$data);
+                          if($response['status']=="success"){
+                            // $this->cambiarEstatus($id,'2');
+                            $response = array(
+                              "status"=>"success",
+                              "message"=>"Fichero fue subido correctamente",
+                              "data"=>$data
+                            );
+                          }
+                      }
+                    }else{
+                      $response=array(
+                          "status"=>"error",
+                          "status_code"=>409,
+                          "message"=>"The documento was not deleted correctly",
+                          "data"=>null
+                      );
+                    }
+                  }else{
+                    $response=array(
+                        "status"=>"error",
+                        "status_code"=>409,
+                        "message"=>"Document does not exists",
+                        "data"=>null
+                    );
+                  }
+                }else{
+                    $response=array(
+                        "status"=>"error",
+                        "status_code"=>409,
+                        "message"=>"id does not exist",
+                        "validations"=>array(
+                            "id"=>"required (get)"
+                        ),
+                        "data"=>null
+                    );
+                }
+
+
+                //a
+            }else{
+                $response=array(
+                    "status"=>"error",
+                    "status_code"=>409,
+                    "message"=>"id was not sent",
+                    "validations"=>array(
+                        "id"=>"required (get)"
+                    ),
+                    "data"=>null
+                );
+            }
+            $this->response($response,200);
+        }
     function aspiranteIngles_C_A_post($id=null){
         $data = $this->post();
 
@@ -1498,7 +2548,7 @@ class Api extends REST_Controller {
                       $response = $this->DAO->insertData('Tb_DocumentosIngles',$data);
 
                       if($response['status']=="success"){
-                        $this->cambiarEstatus($id,'1');
+                        $this->cambiarEstatus($id,'2');
                         $response = array(
                           "status"=>"success",
                           "message"=>"Fichero fue subido correctamente",

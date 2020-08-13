@@ -439,3 +439,88 @@ create table Tb_Preparatoria_Aspirante(
    Tb_TipoCursosInstituciones as tci,Tb_AlojamientoCurso as ac
    where tci.fkTipoCurso = tc.idTipoCurso and tci.fkInstitucion =i.idInstitucion and
    ac.fkTipoAlojamiento = ta.idTipoAlojamiento and ac.fkInstitucion=i.idInstitucion;
+
+
+ -- cambios nuevos
+
+  CREATE TABLE Tb_CarpetaBecas(
+    idCarpetaBeca int primary key auto_increment,
+    nombre varchar(60),
+    CD timestamp default current_timestamp,
+    LU timestamp default current_timestamp on update current_timestamp
+  );
+
+   CREATE TABLE Tb_DocumentoBeca(
+   	 idDocumentoBeca int not null AUTO_INCREMENT PRIMARY KEY,
+   	 urlDocumentoBeca text not null,
+   	 typeDocumentoBeca varchar(15),
+   	 extDocumentoBeca varchar(10),
+     nombreDocumentoBeca text,
+     tipoBeca enum('Beca') default 'Beca',
+   	 statusDocumentoBeca enum('Activo','Inactivo','Revision') default 'Activo',
+   	 creationDateBeca timestamp default current_timestamp,
+   	 lastUpdateBeca timestamp default current_timestamp on update current_timestamp
+   );
+   insert into Tb_DocumentoBeca(urlDocumentoBeca,typeDocumentoBeca,extDocumentoBeca,nombreDocumentoBeca)values('http://localhost/angloApi/files/VeranoAcademico/45/Pasaporte.pdf','application/pdf','.pdf','Pasaporte.pdf');
+
+   CREATE TABLE Tb_DocumentoBecaExtras(
+   	 idDocumentoBecaExtra int not null AUTO_INCREMENT PRIMARY KEY,
+   	 urlDocumentoBecaExtra text not null,
+   	 typeDocumentoBecaExtra varchar(15),
+   	 extDocumentoBecaExtra varchar(10),
+     nombreDocumentoBecaExtra text,
+     tipoBecaExtra enum('ExtraBeca') default 'ExtraBeca',
+   	 statusDocumentoBecaExtra enum('Activo','Inactivo','Revision') default 'Activo',
+   	 creationBecaExtra timestamp default current_timestamp,
+   	 lastUpdateBecaExtra timestamp default current_timestamp on update current_timestamp
+   );
+   insert into Tb_DocumentoBecaExtras(urlDocumentoBecaExtra,typeDocumentoBecaExtra,extDocumentoBecaExtra,nombreDocumentoBecaExtra)values('http://localhost/angloApi/files/VeranoAcademico/48/Pasaporte.pdf','application/pdf','.pdf','Extra.pdf');
+  CREATE TABLE Tb_DescBeca(
+    idDescBeca int primary key auto_increment,
+    descBeca text,
+    estados text,
+    CD timestamp default current_timestamp,
+    LU timestamp default current_timestamp on update current_timestamp
+  );
+
+  insert into Tb_DescBeca(descBeca, estados)values('Es una beca para estudiantes de Uk','Mex, Qro, Mtr');
+
+  CREATE TABLE Tb_DocBeca_Extra_Desc(
+    idTbBecaExtraDesc int primary key auto_increment,
+    fkDocumentoBeca int,
+    fkDocumentoBecaExtras int,
+    fkDescBeca int,
+    FOREIGN KEY(fkDocumentoBeca) REFERENCES Tb_DocumentoBeca(idDocumentoBeca) on update cascade on delete cascade,
+    FOREIGN KEY(fkDocumentoBecaExtras) REFERENCES Tb_DocumentoBecaExtras(idDocumentoBecaExtra) on update cascade on delete cascade,
+    FOREIGN KEY(fkDescBeca) REFERENCES Tb_DescBeca(idDescBeca) on update cascade on delete cascade
+  );
+  insert into Tb_DocBeca_Extra_Desc(fkDocumentoBeca,fkDocumentoBecaExtras,fkDescBeca)values(1,1,1);
+
+  CREATE TABLE Tb_DocsExtra(
+    idDocsExtra int primary key auto_increment,
+    decDocsExtra text,
+    tipoInstitucionExtra enum('Universidad','Preparatoria','CursoIngles','CursoVerano','CursoVeranoIngles','CursoVeranoAcademico'),
+    fkDocBeca_Extra_Desc int,
+    FOREIGN KEY(fkDocBeca_Extra_Desc) REFERENCES Tb_DocBeca_Extra_Desc(idTbBecaExtraDesc) on update cascade on delete cascade
+  );
+  insert into Tb_DocsExtra(decDocsExtra,tipoInstitucionExtra,fkDocBeca_Extra_Desc)values('Una carta','CursoVeranoIngles',1);
+    insert into Tb_DocsExtra(decDocsExtra,tipoInstitucionExtra,fkDocBeca_Extra_Desc)values('Una Pasaporte','CursoVeranoIngles',1);
+      insert into Tb_DocsExtra(decDocsExtra,tipoInstitucionExtra,fkDocBeca_Extra_Desc)values('Una Visa','CursoVeranoIngles',1);
+  CREATE TABLE Tb_InstDocBeca_Extra_Desc(
+    idInstDocBeca_Extra_Desc int primary key auto_increment,
+    fkInstitucion int,
+    fkCarpetaBeca int,
+    statusBeca enum('Activo','Inactivo','Revision') default 'Activo',
+    tipoInstitucion enum('Universidad','Preparatoria','CursoIngles','CursoVerano','CursoVeranoIngles','CursoVeranoAcademico'),
+    fkDocBeca_Extra_Desc int,
+    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
+    FOREIGN KEY(fkDocBeca_Extra_Desc) REFERENCES Tb_DocBeca_Extra_Desc(idTbBecaExtraDesc) on update cascade on delete cascade,
+    FOREIGN KEY(fkCarpetaBeca) REFERENCES Tb_CarpetaBecas(idCarpetaBeca) on update cascade on delete cascade
+  );
+
+  insert into Tb_InstDocBeca_Extra_Desc(fkInstitucion,tipoInstitucion,fkDocBeca_Extra_Desc) values(17,'CursoVeranoIngles',1);
+    insert into Tb_InstDocBeca_Extra_Desc(fkInstitucion,tipoInstitucion,fkDocBeca_Extra_Desc) values(19,'CursoVeranoIngles',1);
+
+  CREATE OR REPLACE VIEW Vw_BecasInst  AS SELECT idInstitucion,nombreInstitucion,nombreDocumentoBeca,urlDocumentoBeca,nombreDocumentoBecaExtra,urlDocumentoBecaExtra,descBeca,estados,statusBeca
+  FROM Tb_InstDocBeca_Extra_Desc as t,Tb_DocBeca_Extra_Desc as tb, Tb_DocumentoBeca as tdb, Tb_DocumentoBecaExtras as tdbe, Tb_DescBeca as tbdsc, Tb_Institucion as i
+  where t.fkDocBeca_Extra_Desc = tb.idTbBecaExtraDesc and t.fkInstitucion = i.idInstitucion and tb.fkDocumentoBeca = tdb.idDocumentoBeca and tb.fkDocumentoBecaExtras = tdbe.idDocumentoBecaExtra and tb.fkDescBeca =  tbdsc.idDescBeca and tipoInstitucion = 'CursoVeranoIngles';

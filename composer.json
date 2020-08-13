@@ -15,7 +15,8 @@
 	},
 	"require": {
 		"php": ">=5.4.0",
-		"codeigniter/framework": "^3.0.4"
+		"codeigniter/framework": "^3.0.4",
+		"sendgrid/sendgrid": "~7"
 	},
 	"autoload": {
 		"classmap": [
