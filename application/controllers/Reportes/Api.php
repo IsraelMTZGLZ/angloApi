@@ -101,4 +101,289 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
+    public function statusPorcentaje_get()
+    {
+        $id = $this->get('id');
+        $existe = $this->DAO->selectEntity('Vw_Aspirante',array('aspirante'=>$id),TRUE); 
+        if($existe){
+            $porcentaje = 0;
+            switch($existe->statusAspirante){
+                case '0':
+                    $porcentaje = 17; 
+                    break;
+                case '1':
+                    $porcentaje = 33; 
+                    break;
+                case '2':
+                    $porcentaje = 50; 
+                    break;
+                case '2R':
+                    $porcentaje = 60; 
+                    break;
+                case '3':
+                    $porcentaje = 67; 
+                    break;
+                case '4C':
+                    $porcentaje = 75; 
+                    break;
+                case '4U':
+                    $porcentaje = 83; 
+                    break;
+                case 'D':
+                    $porcentaje = 70; 
+                    break;
+                default:
+                    $porcentaje = 100; 
+                    break;
+            }
+
+            $response = array(
+                "status"=>"success",
+                "message"=> "Porcentaje obtenido con exito",
+                "data"=>$porcentaje,
+            );
+        }else{
+            $response = array(
+                "status"=>"error",
+                "message"=> "Revisa el id",
+                "data"=>null,
+                );
+        } 
+        $this->response($response,200);
+    }
+
+    public function primerRegistro_get($id)
+    {
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Too many data was sent",
+                "validations" =>array(
+                        "id"=>"send Id (get) to get specific item or empty to get all items "
+                ),
+                "data"=>null
+            );
+        }else{
+            $query = $this->db->query("select * from Tb_Usuarios where idUsuario='".$id."'")->row();
+           //$query = null;
+
+            if ($query) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Item loaded succesful",
+                    "validations" =>null,
+                    "data"=>$query
+                );
+            }else{
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "No data provided",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+            
+            
+        }
+        $this->response($response,200);
+    }
+
+    public function primerRegistroAspirante_get($id)
+    {
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Too many data was sent",
+                "validations" =>array(
+                        "id"=>"send Id (get) to get specific item or empty to get all items "
+                ),
+                "data"=>null
+            );
+        }else{
+            $query = $this->db->query("select * from Tb_Aspirantes where idAspirante='".$id."'")->row();
+           //$query = null;
+
+            if ($query) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Item loaded succesful",
+                    "validations" =>null,
+                    "data"=>$query
+                );
+            }else{
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "No data provided",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+            
+            
+        }
+        $this->response($response,200);
+    }
+
+    public function primerDocumentos_get($id)
+    {
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Too many data was sent",
+                "validations" =>array(
+                        "id"=>"send Id (get) to get specific item or empty to get all items "
+                ),
+                "data"=>null
+            );
+        }else{
+            $query = $this->db->query("select * from Tb_Documentos WHERE creationDate  = ( select min(creationDate) from tb_documentos) and fkAspirante ='".$id."'")->row();
+           //$query = null;
+
+            if ($query) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Item loaded succesful",
+                    "validations" =>null,
+                    "data"=>$query
+                );
+            }else{
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "No data provided",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+            
+            
+        }
+        $this->response($response,200);
+    }
+
+    public function primerNumero3_get($id)
+    {
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Too many data was sent",
+                "validations" =>array(
+                        "id"=>"send Id (get) to get specific item or empty to get all items "
+                ),
+                "data"=>null
+            );
+        }else{
+            $query = $this->db->query("select * from Tb_InstitucionAspiranteUniversidades WHERE CIAU  = ( select min(CIAU) from Tb_InstitucionAspiranteUniversidades) and fkAspiranteUniversidad ='".$id."'")->row();
+           //$query = null;
+
+            if ($query) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Item loaded succesful",
+                    "validations" =>null,
+                    "data"=>$query
+                );
+            }else{
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "No data provided",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+            
+            
+        }
+        $this->response($response,200);
+    }
+
+    public function primeraCarta4_get($id)
+    {
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Too many data was sent",
+                "validations" =>array(
+                        "id"=>"send Id (get) to get specific item or empty to get all items "
+                ),
+                "data"=>null
+            );
+        }else{
+            $query = $this->db->query("select * from Tb_DocumentosOfertaCU WHERE creationDate  = ( select min(creationDate) from Tb_DocumentosOfertaCU) and fkAspirante ='".$id."'")->row();
+           //$query = null;
+
+            if ($query) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Item loaded succesful",
+                    "validations" =>null,
+                    "data"=>$query
+                );
+            }else{
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "No data provided",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+            
+            
+        }
+        $this->response($response,200);
+    }
+
+    public function primeraVisa_get($id)
+    {
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Too many data was sent",
+                "validations" =>array(
+                        "id"=>"send Id (get) to get specific item or empty to get all items "
+                ),
+                "data"=>null
+            );
+        }else{
+            $query = $this->db->query("select * from Tb_DocVisa WHERE tipoDocumento='Visa' and fkAspirante ='".$id."'")->row();
+           //$query = null;
+
+            if ($query) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Item loaded succesful",
+                    "validations" =>null,
+                    "data"=>$query
+                );
+            }else{
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "No data provided",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+            
+            
+        }
+        $this->response($response,200);
+    }
+
 }

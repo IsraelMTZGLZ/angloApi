@@ -48,7 +48,7 @@ CREATE TABLE Tb_Usuarios(
     cambiarPasswordUsuario enum('True','False') not null default 'False',
     typeUsuario enum('Agente','Aspirante','Admin') not null,
     statusUsuario enum('Activo','Inactivo','Pendiente') default 'Activo',
-    tipoRegistro enum('Web') default 'Web' not null,
+    tipoRegistro enum('WEB','ASF','BC','CON','EM','EUR','FB','FPP','OTH','REC','RS','TEC','TEL','UNAM','UNI','UP') default 'WEB' not null,
     creationDateUsuario timestamp default current_timestamp,
     lastUpdateUsuario timestamp default current_timestamp on update current_timestamp,
     fkPersona int not null,
@@ -62,6 +62,7 @@ CREATE TABLE Tb_Aspirantes(
     ciudadAspirante varchar(150),
     programaDeInteres enum('Universidad','Preparatoria','CursoIngles','CursoVerano'),
     statusAspirante enum('0','1','2') default '0',
+    statusAspiranteControl enum('Activo','Inactivo') default 'Activo',
     creationDateAspirante timestamp default current_timestamp,
     lastUpdateAspirante timestamp default current_timestamp on update current_timestamp,
     fkPersona int not null,
@@ -108,7 +109,7 @@ CREATE TABLE `Tb_config` (
 CREATE OR REPLACE View Vw_Aspirante as
 select idPersona as persona,firstNamePersona as names, lastNamePersona as paterns,concat(firstNamePersona,' ',lastNamePersona) as fullname,generoPersona as genero,photoPersona as photo,
 if(p.photoPersona is null,'NULL',(select urlImagen from Tb_Imagenes as i,Tb_Personas where i.idImagen=p.photoPersona limit 1)) as photoUrl,
-emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsuario as statusU,
+emailUsuario as email, cambiarPasswordUsuario as cambiarP, typeUsuario,statusUsuario as statusU,tipoRegistro,
 idUsuario as usuario,typeOauthUsuario,MONTH(creationDateUsuario) as mesCreation,YEAR(creationDateUsuario)  as yearCreation,concat(MONTH(creationDateUsuario),'-',YEAR(creationDateUsuario)) as completeFecha,
 CASE
     WHEN typeUsuario="Aspirante" THEN
@@ -137,7 +138,11 @@ END as statusAspirante,
 CASE
 WHEN typeUsuario="Aspirante" THEN
    (select programaDeInteres from Tb_Aspirantes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
-END as programaDeInteres
+END as programaDeInteres,
+CASE
+WHEN typeUsuario="Aspirante" THEN
+   (select statusAspiranteControl from Tb_Aspirantes as a,Tb_Personas where a.fkPersona = p.idPersona limit 1)
+END as statusAspiranteControl
 from Tb_Personas as p, Tb_Usuarios as u
 where p.idPersona = u.fkPersona and typeUsuario="Aspirante";
 
@@ -207,7 +212,6 @@ CREATE TABLE Tb_InstitucionFacultad(
     lastUpdateInstitucionFacultad timestamp default current_timestamp on update current_timestamp
 );
 
---preparatoria
 CREATE TABLE Tb_TipoEstudio(
     idTipoEstudio INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     nombreTipoEstudio VARCHAR(120) NOT NULL,
@@ -311,7 +315,6 @@ Tb_TipoAlojamiento as ta, Tb_TipoAlojamientoInstitucion as tai
 where tei.fkInstitucion = i.idInstitucion and tei.fkTipoEstudio = te.idTipoEstudio
 and tai.fkTipoAlojamiento = ta.idTipoAlojamiento and tai.fkInstitucion=i.idInstitucion;
 
---Campamento de verano
 CREATE TABLE Tb_Edades(
     idEdad INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nombreEdad VARCHAR(50) NOT NULL,
@@ -395,7 +398,6 @@ where ei.fkEdad = e.idEdad and ei.fkInstitucion=i.idInstitucion and
 ci.fkCampamento = c.idCampamento and ci.fkInstitucion = i.idInstitucion and
 ac.fkTipoAlojamiento = t.idTipoAlojamiento and ac.fkInstitucion= i.idInstitucion;
 
---curso de ingles
 CREATE TABLE Tb_TipoCursos(
     idTipoCurso INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     nombreTipoCurso VARCHAR(50) NOT NULL,
@@ -446,6 +448,7 @@ CREATE TABLE Tb_AspiranteUniversidades(
     fkFacultad int,
     estudiosAspiranteUniversidad enum('Carrera','Masters','PhD'),
     anioMesIngreso date,
+    carrera text,
     statusAU enum('Activo','Inactivo') default 'Activo',
     FOREIGN KEY(fkFacultad) REFERENCES Tb_Facultad(idFacultad) on update cascade on delete cascade,
     FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
@@ -466,11 +469,10 @@ CREATE TABLE Tb_InstitucionAspiranteUniversidades(
 CREATE OR REPLACE VIEW Vw_AspiranteUniversidad as
 select nombreFacultad,abreviacionFacultad,idFacultad,
 fkAspirante,estudiosAspiranteUniversidad,anioMesIngreso,idAspiranteUniversidad,statusAU,
-YEAR(anioMesIngreso) AS anio,MONTHNAME(anioMesIngreso) AS mes
+YEAR(anioMesIngreso) AS anio,MONTHNAME(anioMesIngreso) AS mes,carrera
 from Tb_Facultad as f, Tb_Aspirantes as a, Tb_AspiranteUniversidades as au
 where au.fkAspirante = a.idAspirante and au.fkFacultad = f.idFacultad;
 
---Tb_InstitucionAspiranteUniversidades
 CREATE OR REPLACE VIEW Vw_AspiranteInstituciones as
 select nombreInstitucion,logoInstitucion,ubicacionInstitucion,
 idAspiranteUniversidad,idInstitucion
@@ -483,6 +485,7 @@ CREATE TABLE Tb_AspirantePreparatorias(
     fkTipoEstudio int,
     fkTipoAlojamiento int,
     anioMesIngreso date,
+    carrera text,
     fkAspirante int,
     statusAP enum('Activo','Inactivo') default 'Activo',
     FOREIGN KEY(fkTipoEstudio) REFERENCES Tb_TipoEstudio(idTipoEstudio) on update cascade on delete cascade,
@@ -506,7 +509,7 @@ CREATE OR REPLACE VIEW Vw_AspirantePreparatoria as
 select
 nombreTipoEstudio,abreviacionTipoEstudio,idTipoEstudio,
 nombreTipoAlojamiento,abreviacionTipoAlojamiento,idTipoAlojamiento,
-anioMesIngreso,fkAspirante,idAspirantePreparatoria,YEAR(anioMesIngreso) AS anio,MONTHNAME(anioMesIngreso) AS mes
+anioMesIngreso,fkAspirante,idAspirantePreparatoria,YEAR(anioMesIngreso) AS anio,MONTHNAME(anioMesIngreso) AS mes,carrera
 from Tb_TipoEstudio as te,Tb_TipoAlojamiento as ta, Tb_AspirantePreparatorias as ap,
 Tb_Aspirantes as a
 where ap.fkAspirante = a.idAspirante and ap.fkTipoEstudio = te.idTipoEstudio and
@@ -589,7 +592,7 @@ CREATE TABLE Tb_DocumentosAgente(
 );
 
 ALTER TABLE Tb_InstitucionAspiranteUniversidades ADD numeroAceptacion varchar(50);
-ALTER TABLE Tb_InstitucionAspiranteUniversidades ADD fechaAceptacion date;
+ALTER TABLE Tb_InstitucionAspiranteUniversidades ADD fechaAceptacion text;
 
 CREATE OR REPLACE VIEW Vw_AspiranteInstituciones as
 select nombreInstitucion,logoInstitucion,ubicacionInstitucion,
@@ -598,16 +601,14 @@ from Tb_Institucion as i , Tb_AspiranteUniversidades as au,
 Tb_InstitucionAspiranteUniversidades as iau
 where iau.fkInstitucion = i.idInstitucion and iau.fkAspiranteUniversidad = au.idAspiranteUniversidad;
 
-ALTER TABLE Tb_Aspirantes change statusAspirante statusAspirante enum('0','1','2','2R','3') default '0';
-
 CREATE OR REPLACE VIEW View_Aspirantes_By_Status as
 select * from View_Aspirantes_Uni_Prepa
-where statusAspirante='2' OR statusAspirante='2R' OR statusAspirante='3';
+where statusAspirante='2' OR statusAspirante='2R' OR statusAspirante='3' OR statusAspirante='4U' OR statusAspirante='4C' OR statusAspirante='D';
 
 ALTER TABLE  Tb_Documentos change tipo tipo enum('Transcripcion','CartaMotivo','CartaRecomendacion','Boleta','Pasaporte','Propuesta','CV','CartaAutorizacion','FormatoSolicitud','examenIngles','calificacionFinal','visa','TranscripcionFinal','ATAS','Titulo') not null;
 
 ALTER TABLE Tb_InstitucionAspirantePreparatorias ADD numeroAceptacion varchar(50);
-ALTER TABLE Tb_InstitucionAspirantePreparatorias ADD fechaAceptacion date;
+ALTER TABLE Tb_InstitucionAspirantePreparatorias ADD fechaAceptacion text;
 
 CREATE OR REPLACE VIEW Vw_AspiranteInstitucionesPrepas as
 select nombreInstitucion,logoInstitucion,ubicacionInstitucion,
@@ -615,3 +616,221 @@ idAspirantePreparatoria,idInstitucion,idInstitucionAspirantePreparatorias,numero
 from Tb_Institucion as i , Tb_AspirantePreparatorias as ap,
 Tb_InstitucionAspirantePreparatorias as iap
 where iap.fkInstitucion = i.idInstitucion and iap.fkAspirantePreparatoria = ap.idAspirantePreparatoria;
+
+
+ALTER TABLE Tb_Aspirantes change statusAspirante statusAspirante enum('0','1','2','2R','3','4C','4U','5','D') default '0';
+
+CREATE TABLE Tb_DocumentosOfertaCU(
+    idReal int not null AUTO_INCREMENT primary key,
+    idDocumento varchar(100) not null unique,
+    nameDocumento text,
+    sizeDocumento int,
+    pathDisplayDocumento text,
+    pathLowerDocumento text,
+    contentHashDocumento text,
+    clientModifiedDocumento text,
+    verUrlDocumento text,
+    revDocumento text,
+    nameCarpeta text,
+    fkAspirante int,
+    fkInstitucionAspiranteUniversidades int,
+    statusDocumento enum('Pendiente','Aceptado','Rechazado') default 'Pendiente',
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
+    FOREIGN KEY(fkInstitucionAspiranteUniversidades) REFERENCES Tb_InstitucionAspiranteUniversidades(idInstitucionAspiranteUniversidades) on update cascade on delete cascade,
+    creationDate timestamp default current_timestamp(),
+	lastUpdate timestamp default current_timestamp on update current_timestamp
+);
+
+ALTER TABLE Tb_DocumentosOfertaCU ADD statusAspirante enum('U','C');
+
+CREATE OR REPLACE VIEW Vw_UnisOfertaAspirantes as
+select ai.*,do.* from Vw_AspiranteInstituciones as ai
+left join Tb_DocumentosOfertaCU as do on ai.idInstitucionAspiranteUniversidades = do.fkInstitucionAspiranteUniversidades
+order by idInstitucionAspiranteUniversidades;
+
+CREATE TABLE Tb_DocumentosOfertaCUPrepa(
+    idReal int not null AUTO_INCREMENT primary key,
+    idDocumento varchar(100) not null unique,
+    nameDocumento text,
+    sizeDocumento int,
+    pathDisplayDocumento text,
+    pathLowerDocumento text,
+    contentHashDocumento text,
+    clientModifiedDocumento text,
+    verUrlDocumento text,
+    revDocumento text,
+    nameCarpeta text,
+    fkAspirante int,
+    fkInstitucionAspirantePreparatorias int,
+    statusDocumento enum('Pendiente','Aceptado','Rechazado') default 'Pendiente',
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
+    FOREIGN KEY(fkInstitucionAspirantePreparatorias) REFERENCES Tb_InstitucionAspirantePreparatorias(idInstitucionAspirantePreparatorias) on update cascade on delete cascade,
+    creationDate timestamp default current_timestamp(),
+	lastUpdate timestamp default current_timestamp on update current_timestamp
+);
+
+ALTER TABLE Tb_DocumentosOfertaCUPrepa ADD statusAspirante enum('U','C');
+
+
+CREATE OR REPLACE VIEW Vw_UnisOfertaAspirantesPrepa as
+select ai.*,do.* from Vw_AspiranteInstitucionesPrepas as ai
+left join Tb_DocumentosOfertaCUPrepa as do on ai.idInstitucionAspirantePreparatorias = do.fkInstitucionAspirantePreparatorias
+order by idInstitucionAspirantePreparatorias;
+
+
+CREATE TABLE Tb_DocumentosVisa(
+    idReal int not null AUTO_INCREMENT primary key,
+    idDocumento varchar(100) not null unique,
+    nameDocumento text,
+    sizeDocumento int,
+    pathDisplayDocumento text,
+    pathLowerDocumento text,
+    contentHashDocumento text,
+    clientModifiedDocumento text,
+    verUrlDocumento text,
+    revDocumento text,
+    nameCarpeta text,
+    fkAspirante int,
+    statusDocumento enum('Pendiente','Aceptado') default 'Pendiente',
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
+    creationDate timestamp default current_timestamp(),
+	lastUpdate timestamp default current_timestamp on update current_timestamp
+);
+
+ALTER TABLE Tb_Documentos add column BoletaTipo enum('Final','Incompleta');
+
+CREATE TABLE Tb_NecesidadesBecas(
+    idNB int not null AUTO_INCREMENT primary key,
+    descNB text
+);
+
+INSERT INTO Tb_NecesidadesBecas(descNB) VALUES('CAS - documento digital emitido por la Universidad que especifica los documentos a presentar para la solicitud para la visa');
+INSERT INTO Tb_NecesidadesBecas(descNB) VALUES('Evidencia de fondos - beca, fondos personales, pueden ser mas de un documento');
+
+CREATE TABLE Tb_NBAspirante(
+    idNBAAspirante int NOT null AUTO_INCREMENT PRIMARY key,
+    fkAspirante INT,
+    fkNB INT,
+    statusNB enum('Pendiente','Rechazado','Aceptado') DEFAULT 'Pendiente',
+    creationDate timestamp default current_timestamp(),
+	lastUpdate timestamp default current_timestamp on update current_timestamp,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
+    FOREIGN KEY(fkNB) REFERENCES Tb_NecesidadesBecas(idNB) on update cascade on delete cascade
+);
+
+CREATE OR REPLACE VIEW Vw_NBA as
+select nb.*,nba.*
+from Tb_NBAspirante as nba , Tb_NecesidadesBecas as nb
+where nba.fkNB = nb.idNB;
+
+CREATE TABLE Tb_DocVisa(
+    idReal int not null AUTO_INCREMENT primary key,
+    idDocumento varchar(100) not null unique,
+    nameDocumento text,
+    sizeDocumento int,
+    pathDisplayDocumento text,
+    pathLowerDocumento text,
+    contentHashDocumento text,
+    clientModifiedDocumento text,
+    verUrlDocumento text,
+    revDocumento text,
+    nameCarpeta text,
+    fkAspirante int,
+    descDocumento text,
+    statusDocumento enum('Pendiente','Aceptado','Rechazado') default 'Pendiente',
+    tipoDocumento enum('Visa','ATAS'),
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
+    creationDate timestamp default current_timestamp(),
+	lastUpdate timestamp default current_timestamp on update current_timestamp
+);
+
+CREATE TABLE AplicaATASAspirante(
+    idAAA INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    aplicaATAS enum('Si','No'),
+    fkAspirante int,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
+    creationDate timestamp default current_timestamp(),
+	lastUpdate timestamp default current_timestamp on update current_timestamp
+);
+
+CREATE TABLE Tb_DocDeferral(
+    idReal int not null AUTO_INCREMENT primary key,
+    idDocumento varchar(100) not null unique,
+    nameDocumento text,
+    sizeDocumento int,
+    pathDisplayDocumento text,
+    pathLowerDocumento text,
+    contentHashDocumento text,
+    clientModifiedDocumento text,
+    verUrlDocumento text,
+    revDocumento text,
+    nameCarpeta text,
+    pathDisplayCarpeta text,
+    pathLowerCarpeta text,
+    fkAspirante int,
+    fkInstitucion int,
+    logo text,
+    statusDocumento enum('Pendiente','Aceptado','Rechazado') default 'Pendiente',
+    keyDocumentoEliminar text,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
+    FOREIGN KEY(fkInstitucion) REFERENCES Tb_Institucion(idInstitucion) on update cascade on delete cascade,
+    creationDate timestamp default current_timestamp(),
+	lastUpdate timestamp default current_timestamp on update current_timestamp
+);
+
+CREATE OR REPLACE VIEW View_Aspirantes_By_Status5 as
+select * from View_Aspirantes_Uni_Prepa
+where statusAspirante='5';
+
+CREATE OR REPLACE VIEW View_DocDefereal as
+select * from Tb_DocDeferral as df, Tb_Institucion as i
+where df.fkInstitucion = i.idInstitucion;
+
+CREATE TABLE AplicaBecasAspirante(
+    idABA INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    aplicaBecas enum('Si','No'),
+    fkAspirante int,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
+    creationDate timestamp default current_timestamp(),
+	lastUpdate timestamp default current_timestamp on update current_timestamp
+);
+
+CREATE TABLE Tb_DocBecasUP(
+    idReal int not null AUTO_INCREMENT primary key,
+    idDocumento varchar(100) not null unique,
+    nameDocumento text,
+    sizeDocumento int,
+    pathDisplayDocumento text,
+    pathLowerDocumento text,
+    contentHashDocumento text,
+    clientModifiedDocumento text,
+    verUrlDocumento text,
+    revDocumento text,
+    nameCarpeta text,
+    pathDisplayCarpeta text,
+    pathLowerCarpeta text,
+    fkAspirante int,
+    descDocumento text,
+    statusDocumento enum('Aceptado','Rechazado','Pendiente') default 'Pendiente',
+    motivo text,
+    FOREIGN KEY(fkAspirante) REFERENCES Tb_Aspirantes(idAspirante) on update cascade on delete cascade,
+    creationDate timestamp default current_timestamp(),
+	lastUpdate timestamp default current_timestamp on update current_timestamp
+);
+
+CREATE TABLE Tb_Becas (
+    idBeca int not null AUTO_INCREMENT  primary key,
+    paisBeca text not null,
+    nombreBeca text not null,
+    linkBeca text not null,
+    aperturaFechaBeca text,
+    cierreFcehaBeca text,
+    periodoEvaluacionBeca text,
+    resultadosBecas text,
+    procesoAsignacionBeca text,
+    montoBeca text,
+    programaBeca text,
+    descripcionBeca text,
+    convenioBeca text
+);
+>>>>>>> b0143ebebc1aa2004b046450e74d5d596d694314

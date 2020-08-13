@@ -375,5 +375,49 @@ class Api extends REST_Controller {
         $this->response($response,200);
     }
 
+    public function universidadOnlyOneBYOne_get()
+    {
+        if (count($this->get())>1) {
+            $response = array(
+                "status" => "error",
+                "status_code" => 409,
+                "message" => "Too many data was sent",
+                "validations" =>array(
+                        "id"=>"send Id (get) to get specific item or empty to get all items "
+                ),
+                "data"=>null
+            );
+        }else{
+            
+            $query = $this->db->query("select distinct idInstitucion from Vw_Uni")->result();
+            $content = array();
+            foreach ($query as $key) {
+                $data = $this->DAO->selectEntity('Vw_Uni',array('idInstitucion'=>$key->idInstitucion),true);
+                array_push($content,$data);
+            }
+
+            if ($query) {
+                $response = array(
+                    "status" => "success",
+                    "status_code" => 201,
+                    "message" => "Articulo cargado correctamente",
+                    "validations" =>null,
+                    "data"=>$content
+                );
+            }else{
+                $response = array(
+                    "status" => "error",
+                    "status_code" => 409,
+                    "message" => "No datos proveidos",
+                    "validations" =>null,
+                    "data"=>null
+                );
+            }
+            
+            
+        }
+        $this->response($response,200);
+    }
+
 
 }

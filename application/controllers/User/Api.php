@@ -366,7 +366,7 @@ class Api extends REST_Controller {
                                     "status"=>"error",
                                     "status_code"=>"201",
                                     "message"=>"Email y/o contraseña incorrecta",
-                                    "data"=>null
+                                    "data"=>$this->bcrypt->check_password($this->post('password'), $itemExist->passwordUsuario)
                                 );
                             }
                         }else{
