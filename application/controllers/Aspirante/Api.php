@@ -47,10 +47,9 @@ class Api extends REST_Controller {
                 );
             }
             else{
+                
 
-                $data['Persona']=array(
-                    "generoPersona"=>$this->post('genero')
-                );
+                
 
                 $data['Aspirante']=array(
                     "fechaNacimientoAspirante"=>$this->post('fecha'),
@@ -60,7 +59,14 @@ class Api extends REST_Controller {
                 );
 
                 $response = $this->DAO->insertData('Tb_Aspirantes',$data['Aspirante']);
-                $response = $this->DAO->updateData('Tb_Personas',$data['Persona'],array("idPersona"=>$this->post('persona')));
+
+                if ($this->post('genero')) {
+                    $data['Persona']=array(
+                        "generoPersona"=>$this->post('genero')
+                    );
+
+                    $response = $this->DAO->updateData('Tb_Personas',$data['Persona'],array("idPersona"=>$this->post('persona')));
+                }
 
             }
         }

@@ -181,4 +181,35 @@ class Api extends REST_Controller {
       $this->response($response,200);
     }
 
+    public function defeatQuitar_delete(){
+        $id = $this->get('id');
+      if ($id) {
+        $IdExists = $this->DAO->selectEntity('Tb_DocDeferral',array('idReal'=>$id),TRUE);
+
+        if($IdExists){
+          $response = $this->DAO->deleteData('Tb_DocDeferral',array('idReal'=>$id));
+        }else{
+          $response = array(
+            "status"=>"error",
+            "status_code"=>409,
+            "message"=>"Id no existe",
+            "validations"=>null,
+            "data"=>null
+          );
+        }
+      } else {
+        $response = array(
+          "status"=>"error",
+          "status_code"=>409,
+          "message"=>"Id no fue encontrado",
+          "validations"=>array(
+            "id"=>"Required (get)",
+          ),
+          "data"=>null
+        );
+      }
+
+      $this->response($response,200);
+    }
+
 }
