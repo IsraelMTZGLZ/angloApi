@@ -1546,7 +1546,7 @@ class Api extends REST_Controller {
           $response = array(
             "status"=>"error",
             "message"=> "check the id",
-            "data"=>$Eixist,
+            "data"=>$id,
             );
         }
         $this->response($response,200);
@@ -1778,7 +1778,8 @@ class Api extends REST_Controller {
                 if($EixistRecomendation){
                   $response = $this->DAO->deleteDataTwoClause('Tb_RecomendationDocsApiranteVIA',array('fkAspirante'=>$id),array('fkDocumento'=>$this->post('idDocument')));
                 }
-                $response = $this->DAO->deleteDataTwoClause('Tb_DocsApiranteVIA',array('fkAspirante'=>$id),array('fkInstitucion'=>$this->post('institucion')));
+                $response = $this->DAO->deleteDataTwoClause('Tb_DocsApiranteVIA',array('fkAspirante'=>$id),array('idDocumento'=>$this->post('idDocument')));
+
                 if($response['status']=="success"){
 
                   $carpeta = 'files/VeranoAcademico/'.$id;
@@ -1868,6 +1869,206 @@ class Api extends REST_Controller {
                     "id"=>"required (get)"
                 ),
                 "data"=>null
+            );
+        }
+        $this->response($response,200);
+    }
+
+    public function veranoCartaStatus_put($id=null){
+        $data = $this->put();
+        $Eixist = $this->DAO->selectbyTwoEntity('Tb_DocsApiranteVIA',array('fkAspirante'=>$id),array('idDocumento'=>$this->put('idDocument')),TRUE);
+        if($Eixist){
+          if(count($data) == 0 || count($data) > 8){
+              $response = array(
+                  "status"=>"error",
+                  "message"=> count($data),
+                  "data"=>null,
+                  "validations"=>array(
+                    "status"=>"Required, The Status is required",
+                  )
+              );
+          }else{
+              $this->form_validation->set_data($data);
+              $this->form_validation->set_rules('status','Status','required');
+
+             if($this->form_validation->run()==FALSE){
+                  $response = array(
+                      "status"=>"error",
+                      "message"=> 'data received',
+                      "data"=>$data,
+                      "validations"=>$this->form_validation->error_array()
+                  );
+               }else{
+
+                 if($this->put('status') == "Rechazado"){
+                   $this->db->trans_begin();
+                   $statuss = array(
+                     "statusDocumento"=>$this->put('status')
+                   );
+                   $statusResponse =$this->DAO->updateByTwoData('Tb_DocsApiranteVIA',$statuss,array('fkAspirante'=>$id),array('idDocumento'=>$this->put('idDocument')));
+
+                    if($statusResponse['status']=="success"){
+                      // $response = array(
+                      //     "status"=>"success",
+                      //     "message"=> "mal",
+                      //     "data"=>$statusResponse
+                      // );
+                        $Eixist = $this->DAO->selectbyTwoEntity('Tb_RecomendationDocsApiranteVIA',array('fkAspirante'=>$id),array('fkDocumento'=>$this->put('idDocument')),TRUE);
+                        if($Eixist){
+                          $recomendationResponseDelete = $this->DAO->deleteDataTwoClause('Tb_RecomendationDocsApiranteVIA',array('fkAspirante'=>$id),array('fkDocumento'=>$this->put('idDocument')));
+                          if($recomendationResponseDelete['status']=="success"){
+                            $recomendation = array(
+                              "descripcion"=>$this->put('desc'),
+                              "fkAspirante"=>$id,
+                              "fkDocumento"=>$this->put('idDocument')
+                            );
+                            $recomendationResponse = $this->DAO->saveOrUpdateItem('Tb_RecomendationDocsApiranteVIA',$recomendation,null,true);
+
+                            if($recomendationResponse['status']=="success"){
+                                $response = array(
+                                   "status"=>"success",
+                                   "message"=>"update successfullyu",
+                                   "data"=>$statusResponse,
+                               );
+
+                            }else{
+                                $response = array(
+                                    "status"=>"error",
+                                    "message"=>  $recomendationResponse['message'],
+                                    "data"=>null,
+                                );
+                            }
+                            if($this->db->trans_status()==FALSE){
+                                $this->db->trans_rollback();
+                            }else{
+                                $this->db->trans_commit();
+                            }
+                          }else{
+                            $response = array(
+                                "status"=>"error",
+                                "message"=>  'error',
+                                "data"=>$recomendationResponseDelete,
+                            );
+                          }
+                          if($this->db->trans_status()==FALSE){
+                              $this->db->trans_rollback();
+                          }else{
+                              $this->db->trans_commit();
+                          }
+                        }else{
+                          $recomendation = array(
+                            "descripcion"=>$this->put('desc'),
+                            "fkAspirante"=>$id,
+                            "fkDocumento"=>$this->put('idDocument')
+                          );
+                          $recomendationResponse = $this->DAO->saveOrUpdateItem('Tb_RecomendationDocsApiranteVIA',$recomendation,null,true);
+
+                          if($recomendationResponse['status']=="success"){
+                              $response = array(
+                                 "status"=>"success",
+                                 "message"=>"update successfullyy",
+                                 "data"=>$statusResponse,
+                             );
+
+                          }else{
+                              $response = array(
+                                  "status"=>"error",
+                                  "message"=>  $recomendationResponse['message'],
+                                  "data"=>null,
+                              );
+                          }
+                          if($this->db->trans_status()==FALSE){
+                              $this->db->trans_rollback();
+                          }else{
+                              $this->db->trans_commit();
+                          }
+
+                        }
+
+                    }else{
+                      $response = array(
+                          "status"=>"error",
+                          "message"=>  'error',
+                          "data"=>null,
+                      );
+                    }
+                        // if($this->db->trans_status()==FALSE){
+                        //     $this->db->trans_rollback();
+                        // }else{
+                        //     $this->db->trans_commit();
+                        // }
+
+                 }else if($this->put('status') == "Aceptado"){
+                   $this->db->trans_begin();
+                   $status = array(
+                     "statusDocumento"=>$this->put('status'),
+                     "type"=>$this->put('oferta')
+                   );
+                   $statusResponse = $this->DAO->saveOrUpdateItemByTwoEntity('Tb_DocsApiranteVIA',$status,array('fkAspirante'=>$id),array('idDocumento'=>$this->put('idDocument')),true);
+                    if($statusResponse['status']=="success"){
+
+                      $EixistRecomendation = $this->DAO->selectbyTwoEntity('Tb_RecomendationDocsApiranteVIA',array('fkAspirante'=>$id),array('fkDocumento'=>$this->put('idDocument')),TRUE);
+                      if($EixistRecomendation){
+                        $recomendationResponse = $this->DAO->deleteDataTwoClause('Tb_RecomendationDocsApiranteVIA',array('fkAspirante'=>$id),array('fkDocumento'=>$this->put('idDocument')));
+                      }else{
+                          $recomendationResponse['status']="success";
+                      }
+                      if($recomendationResponse['status']=="success"){
+                        // $this->cambiarEstatus($id,$this->put('statusAspirante'));
+                          $response = array(
+                             "status"=>"success",
+                             "message"=>"update successfully",
+                             "data"=>$statusResponse,
+                         );
+
+                      }else{
+                          $response = array(
+                              "status"=>"error",
+                              "message"=>  $recomendationResponse['message'],
+                              "data"=>null,
+                          );
+                      }
+                      if($this->db->trans_status()==FALSE){
+                          $this->db->trans_rollback();
+                      }else{
+                          $this->db->trans_commit();
+                      }
+                    }else{
+                      $response = array(
+                          "status"=>"errorr",
+                          "message"=>  'error',
+                          "data"=>null,
+                      );
+                    }
+                    if($this->db->trans_status()==FALSE){
+                        $this->db->trans_rollback();
+                    }else{
+                        $this->db->trans_commit();
+                    }
+                 }else {
+                   $response = array(
+                       "status"=>"error",
+                       "message"=>  'error',
+                       "data"=>null,
+                   );
+                 }
+                 if($this->db->trans_status()==FALSE){
+                     $this->db->trans_rollback();
+                 }else{
+                     $this->db->trans_commit();
+                 }
+               // $data = array(
+               //   "statusDocumento"=>$this->put('status'),
+               // );
+               // $response = $this->DAO->updateData('Tb_DocumentosVerano',$data,array('fkAspirante'=>$id));
+
+               }
+          }
+        }else{
+          $response = array(
+            "status"=>"error",
+            "message"=> "check the id",
+            "data"=>$Eixist,
             );
         }
         $this->response($response,200);

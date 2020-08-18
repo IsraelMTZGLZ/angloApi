@@ -2911,7 +2911,7 @@ echo $response;
         }else{
           $response = array(
             "status"=>"error",
-            "message"=> "check the ied",
+            "message"=> "check the id",
             "data"=>$this->put('oferta'),
             );
         }
