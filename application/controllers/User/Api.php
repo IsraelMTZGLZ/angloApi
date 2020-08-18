@@ -330,7 +330,7 @@ class Api extends REST_Controller {
                 if ($itemExist) {
                     if ($itemExist->typeOauthUsuario=='Registro') {
                         if ($itemExist->statusUsuario=="Activo"){
-                            if (!$this->bcrypt->check_password($this->post('password'), $itemExist->passwordUsuario )) {
+                            if ($this->bcrypt->check_password($this->post('password'), $itemExist->passwordUsuario )) {
 
                                 if ($itemExist->typeUsuario=="Agente") {
                                     $vista='Vw_Agente';
